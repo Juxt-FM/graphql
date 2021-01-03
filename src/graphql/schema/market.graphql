@@ -1,0 +1,18 @@
+type Watchlist {
+  id: ID!
+  name: String!
+  symbols: [String!]!
+  updatedAt: String!
+  createdAt: String!
+}
+
+input WatchlistInput {
+  name: String
+  symbols: [String!]
+}
+
+extend type Mutation {
+  createWatchlist(data: WatchlistInput!): Watchlist!
+  updateWatchlist(id: ID!, data: WatchlistInput!): Watchlist!
+  deleteWatchlist(id: ID!): String!
+}

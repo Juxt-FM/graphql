@@ -1,0 +1,105 @@
+enum PublicationStatus {
+  public
+  draft
+}
+
+enum PostContentFormat {
+  html
+  markdown
+}
+
+type BlogPost {
+  id: ID!
+  publicationStatus: PublicationStatus!
+  contentFormat: PostContentFormat!
+  author: ID!
+  title: String!
+  subtitle: String
+  imageURL: String
+  content: String!
+  symbols: [String!]!
+  tags: [String!]!
+  comments(depth: Int!, limit: Int!, offset: Int!): [Comment!]!
+  reactionCount: Int!
+  reactionStatus: Reaction
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Comment {
+  id: ID!
+  post: ID!
+  replyStatus: ID!
+  author: ID!
+  message: String!
+  replies: [Comment!]
+  reactionCount: Int!
+  reactionStatus: Reaction
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Reaction {
+  id: ID!
+  to: ID!
+  reaction: String!
+  updatedAt: String!
+  createdAt: String!
+}
+
+input BlogPostInput {
+  publicationStatus: PublicationStatus
+  contentFormat: PostContentFormat
+  symbols: [String!]!
+  tags: [String!]!
+  title: String!
+  imageURL: String
+  subtitle: String
+  content: String!
+}
+
+input CommentInput {
+  post: ID!
+  replyStatus: ID
+  message: String!
+}
+
+input ReactionInput {
+  to: String!
+  toType: String!
+  reaction: String!
+}
+
+input BlogPostFilters {
+  user: ID
+  query: String
+  symbols: [String!]
+  limit: Int!
+  offset: Int!
+}
+
+input CommentThreadFilters {
+  depth: Int!
+  limit: Int!
+  offset: Int!
+}
+
+extend type Mutation {
+  createBlogPost(data: BlogPostInput!): BlogPost!
+  updateBlogPost(id: ID!, data: BlogPostInput!): BlogPost!
+  deleteBlogPost(id: ID!): String!
+  createComment(data: CommentInput!): Comment!
+  updateComment(id: ID!, data: CommentInput!): Comment!
+  deleteComment(id: ID!): Comment!
+  createReaction(data: ReactionInput!): Reaction!
+  updateReaction(id: ID!, data: ReactionInput!): Reaction!
+  deleteReaction(id: ID!): String!
+}
+
+extend type Query {
+  singleBlogPost(id: ID!): BlogPost!
+  filterBlogPosts(filters: BlogPostFilters!): [BlogPost!]!
+  reactions(id: ID!, limit: Int!, offset: Int!): [Reaction!]!
+  myDrafts(limit: Int, offset: Int): [BlogPost!]!
+  commentThread(parent: ID!, filters: CommentThreadFilters!): [Comment!]!
+}

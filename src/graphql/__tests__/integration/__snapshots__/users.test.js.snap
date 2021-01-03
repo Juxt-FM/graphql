@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`User Mutations update user account 1`] = `
+Object {
+  "data": Object {
+    "updateUser": Object {
+      "createdAt": "1604465235451",
+      "email": Object {
+        "address": "user@email.com",
+        "verified": true,
+      },
+      "id": "1",
+      "lastLogin": "1604465235451",
+      "phone": null,
+      "profile": Object {
+        "name": "Test User",
+      },
+      "updatedAt": "1604465235451",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`User Queries fetch authenticated user account 1`] = `
+Object {
+  "data": Object {
+    "me": Object {
+      "createdAt": "1604465235451",
+      "email": Object {
+        "address": "user@email.com",
+        "verified": true,
+      },
+      "id": "1",
+      "lastLogin": "1604465235451",
+      "phone": null,
+      "profile": Object {
+        "name": "Test User",
+      },
+      "updatedAt": "1604465235451",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
