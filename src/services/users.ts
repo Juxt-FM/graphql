@@ -3,8 +3,6 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import _ from "lodash";
-
 import BaseService, { IBaseConfig } from "./base";
 
 import UserModel, { IUserModel } from "./models/user";

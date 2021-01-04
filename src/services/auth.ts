@@ -6,7 +6,6 @@
 import { UserInputError } from "apollo-server-express";
 import { Error as MongooseError } from "mongoose";
 import bcrypt from "bcrypt";
-import _ from "lodash";
 
 import { IBaseConfig } from "./base";
 import TokenService, { ITokenConfig } from "./token";

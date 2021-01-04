@@ -5,7 +5,6 @@
 
 import { RESTDataSource, RequestOptions } from "apollo-datasource-rest";
 import { ApolloError, UserInputError } from "apollo-server-express";
-import _ from "lodash";
 
 import { IContext } from "../server";
 

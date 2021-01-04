@@ -110,7 +110,7 @@ export class FMPAPI extends RESTDataSource<IContext> {
    * @param symbol
    * @param timeframe
    */
-  async getIntradayRecords(symbol: string, timeframe: string = "1min") {
+  async getIntradayRecords(symbol: string, timeframe = "1min") {
     try {
       const records = await this.get(
         `/api/v3/historical-chart/${timeframe}/${symbol}`

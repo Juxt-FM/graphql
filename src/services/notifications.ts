@@ -4,7 +4,6 @@
  */
 
 import nodemailer, { TestAccount } from "nodemailer";
-import _ from "lodash";
 
 import Mail from "nodemailer/lib/mailer";
 

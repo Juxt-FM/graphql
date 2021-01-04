@@ -12,7 +12,6 @@ import {
 import { applyMiddleware } from "graphql-middleware";
 import { GraphQLError } from "graphql";
 import permissions from "./permissions";
-import _ from "lodash";
 
 import {
   UserAPI,

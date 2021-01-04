@@ -4,7 +4,6 @@
  */
 
 import { ApolloError } from "apollo-server-express";
-import _ from "lodash";
 
 import BaseService, { IBaseConfig } from "./base";
 
