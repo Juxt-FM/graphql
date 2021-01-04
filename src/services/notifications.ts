@@ -46,7 +46,7 @@ export class NotificationService {
    * @param text
    */
   async sendEmail(to: string[], subject: string, text: string) {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.log(`Sending email: '${text}' to ${to.join(", ")}.`);
 
     return await this.transporter.sendMail({
@@ -64,7 +64,7 @@ export class NotificationService {
    * @param message
    */
   async sendSMS(to: string[], message: string) {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.log(`Sending sms: '${message}' to ${to.join(", ")}.`);
   }
 }

@@ -9,7 +9,7 @@ export const logInfo = (msg: string) => {
   try {
     stLogger.info(msg);
   } catch {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.log(`Logger inactive: "${msg}"`);
   }
 };
@@ -18,7 +18,7 @@ export const logError = (msg: string) => {
   try {
     stLogger.error(msg);
   } catch {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.log(`Logger inactive: "${msg}"`);
   }
 };
@@ -27,7 +27,7 @@ export const start = () => {
   try {
     stMonitor.start();
   } catch {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.log("Sematext unavailable.");
   }
 };
