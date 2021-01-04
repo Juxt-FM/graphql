@@ -7,11 +7,13 @@ WORKDIR /build
 
 COPY package.json .
 
-RUN npm install
+COPY yarn.lock .
+
+RUN yarn install
 
 COPY . .
 
-RUN npm run build
+RUN yarn build
 
 
 # Build the final slimmed application image
@@ -24,10 +26,10 @@ WORKDIR /app
 
 COPY package.json .
 
-RUN npm install --only=production
+COPY yarn.lock .
+
+RUN yarn install --production
 
 COPY --from=build /build/dist .
-
-EXPOSE ${PORT}
 
 CMD ["node", "app.js"]
