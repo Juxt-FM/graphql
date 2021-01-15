@@ -6,12 +6,11 @@
 import { IResolverContext } from "../../server";
 import {
   MutationCreateUserArgs,
-  MutationForgotPasswordArgs,
   MutationLoginUserArgs,
   MutationResetPasswordArgs,
   MutationVerifyEmailArgs,
-  MutationVerifyOtpArgs,
   MutationVerifyPhoneArgs,
+  MutationLogoutUserArgs,
 } from "../../types";
 
 export const createUser = async (
@@ -21,7 +20,7 @@ export const createUser = async (
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.registerUser(args.data);
+  return await auth.registerUser(args.data, args.device);
 };
 
 export const loginUser = async (
@@ -31,7 +30,7 @@ export const loginUser = async (
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.loginUser(args.data);
+  return await auth.loginUser(args.data, args.device);
 };
 
 export const refreshToken = async (
@@ -46,12 +45,12 @@ export const refreshToken = async (
 
 export const logoutUser = async (
   parent: undefined,
-  args: undefined,
+  args: MutationLogoutUserArgs,
   context: IResolverContext
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.logoutUser();
+  return await auth.logoutUser(args.device);
 };
 
 export const resetPassword = async (
@@ -64,26 +63,6 @@ export const resetPassword = async (
   return await auth.resetPassword(args.data);
 };
 
-export const forgotPassword = async (
-  parent: undefined,
-  args: MutationForgotPasswordArgs,
-  context: IResolverContext
-) => {
-  const { auth } = context.dataSources;
-
-  return await auth.forgotPassword(args.email);
-};
-
-export const verifyOTP = async (
-  parent: undefined,
-  args: MutationVerifyOtpArgs,
-  context: IResolverContext
-) => {
-  const { auth } = context.dataSources;
-
-  return await auth.loginOTP(args.code);
-};
-
 export const verifyEmail = async (
   parent: undefined,
   args: MutationVerifyEmailArgs,
@@ -91,7 +70,7 @@ export const verifyEmail = async (
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.verifyEmail(args.code);
+  return await auth.verifyEmail(args.email, args.code);
 };
 
 export const verifyPhone = async (
@@ -101,7 +80,7 @@ export const verifyPhone = async (
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.verifyPhone(args.code);
+  return await auth.verifyPhone(args.phone, args.code);
 };
 
 export const deactivateAccount = async (

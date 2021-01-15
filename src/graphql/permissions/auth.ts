@@ -14,10 +14,9 @@ export default {
     createUser: not(isAuthenticated),
     loginUser: not(isAuthenticated),
     refreshToken: not(isAuthenticated),
-    verifyOTP: not(isAuthenticated),
     verifyEmail: isAuthenticated,
     logoutUser: isAuthenticated,
     resetPassword: isAuthenticated,
-    updateUser: isAuthenticated,
+    deactivateAccount: isAuthenticated,
   },
 };

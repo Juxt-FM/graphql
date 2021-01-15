@@ -4,14 +4,13 @@
  */
 
 import { IResolverContext } from "../../server";
-import { MutationUpdateUserArgs } from "../../types";
 
-export const updateUser = async (
+export const profile = async (
   parent: undefined,
-  args: MutationUpdateUserArgs,
+  args: any,
   context: IResolverContext
 ) => {
   const { users } = context.dataSources;
 
-  return await users.updateUser(args.data);
+  return await users.getUserProfile(args.id);
 };

@@ -13,20 +13,8 @@ import { applyMiddleware } from "graphql-middleware";
 import { GraphQLError } from "graphql";
 import neo4j from "neo4j-driver";
 
-import {
-  UserAPI,
-  AuthAPI,
-  AnalysisAPI,
-  MarketAPI,
-  BlogAPI,
-  FMPAPI,
-} from "./sources";
-import {
-  AuthService,
-  UserService,
-  VerificationService,
-  NotificationService,
-} from "../services";
+import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
+import { AuthService, ProfileService, NotificationService } from "../services";
 import {
   auth as authConfig,
   mail as mailConfig,
@@ -65,10 +53,8 @@ const neo4jDriver = neo4j.driver(
 const dataSources = () => ({
   auth: new AuthAPI(),
   users: new UserAPI(),
-  analysis: new AnalysisAPI({ uri: process.env.ANALYSIS_SERVICE_URI }),
   market: new MarketAPI({ uri: process.env.MARKET_SERVICE_URI }),
   blog: new BlogAPI({ uri: process.env.BLOG_SERVICE_URI }),
-  fmp: new FMPAPI({ apikey: process.env.FMP_API_KEY }),
 });
 
 /**
@@ -79,15 +65,14 @@ const context = async (ctx: IContext) => {
   const {
     req: { user },
   } = ctx;
+
   const authService = new AuthService(authConfig, ctx, neo4jDriver);
-  const userService = new UserService(ctx, neo4jDriver);
-  const verificationService = new VerificationService(ctx, neo4jDriver);
+  const userService = new ProfileService(ctx, neo4jDriver);
 
   return {
     user,
     authService,
     userService,
-    verificationService,
     notificationService,
     expressCtx: {
       req: ctx.req,

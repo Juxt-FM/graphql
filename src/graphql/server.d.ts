@@ -1,17 +1,5 @@
-import {
-  AuthService,
-  NotificationService,
-  UserService,
-  VerificationService,
-} from "../services";
-import {
-  UserAPI,
-  AuthAPI,
-  AnalysisAPI,
-  MarketAPI,
-  BlogAPI,
-  FMPAPI,
-} from "./sources";
+import { AuthService, NotificationService, ProfileService } from "../services";
+import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
 import { Request, Response } from "express";
 
 export interface IAuthenticatedUser {
@@ -22,8 +10,7 @@ export interface IAuthenticatedUser {
 export interface IContext {
   user: IAuthenticatedUser | undefined;
   authService: AuthService;
-  userService: UserService;
-  verificationService: VerificationService;
+  profileService: ProfileService;
   notificationService: NotificationService;
   expressCtx: {
     req: Request;
@@ -35,9 +22,7 @@ export interface IResolverContext extends IContext {
   dataSources: {
     users: UserAPI;
     auth: AuthAPI;
-    analysis: AnalysisAPI;
     market: MarketAPI;
     blog: BlogAPI;
-    fmp: FMPAPI;
   };
 }

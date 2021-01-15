@@ -1,0 +1,67 @@
+enum DevicePlatform {
+  ios
+  android
+  web
+}
+
+type User {
+  id: ID!
+  email: String!
+  phone: String
+  profile: UserProfile!
+  verified: String
+  suspended: String
+  updated: String!
+  created: String!
+}
+
+type Device {
+  id: ID!
+  platform: DevicePlatform!
+  model: String!
+  ipAddr: String!
+  created: String!
+  updated: String!
+}
+
+type AuthCredentials {
+  accessToken: String!
+}
+
+input DeviceInput {
+  id: ID!
+  platform: DevicePlatform!
+  model: String!
+  fcmKey: String
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  confirmPassword: String!
+}
+
+input LoginUserInput {
+  identifier: String!
+  password: String!
+}
+
+input PasswordResetInput {
+  password: String!
+  confirmPassword: String!
+}
+
+type Query {
+  me: User!
+}
+
+type Mutation {
+  createUser(data: CreateUserInput!, device: DeviceInput!): AuthCredentials!
+  loginUser(data: LoginUserInput!, device: DeviceInput!): AuthCredentials!
+  logoutUser(device: ID!): String!
+  verifyEmail(email: String!, code: String!): AuthCredentials
+  verifyPhone(phone: String!, code: String!): AuthCredentials
+  resetPassword(data: PasswordResetInput!): String!
+  refreshToken: AuthCredentials!
+  deactivateAccount: String!
+}

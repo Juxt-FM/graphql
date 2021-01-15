@@ -1,0 +1,27 @@
+type UserProfile {
+  id: ID!
+  name: String
+  location: String
+  summary: String
+  profileImageURL: String
+  coverImageURL: String
+  watchlists: [Watchlist!]!
+  posts: [BlogPost!]!
+  comments: [Comment!]!
+  created: String!
+  updated: String!
+}
+
+input UpdateProfileInput {
+  name: String
+  summary: String
+  location: String
+}
+
+extend type Query {
+  profile(id: ID!): UserProfile!
+}
+
+extend type Mutation {
+  updateProfile(data: UpdateProfileInput!): UserProfile!
+}

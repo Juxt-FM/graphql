@@ -4,14 +4,14 @@
  */
 
 import * as Query from "./query";
-import * as Mutation from "./mutation";
+// import * as Mutation from "./mutation";
 
 import { IResolverContext } from "../../server";
 import { UserProfile } from "../../types";
 
 export default {
   Query,
-  Mutation,
+  // Mutation,
   UserProfile: {
     posts: async (
       parent: UserProfile,

@@ -20,13 +20,25 @@ export class AuthAPI extends DataSource {
   }
 
   /**
+   * Returns the logged in user
+   */
+  async getCurrentUser() {
+    const { user, authService } = this.context;
+    try {
+      return await authService.getUser(user.id);
+    } catch (e) {
+      return e;
+    }
+  }
+
+  /**
    * Attempt to log in a user
    * @param data
    */
-  async loginUser(data: LoginUserInput) {
+  async loginUser(data: LoginUserInput, device: any) {
     const { authService } = this.context;
     try {
-      return await authService.login(data);
+      return await authService.login(data, device);
     } catch (e) {
       return e;
     }
@@ -36,24 +48,20 @@ export class AuthAPI extends DataSource {
    * Create a new user and return the result
    * @param data
    */
-  async registerUser(data: CreateUserInput) {
-    const {
-      authService,
-      verificationService,
-      notificationService,
-    } = this.context;
+  async registerUser(data: CreateUserInput, device: any) {
+    const { authService, notificationService } = this.context;
     try {
-      const { user, credentials } = await authService.register(data);
+      const { user, credentials, emailCode } = await authService.register(
+        data,
+        device
+      );
 
-      const verification = await verificationService.createCode(
-        user,
-        "email_verification"
-      );
       notificationService.sendEmail(
-        [user.emailAddress],
+        [user.email],
         "Email Verification",
-        verification.code
+        `Your JUXT verification code: ${emailCode}`
       );
+
       return credentials;
     } catch (e) {
       return e;
@@ -63,10 +71,10 @@ export class AuthAPI extends DataSource {
   /**
    * Clears the credentials for this user
    */
-  async logoutUser() {
+  async logoutUser(device: any) {
     try {
-      const { authService } = this.context;
-      return await authService.logout();
+      const { user, authService } = this.context;
+      return await authService.logout(user.id, device);
     } catch (e) {
       return e;
     }
@@ -79,7 +87,7 @@ export class AuthAPI extends DataSource {
   async refreshToken() {
     const { authService } = this.context;
     try {
-      return await authService.refreshAccessToken();
+      return "Refresh access token.";
     } catch (e) {
       return e;
     }
@@ -99,61 +107,19 @@ export class AuthAPI extends DataSource {
   }
 
   /**
-   * Sends an OTP to the user's email address
-   * @param email
-   */
-  async forgotPassword(identifier: string) {
-    const {
-      verificationService,
-      notificationService,
-      userService,
-    } = this.context;
-    try {
-      const userObj = await userService.getByEmail(identifier);
-      const verification = await verificationService.createCode(
-        userObj,
-        "forgot_password"
-      );
-
-      notificationService.sendEmail(
-        [userObj.emailAddress],
-        "Forgot Password",
-        verification.code
-      );
-
-      return "A one time password has been sent to your email address.";
-    } catch (e) {
-      return e;
-    }
-  }
-
-  /**
-   * Logs a user in with an OTP
-   * @param code
-   */
-  async loginOTP(code: string) {
-    const { verificationService, authService } = this.context;
-    try {
-      const verification = await verificationService.otp(code);
-      await verification.populate("user").execPopulate();
-
-      // @ts-ignore
-      return await authService.authenticateOTP(verification.user);
-    } catch (e) {
-      return e;
-    }
-  }
-
-  /**
    * Verifies a user's identity with the code
    * that was sent to their email address
    * @param code
    */
-  async verifyEmail(code: string) {
-    const { user, verificationService, authService } = this.context;
+  async verifyEmail(email: string, code: string) {
+    const { user, authService } = this.context;
     try {
-      await verificationService.email(user.id, code);
-      return await authService.verifyEmail(user.id, !user.verified);
+      return await authService.verifyEmail(
+        user.id,
+        email,
+        code,
+        !user.verified
+      );
     } catch (e) {
       return e;
     }
@@ -164,11 +130,15 @@ export class AuthAPI extends DataSource {
    * that was sent to their phone number
    * @param code
    */
-  async verifyPhone(code: string) {
-    const { user, verificationService, authService } = this.context;
+  async verifyPhone(phone: string, code: string) {
+    const { user, authService } = this.context;
     try {
-      await verificationService.phone(user.id, code);
-      return await authService.verifyPhone(user.id, !user.verified);
+      return await authService.verifyPhone(
+        user.id,
+        phone,
+        code,
+        !user.verified
+      );
     } catch (e) {
       return e;
     }
