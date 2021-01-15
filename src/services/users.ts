@@ -8,12 +8,10 @@ import BaseService, { IBaseConfig } from "./base";
 import UserModel, { IUserModel } from "./models/user";
 
 interface IUpdateUserInput {
-  name?: string;
-  summary?: string;
-  location?: string;
   email?: string;
   phoneNumber?: string;
 }
+
 export class UserService extends BaseService {
   private model: IUserModel;
 
@@ -79,7 +77,7 @@ export class UserService extends BaseService {
    */
   async update(id: string, data: IUpdateUserInput) {
     try {
-      const { email, phoneNumber, name, summary, location } = data;
+      const { email, phoneNumber } = data;
       const user = await this.model.findById(id);
 
       /**
@@ -89,9 +87,6 @@ export class UserService extends BaseService {
 
       user.email.address = email || user.emailAddress;
       user.phone.number = phoneNumber || user.phoneNumber;
-      user.profile.name = name || user.profile.name;
-      user.profile.summary = summary || user.profile.summary;
-      user.profile.location = location || user.profile.location;
 
       const emailChanged = user.isModified("email.address");
       const phoneChanged = user.isModified("phone.number");

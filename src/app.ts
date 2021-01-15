@@ -6,11 +6,10 @@
 import express from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import mongoose from "mongoose";
 import expressJwt from "express-jwt";
 
 import graph from "./graphql";
-import { mongo as mongoConfig, auth as authConfig } from "./config";
+import { auth as authConfig } from "./config";
 import { authErrors } from "./middleware";
 import * as logger from "./logging";
 
@@ -71,24 +70,5 @@ app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`Server started at http://localhost:${port}`);
 });
-
-mongoose
-  .connect(mongoConfig.uri, {
-    authSource: "admin",
-    user: mongoConfig.user,
-    pass: mongoConfig.password,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    // eslint-disable-next-line no-console
-    console.log("Connected to MongoDB.");
-  })
-  .catch(() => {
-    // eslint-disable-next-line no-console
-    console.log("An error occurred while connecting to MongoDB.");
-  });
 
 logger.start();

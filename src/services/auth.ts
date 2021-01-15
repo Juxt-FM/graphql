@@ -4,13 +4,14 @@
  */
 
 import { UserInputError } from "apollo-server-express";
-import { Error as MongooseError } from "mongoose";
+import neo4j from "neo4j-driver";
 import bcrypt from "bcrypt";
 
 import { IBaseConfig } from "./base";
 import TokenService, { ITokenConfig } from "./token";
 
 import UserModel, { IUserDocument, IUserModel } from "./models/user";
+import { Driver } from "neo4j-driver";
 
 interface IRegisterInput {
   email: string;
@@ -41,10 +42,16 @@ interface IPasswordResetInput {
 
 export class AuthService extends TokenService {
   private userModel: IUserModel;
+  private driver: Driver;
 
-  constructor(tokenConfig: ITokenConfig, baseConfig: IBaseConfig) {
+  constructor(
+    tokenConfig: ITokenConfig,
+    baseConfig: IBaseConfig,
+    driver: Driver
+  ) {
     super(tokenConfig, baseConfig);
     this.userModel = UserModel;
+    this.driver = driver;
   }
 
   /**
@@ -130,26 +137,52 @@ export class AuthService extends TokenService {
    */
   async register(data: IRegisterInput) {
     try {
-      const { password, confirmPassword, name, email, phoneNumber } = data;
+      const { name, email, phoneNumber, ...args } = data;
 
-      const user = new this.userModel({
-        email: {
-          address: email,
-        },
-        phone: {
-          number: phoneNumber,
-        },
-        profile: {
-          name,
-        },
-        password: await this.validatePassword(password, confirmPassword),
+      if (!(email || phoneNumber)) throw Error();
+
+      const session = this.driver.session({
+        database: "foo",
+        defaultAccessMode: neo4j.session.WRITE,
       });
 
-      await user.save();
+      const password = await this.validatePassword(
+        args.password,
+        args.confirmPassword
+      );
 
-      return { user, credentials: await this.getCredentials(user) };
+      const emailStatement = `
+      CREATE (e:EmailAddress {emailAddress: $email}) 
+      SET e.createdAt = now, e.updatedAt = now 
+      CREATE (e)<-[:HAS_ATTRIBUTE]-(u) 
+      `;
+
+      const phoneStatement = `
+      CREATE (p:PhoneNumber {phoneNumber: $phoneNumber}) 
+      SET e.createdAt = now, e.updatedAt = now 
+      CREATE (p)<-[:HAS_ATTRIBUTE]-(u) 
+      `;
+
+      const query = `
+      WITH datetime({timezone: 'America/New_York'}) as now 
+      CREATE (u:User {id: apoc.create.uuid()}) 
+      SET u.password = $password, u.lastLogin = now, u.createdAt = now, u.updatedAt = now 
+      WITH u, now 
+      ${email ? emailStatement : ""}
+      ${phoneNumber ? phoneStatement : ""}
+      RETURN u AS user, p AS phoneNumber, e AS email
+      `;
+
+      return session
+        .run(query, { password, email, phoneNumber })
+        .then(({ records }) => {
+          const user = records[0];
+
+          return { user, credentials: await this.getCredentials(user) };
+        })
+        .catch(() => {});
     } catch (e) {
-      this.handleMutationError(e);
+      throw this.getDefaultError();
     }
   }
 

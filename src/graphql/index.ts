@@ -11,7 +11,7 @@ import {
 } from "apollo-server-express";
 import { applyMiddleware } from "graphql-middleware";
 import { GraphQLError } from "graphql";
-import permissions from "./permissions";
+import neo4j from "neo4j-driver";
 
 import {
   UserAPI,
@@ -27,10 +27,15 @@ import {
   VerificationService,
   NotificationService,
 } from "../services";
-import { auth as authConfig, mail as mailConfig } from "../config";
+import {
+  auth as authConfig,
+  mail as mailConfig,
+  neo4j as neo4jConfig,
+} from "../config";
 
 import typeDefs from "./schema";
 import resolvers from "./resolvers";
+import permissions from "./permissions";
 
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import { Request } from "express";
@@ -47,6 +52,11 @@ const notificationService = new NotificationService({
 });
 
 notificationService.initialize();
+
+const neo4jDriver = neo4j.driver(
+  neo4jConfig.host,
+  neo4j.auth.basic(neo4jConfig.user, neo4jConfig.password)
+);
 
 /**
  * Our datasources are defined separately from
@@ -69,9 +79,9 @@ const context = async (ctx: IContext) => {
   const {
     req: { user },
   } = ctx;
-  const authService = new AuthService(authConfig, ctx);
-  const userService = new UserService(ctx);
-  const verificationService = new VerificationService(ctx);
+  const authService = new AuthService(authConfig, ctx, neo4jDriver);
+  const userService = new UserService(ctx, neo4jDriver);
+  const verificationService = new VerificationService(ctx, neo4jDriver);
 
   return {
     user,
