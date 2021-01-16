@@ -41,6 +41,7 @@ export interface ICreateUserResult {
 
 /**
  * Neo4j authentication handler.
+ * @param {Driver} - Graph Driver
  */
 export default class AuthHandler {
   private driver: Driver;

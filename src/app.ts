@@ -9,7 +9,7 @@ import cookieParser from "cookie-parser";
 import expressJwt from "express-jwt";
 
 import graph from "./graphql";
-import { auth as authConfig } from "./config";
+import { auth as authConfig } from "./settings";
 import { authErrors } from "./middleware";
 import * as logger from "./logging";
 
