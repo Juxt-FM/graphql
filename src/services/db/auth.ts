@@ -104,7 +104,6 @@ export default class AuthHandler {
         WITH timestamp() as now 
         CREATE (u:User {id: apoc.create.uuid()})-[:HAS_PROFILE]->(prof:Profile) 
         SET u.password = $password, u.created = now, u.updated = now, prof.created = now, prof.updated = now 
-        WITH u, now, prof
         CREATE (u)-[ev:NEEDS_VERIFICATION]->(e:EmailAddress {value: $email})<-[:HAS_ATTRIBUTE]-(u) 
         SET e.created = now, e.updated = now, ev.code = apoc.text.random(5, 'A-Z0-9'), ev.created = now
         RETURN u AS user, prof AS profile, e.value AS email, ev.code AS emailCode
@@ -296,11 +295,11 @@ export default class AuthHandler {
 
     try {
       const query = `
-        MATCH (u:User {id: $userId})-[pv:NEEDS_VERIFICATION]->(p:PhoneNumber {value: $phone})
+        MATCH (u:User {id: $userId})-[nv:NEEDS_VERIFICATION]->(p:PhoneNumber {value: $phone})
         WHERE pv.code = $code 
-        DETACH DELETE pv
-        CREATE (u)-[ver:VERIFIED]->(p)
-        SET ver.timestamp = timestamp(), u.verified = coalesce(u.verified, timestamp()) 
+        DETACH DELETE nv
+        CREATE (u)-[v:VERIFIED]->(p)
+        SET v.timestamp = timestamp(), u.verified = coalesce(u.verified, timestamp()) 
         RETURN u AS user
         `;
 
