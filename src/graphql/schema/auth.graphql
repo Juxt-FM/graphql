@@ -35,20 +35,15 @@ input DeviceInput {
   fcmKey: String
 }
 
-input CreateUserInput {
+input UserInput {
   email: String!
   password: String!
   confirmPassword: String!
 }
 
-input LoginUserInput {
+input LoginInput {
   identifier: String!
   password: String!
-}
-
-input PasswordResetInput {
-  password: String!
-  confirmPassword: String!
 }
 
 type Query {
@@ -56,12 +51,12 @@ type Query {
 }
 
 type Mutation {
-  createUser(data: CreateUserInput!, device: DeviceInput!): AuthCredentials!
-  loginUser(data: LoginUserInput!, device: DeviceInput!): AuthCredentials!
+  createUser(data: UserInput!, device: DeviceInput!): AuthCredentials!
+  loginUser(data: LoginInput!, device: DeviceInput!): AuthCredentials!
   logoutUser(device: ID!): String!
-  verifyEmail(email: String!, code: String!): AuthCredentials
-  verifyPhone(phone: String!, code: String!): AuthCredentials
-  resetPassword(data: PasswordResetInput!): String!
+  verifyEmail(code: String!): AuthCredentials
+  verifyPhone(code: String!): AuthCredentials
+  resetPassword(password: String!, confirmPassword: String!): String!
   refreshToken: AuthCredentials!
   deactivateAccount: String!
 }

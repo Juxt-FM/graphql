@@ -70,7 +70,7 @@ export const verifyEmail = async (
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.verifyEmail(args.email, args.code);
+  return await auth.verifyEmail(args.code);
 };
 
 export const verifyPhone = async (
@@ -80,7 +80,7 @@ export const verifyPhone = async (
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.verifyPhone(args.phone, args.code);
+  return await auth.verifyPhone(args.code);
 };
 
 export const deactivateAccount = async (

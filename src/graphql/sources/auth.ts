@@ -51,7 +51,7 @@ export class AuthAPI extends DataSource {
   async registerUser(data: CreateUserInput, device: any) {
     const { authService, notificationService } = this.context;
     try {
-      const { user, credentials, emailCode } = await authService.register(
+      const { user, credentials, code } = await authService.register(
         data,
         device
       );
@@ -59,7 +59,7 @@ export class AuthAPI extends DataSource {
       notificationService.sendEmail(
         [user.email],
         "Email Verification",
-        `Your JUXT verification code: ${emailCode}`
+        `Your JUXT verification code: ${code}`
       );
 
       return credentials;
@@ -111,15 +111,10 @@ export class AuthAPI extends DataSource {
    * that was sent to their email address
    * @param code
    */
-  async verifyEmail(email: string, code: string) {
+  async verifyEmail(code: string) {
     const { user, authService } = this.context;
     try {
-      return await authService.verifyEmail(
-        user.id,
-        email,
-        code,
-        !user.verified
-      );
+      return await authService.verifyEmail(user.id, code, !user.verified);
     } catch (e) {
       return e;
     }
@@ -130,15 +125,10 @@ export class AuthAPI extends DataSource {
    * that was sent to their phone number
    * @param code
    */
-  async verifyPhone(phone: string, code: string) {
+  async verifyPhone(code: string) {
     const { user, authService } = this.context;
     try {
-      return await authService.verifyPhone(
-        user.id,
-        phone,
-        code,
-        !user.verified
-      );
+      return await authService.verifyPhone(user.id, code, !user.verified);
     } catch (e) {
       return e;
     }

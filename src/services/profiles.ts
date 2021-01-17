@@ -3,18 +3,16 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import { Driver } from "neo4j-driver";
-
 import BaseService, { IBaseConfig } from "./base";
-import ProfileHandler from "./db/profiles";
+import { ProfileHandler } from "../db";
 
 export class ProfileService extends BaseService {
   private dbHandler: ProfileHandler;
 
-  constructor(baseConfig: IBaseConfig, driver: Driver) {
+  constructor(baseConfig: IBaseConfig, handler: ProfileHandler) {
     super(baseConfig);
 
-    this.dbHandler = new ProfileHandler(driver);
+    this.dbHandler = handler;
   }
 
   /**

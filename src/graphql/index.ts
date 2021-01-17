@@ -14,7 +14,12 @@ import { GraphQLError } from "graphql";
 
 import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
 import { AuthService, ProfileService, NotificationService } from "../services";
-import { auth as authConfig, mail as mailConfig } from "../settings";
+import GraphDB, { AuthHandler, ProfileHandler } from "../db";
+import {
+  auth as authConfig,
+  mail as mailConfig,
+  database as dbConfig,
+} from "../settings";
 
 import typeDefs from "./schema";
 import resolvers from "./resolvers";
@@ -22,6 +27,13 @@ import permissions from "./permissions";
 
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import { Request } from "express";
+
+/**
+ * Connect to database
+ */
+const db = new GraphDB(dbConfig.host);
+
+db.connect();
 
 /**
  * Setup the email service
@@ -56,8 +68,16 @@ const context = async (ctx: IContext) => {
     req: { user },
   } = ctx;
 
-  const authService = new AuthService(authConfig, ctx, neo4jDriver);
-  const userService = new ProfileService(ctx, neo4jDriver);
+  const authService = new AuthService(
+    authConfig,
+    ctx,
+    db.registerHandler(AuthHandler)
+  );
+
+  const userService = new ProfileService(
+    ctx,
+    db.registerHandler(ProfileHandler)
+  );
 
   return {
     user,

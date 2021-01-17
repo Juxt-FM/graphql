@@ -13,8 +13,8 @@ export const auth = {
   refreshCookie: process.env.REFRESH_TOKEN_COOKIE || "device_token",
 };
 
-export const gremlin = {
-  host: process.env.GREMLIN_HOST || "wss://localhost:8182/gremlin",
+export const database = {
+  host: process.env.GREMLIN_HOST || "ws://localhost:8182/gremlin",
 };
 
 export const mail = {

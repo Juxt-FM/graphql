@@ -4,13 +4,12 @@
  */
 
 import { ApolloError, UserInputError } from "apollo-server-express";
-import { Driver } from "neo4j-driver";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
 
 import BaseService, { IBaseConfig } from "./base";
-import UserHandler, { IUser, IUserDevice } from "./db/auth";
+import { AuthHandler, IUser, IUserDevice } from "../db";
 
 interface IRegisterArgs {
   email: string;
@@ -48,13 +47,13 @@ interface IAuthConfig {
  */
 export class AuthService extends BaseService {
   private config: IAuthConfig;
-  private dbHandler: UserHandler;
+  private dbHandler: AuthHandler;
 
-  constructor(config: IAuthConfig, baseConfig: IBaseConfig, driver: Driver) {
+  constructor(config: IAuthConfig, baseConfig: IBaseConfig, handler: any) {
     super(baseConfig);
 
     this.config = config;
-    this.dbHandler = new UserHandler(driver);
+    this.dbHandler = handler;
   }
 
   /**
@@ -204,7 +203,7 @@ export class AuthService extends BaseService {
     try {
       const credentials = await this.getCredentials(user);
 
-      device.ipAddr = this.getHost();
+      device.address = this.getHost();
 
       await this.dbHandler.deviceLogin(
         user.id,
@@ -327,18 +326,12 @@ export class AuthService extends BaseService {
   /**
    * Verifies a user's email
    * @param userId
-   * @param email
    * @param code
    * @param reauthenticate
    */
-  async verifyEmail(
-    userId: string,
-    email: string,
-    code: string,
-    reauthenticate: boolean
-  ) {
+  async verifyEmail(userId: string, code: string, reauthenticate: boolean) {
     try {
-      const user = await this.dbHandler.verifyEmail(userId, email, code);
+      const user = await this.dbHandler.verifyEmail(userId, code);
 
       if (reauthenticate)
         return { accessToken: this.signToken(user.id, Boolean(user.verified)) };
@@ -354,18 +347,12 @@ export class AuthService extends BaseService {
   /**
    * Verifies a user's phone
    * @param userId
-   * @param phone
    * @param code
    * @param reauthenticate
    */
-  async verifyPhone(
-    userId: string,
-    phone: string,
-    code: string,
-    reauthenticate: boolean
-  ) {
+  async verifyPhone(userId: string, code: string, reauthenticate: boolean) {
     try {
-      const user = await this.dbHandler.verifyPhone(userId, phone, code);
+      const user = await this.dbHandler.verifyPhone(userId, code);
 
       if (reauthenticate)
         return { accessToken: this.signToken(user.id, Boolean(user.verified)) };
