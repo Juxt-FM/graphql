@@ -18,9 +18,7 @@ import {
 
 const {
   t: { id },
-} = gremlin.process;
-const {
-  cardinality: { single },
+  statics: __,
 } = gremlin.process;
 
 export interface ICreateUserArgs {
@@ -55,7 +53,6 @@ export class AuthHandler {
       ...user,
       created: toDate(user.created),
       updated: toDate(user.updated),
-      verified: user.verified ? toDate(user.verified) : undefined,
       deactivated: user.deactivated ? toDate(user.deactivated) : undefined,
       suspended: user.suspended ? toDate(user.suspended) : undefined,
     };
@@ -99,16 +96,16 @@ export class AuthHandler {
   async createUser(data: ICreateUserArgs) {
     const query = this.graph.query();
 
-    const now = moment().unix();
+    const now = moment().valueOf();
     const code = this.getVerificationCode();
 
     const result = await query
       .addV(labels.User)
       .property("email", data.email)
       .property("password", data.password)
+      .property("verified", false)
       .property("created", now)
       .property("updated", now)
-      .as("user")
       .properties("email")
       .property("code", code)
       .addV(labels.Profile)
@@ -147,11 +144,10 @@ export class AuthHandler {
    */
   async findUserByAttribute(attribute: string) {
     const query = this.graph.query();
-
     const result = await query
       .V()
       .hasLabel(labels.User)
-      .has("email", attribute)
+      .or(__.has("phone", attribute), __.has("email", attribute))
       .elementMap()
       .next();
 
@@ -170,17 +166,23 @@ export class AuthHandler {
   async deviceLogin(userId: string, token: string, device: IUserDevice) {
     const query = this.graph.query();
 
-    let d = query.V().has(labels.UserDevice, "identifier", device.id);
+    let deviceObj: any = await query
+      .V()
+      .has(labels.UserDevice, "identifier", device.id)
+      .elementMap()
+      .next();
 
-    if (!d.hasNext())
-      d = query
+    if (!deviceObj.value)
+      deviceObj = query
         .addV(labels.UserDevice)
         .property("identifier", device.id)
         .property("address", device.address)
         .property("platform", device.platform)
         .property("model", device.model)
-        .property("created", moment().unix())
-        .property("updated", moment().unix());
+        .property("created", moment().valueOf())
+        .property("updated", moment().valueOf())
+        .elementMap()
+        .next();
 
     await query
       .V(userId)
@@ -194,9 +196,13 @@ export class AuthHandler {
       .addE(relationships.LoggedIn)
       .from_("device")
       .to("user")
-      .property("timestamp", moment().unix())
+      .property("timestamp", moment().valueOf())
       .property("token", token)
       .next();
+
+    const result: any = Object.fromEntries(deviceObj.value);
+
+    return result;
   }
 
   /**
@@ -211,7 +217,7 @@ export class AuthHandler {
       .V(deviceId)
       .out(relationships.LoggedIn)
       .has(id, userId)
-      .property("loggedOut", moment().unix())
+      .property("loggedOut", moment().valueOf())
       .properties("token")
       .drop()
       .next();
@@ -236,22 +242,31 @@ export class AuthHandler {
   async verifyEmail(userId: string, code: string) {
     const query = this.graph.query();
 
-    const result = await query
+    const codeProp = await query
       .V(userId)
       .as("user")
       .properties("email")
-      .has("code", code)
-      .property(single, "verified", moment().unix())
-      .properties("code")
-      .drop()
-      .select("user")
-      .property("verified")
-      .valueMap()
+      .values("code")
       .next();
 
-    const user: any = Object.fromEntries(result.value);
+    if (codeProp.value === code) {
+      const result = await query
+        .V(userId)
+        .property("verified", true)
+        .as("user")
+        .sideEffect(__.properties("email").properties("code").drop())
+        .select("user")
+        .elementMap()
+        .next();
 
-    return this.transformUser(user);
+      const user: any = Object.fromEntries(result.value);
+
+      return this.transformUser(user);
+    } else {
+      const err = new Error("Invalid code.");
+      err.name = "INVALIDCODE";
+      throw err;
+    }
   }
 
   /**
@@ -262,19 +277,28 @@ export class AuthHandler {
   async verifyPhone(userId: string, code: string) {
     const query = this.graph.query();
 
-    const result = await query
+    const codeProp = await query
       .V(userId)
+      .as("user")
       .properties("phone")
-      .has("code", code)
-      .property(single, "verified", moment().unix())
-      .properties("code")
-      .drop()
-      .valueMap()
+      .values("code")
       .next();
 
-    const user: any = Object.fromEntries(result.value);
+    if (codeProp.value === code) {
+      const result = await query
+        .V(userId)
+        .property("verified", true)
+        .elementMap()
+        .next();
 
-    return this.transformUser(user);
+      const user: any = Object.fromEntries(result.value);
+
+      return this.transformUser(user);
+    } else {
+      const err = new Error("Invalid code.");
+      err.name = "INVALIDCODE";
+      throw err;
+    }
   }
 
   /**
@@ -284,6 +308,6 @@ export class AuthHandler {
   async deactivateAccount(userId: string) {
     const query = this.graph.query();
 
-    await query.V(userId).property("deactivated", moment().unix()).next();
+    await query.V(userId).property("deactivated", moment().valueOf()).next();
   }
 }

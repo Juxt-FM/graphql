@@ -6,18 +6,23 @@
 import BaseService, { IBaseConfig } from "./base";
 import { ProfileHandler } from "../db";
 
+/**
+ * Profile service (post authors, public profiles, etc.)
+ * @param {IBaseConfig} baseConfig
+ * @param {any} dbHandler
+ */
 export class ProfileService extends BaseService {
   private dbHandler: ProfileHandler;
 
-  constructor(baseConfig: IBaseConfig, handler: ProfileHandler) {
+  constructor(baseConfig: IBaseConfig, dbHandler: ProfileHandler) {
     super(baseConfig);
 
-    this.dbHandler = handler;
+    this.dbHandler = dbHandler;
   }
 
   /**
    * Get a user profile by ID
-   * @param id
+   * @param {string} id
    */
   async getById(id: string) {
     try {

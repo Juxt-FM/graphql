@@ -24,7 +24,7 @@ export interface IRawUser {
   phone: string;
   created: number;
   updated: number;
-  verified?: number;
+  verified?: boolean;
   deactivated?: number;
   suspended?: number;
 }
@@ -34,9 +34,9 @@ export interface IUser {
   email: string;
   phone?: string;
   password: string;
+  verified?: boolean;
   created: Date;
   updated: Date;
-  verified?: Date;
   deactivated?: Date;
   suspended?: Date;
 }

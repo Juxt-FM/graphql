@@ -12,6 +12,10 @@ export interface IBaseConfig {
   res: Response;
 }
 
+/**
+ * Base service class
+ * @param {IBaseConfig} config
+ */
 export default class BaseService {
   request: Request;
   response: Response;

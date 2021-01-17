@@ -7,16 +7,20 @@ import nodemailer, { TestAccount } from "nodemailer";
 
 import Mail from "nodemailer/lib/mailer";
 
-interface INotificationServiceConfig {
+interface INotificationsConfig {
   from: string;
 }
 
+/**
+ * Profile service (post authors, public profiles, etc.)
+ * @param {INotificationsConfig} config
+ */
 export class NotificationService {
-  config: INotificationServiceConfig;
+  config: INotificationsConfig;
   account: TestAccount;
   transporter: Mail;
 
-  constructor(config: INotificationServiceConfig) {
+  constructor(config: INotificationsConfig) {
     this.config = config;
   }
 
@@ -39,11 +43,10 @@ export class NotificationService {
 
   /**
    * Sends email to a list of recipients
-   *
    * TODO - Use an html template for all emails
-   * @param to
-   * @param subject
-   * @param text
+   * @param {string[]} to
+   * @param {string} subject
+   * @param {string} text
    */
   async sendEmail(to: string[], subject: string, text: string) {
     // eslint-disable-next-line no-console
@@ -59,9 +62,8 @@ export class NotificationService {
 
   /**
    * Sends sms to a list of recipients
-   *
-   * @param to
-   * @param message
+   * @param {string} to
+   * @param {string} message
    */
   async sendSMS(to: string[], message: string) {
     // eslint-disable-next-line no-console

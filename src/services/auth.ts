@@ -38,26 +38,24 @@ interface IAuthConfig {
 }
 
 /**
- * The auth service is where all the different
- * methods are called from (registration, login, etc.)
- *
- * It extends the token service to access protected
- * methods and also exposes the method to refresh
- * a user's token
+ * Authentication service (register, login, etc.)
+ * @param {IAuthConfig} config
+ * @param {IBaseConfig} baseConfig
+ * @param {any} dbHandler
  */
 export class AuthService extends BaseService {
   private config: IAuthConfig;
   private dbHandler: AuthHandler;
 
-  constructor(config: IAuthConfig, baseConfig: IBaseConfig, handler: any) {
+  constructor(config: IAuthConfig, baseConfig: IBaseConfig, dbHandler: any) {
     super(baseConfig);
 
     this.config = config;
-    this.dbHandler = handler;
+    this.dbHandler = dbHandler;
   }
 
   /**
-   * Returns the default login error response
+   * Returns a default login error response
    */
   private getDefaultAuthenticationError() {
     return new UserInputError(
@@ -68,7 +66,8 @@ export class AuthService extends BaseService {
 
   /**
    * Signs a JWT for the provided user
-   * @param user
+   * @param {string} id
+   * @param {boolean} verified
    */
   protected signToken = (id: string, verified: boolean) =>
     new Promise<string>((resolve, reject) => {
@@ -91,19 +90,19 @@ export class AuthService extends BaseService {
   /**
    * Signs and returns a JWT, and generates a refresh token
    * to be stored in an HTTP only cookie
-   * @param user
+   * @param {IUser} user
    */
   private async getCredentials(user: IUser) {
     return {
       refreshToken: uid(256),
-      accessToken: await this.signToken(user.id, Boolean(user.verified)),
+      accessToken: await this.signToken(user.id, user.verified),
     };
   }
 
   /**
    * Hashes a user's password for safe
    * storage in database
-   * @param password
+   * @param {string} password
    */
   private hashPassword(password: string) {
     return new Promise<string>((resolve, reject) => {
@@ -116,7 +115,7 @@ export class AuthService extends BaseService {
 
   /**
    * Returns true if valid, else false
-   * @param email
+   * @param {string} email
    */
   private async validateEmail(email: string) {
     email = email.trim();
@@ -139,7 +138,7 @@ export class AuthService extends BaseService {
 
   /**
    * Returns true if valid, else false
-   * @param phoneNumber
+   * @param {string} phoneNumber
    */
   private async validatePhone(phoneNumber: string) {
     phoneNumber = phoneNumber.trim();
@@ -163,8 +162,8 @@ export class AuthService extends BaseService {
   /**
    * Validates the provided passwords and
    * returns the hashed result
-   * @param password
-   * @param confirmPassword
+   * @param {string} password
+   * @param {string} confirmPassword
    */
   private validatePassword(password: string, confirmPassword: string) {
     if (password !== confirmPassword)
@@ -180,9 +179,9 @@ export class AuthService extends BaseService {
 
   /**
    * Authenticates a user and returns a signed JWT
-   * @param user
-   * @param password
-   * @param device
+   * @param {IUser} user
+   * @param {string} password
+   * @param {IUserDevice} device
    */
   private async authenticate(
     user: IUser,
@@ -196,8 +195,8 @@ export class AuthService extends BaseService {
 
   /**
    * Retrieve credentials and perform any necessary actions.
-   * @param user
-   * @param device
+   * @param {IUser} user
+   * @param {IUserDevice} device
    */
   private async authenticationSuccess(user: IUser, device: IUserDevice) {
     try {
@@ -223,7 +222,7 @@ export class AuthService extends BaseService {
 
   /**
    * Get a user by their ID
-   * @param id
+   * @param {string} id
    */
   async getUser(id: string) {
     try {
@@ -239,8 +238,8 @@ export class AuthService extends BaseService {
 
   /**
    * Creates a new user and returns a signed JWT
-   * @param data
-   * @param device
+   * @param {IRegisterArgs} data
+   * @param {IUserDevice} device
    */
   async register(data: IRegisterArgs, device: IUserDevice) {
     try {
@@ -266,7 +265,8 @@ export class AuthService extends BaseService {
 
   /**
    * Logs in a user and returns a signed JWT
-   * @param data
+   * @param {ILoginInput} data
+   * @param {IUserDevice} device
    */
   async login(data: ILoginInput, device: IUserDevice) {
     try {
@@ -287,6 +287,8 @@ export class AuthService extends BaseService {
 
   /**
    * Clears all credentials
+   * @param {string} user
+   * @param {string} device
    */
   async logout(user: string, device: string) {
     try {
@@ -303,17 +305,17 @@ export class AuthService extends BaseService {
 
   /**
    * Resets a user's password
-   * @param userId
-   * @param data
+   * @param {string} user
+   * @param {IPasswordResetInput} data
    */
-  async resetPassword(userId: string, data: IPasswordResetInput) {
+  async resetPassword(user: string, data: IPasswordResetInput) {
     try {
       const password = await this.validatePassword(
         data.password,
         data.confirmPassword
       );
 
-      await this.dbHandler.resetPassword(userId, password);
+      await this.dbHandler.resetPassword(user, password);
     } catch (e) {
       if (e instanceof ApolloError) throw e;
       else {
@@ -325,9 +327,9 @@ export class AuthService extends BaseService {
 
   /**
    * Verifies a user's email
-   * @param userId
-   * @param code
-   * @param reauthenticate
+   * @param {string} userId
+   * @param {string} code
+   * @param {boolean} reauthenticate
    */
   async verifyEmail(userId: string, code: string, reauthenticate: boolean) {
     try {
@@ -337,6 +339,7 @@ export class AuthService extends BaseService {
         return { accessToken: this.signToken(user.id, Boolean(user.verified)) };
     } catch (e) {
       if (e instanceof ApolloError) throw e;
+      else if (e.name === "INVALIDCODE") throw new ApolloError("Invalid code.");
       else {
         console.log(`Server error during password reset: ${e}`);
         throw this.getDefaultError();
@@ -346,9 +349,9 @@ export class AuthService extends BaseService {
 
   /**
    * Verifies a user's phone
-   * @param userId
-   * @param code
-   * @param reauthenticate
+   * @param {string} userId
+   * @param {string} code
+   * @param {boolean} reauthenticate
    */
   async verifyPhone(userId: string, code: string, reauthenticate: boolean) {
     try {
@@ -368,10 +371,11 @@ export class AuthService extends BaseService {
   /**
    * Sets the user's deactivation date for 30
    * days in the future
+   * @param {string} user
    */
-  async deactivateAccount(userId: string) {
+  async deactivateAccount(user: string) {
     try {
-      await this.dbHandler.deactivateAccount(userId);
+      await this.dbHandler.deactivateAccount(user);
       return "Account deactivated.";
     } catch (e) {
       if (e instanceof ApolloError) throw e;
