@@ -41,6 +41,16 @@ export interface IUserAccount {
   suspended?: Date;
 }
 
+export interface IUserDevice {
+  id: string;
+  identifier: string;
+  platform: "ios" | "android" | "web";
+  model: string;
+  address: string;
+  created: Date;
+  updated: Date;
+}
+
 export interface IUserProfile {
   id: string;
   name?: string;
@@ -48,16 +58,6 @@ export interface IUserProfile {
   summary?: string;
   coverImageURL?: string;
   profileImageURL?: string;
-  created: Date;
-  updated: Date;
-}
-
-export interface IUserDevice {
-  id: string;
-  identifier: string;
-  platform: "ios" | "android" | "web";
-  model: string;
-  address: string;
   created: Date;
   updated: Date;
 }

@@ -4,15 +4,24 @@ const { default: typeDefs } = require("../schema");
 const { default: resolvers } = require("../resolvers");
 
 const { mockUserService } = require("../sources/__tests__/users.test");
-const {
-  mockAuthService,
-  mockVerificationService,
-} = require("../sources/__tests__/auth.test");
+const { mockAuthService } = require("../sources/__tests__/auth.test");
 const { NotificationService } = require("../../services");
 
-const buildTestServer = async () => {
+const buildTestServer = async (options) => {
   const users = new UserAPI();
   const auth = new AuthAPI();
+
+  const mockExpressContext = {
+    req: {
+      signedCookies: {
+        device_token: "fhjasdljkfhasjkfhadslkjfhklajsfhkladsfjfs",
+      },
+    },
+    res: {
+      cookie: jest.fn(),
+    },
+  };
+
   const mockNotificationService = new NotificationService({
     from: "test@email.com",
   });
@@ -20,14 +29,14 @@ const buildTestServer = async () => {
   mockNotificationService.sendEmail = jest.fn();
   mockNotificationService.sendSMS = jest.fn();
 
+  const verifiedUser = options ? options.verified || false : false;
+
   const context = {
-    user: { id: 1, verified: false },
+    user: { id: 1, verified: verifiedUser },
     userService: mockUserService,
     authService: mockAuthService,
-    verificationService: mockVerificationService,
     notificationService: mockNotificationService,
-    apcaKeyId: "some_alpaca_key_id",
-    apcaSecretKey: "some_alpaca_secret_key",
+    expressCtx: mockExpressContext,
   };
 
   const dataSources = () => ({
@@ -46,7 +55,6 @@ const buildTestServer = async () => {
     server,
     mockUserService,
     mockAuthService,
-    mockVerificationService,
     mockNotificationService,
   };
 };

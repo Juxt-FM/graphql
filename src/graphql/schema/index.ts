@@ -12,4 +12,4 @@ const buildSchema = (modules: string[]) => {
   return schema;
 };
 
-export default buildSchema(["auth", "profiles", "blog", "market"]);
+export default buildSchema(["auth", "users", "blog", "market"]);

@@ -24,3 +24,5 @@ test("getUserProfile - should return a user's profile", async () => {
   expect(mockUserService.getById).toBeCalledWith("1");
   expect(result).toEqual(mockProfile);
 });
+
+module.exports = { mockUserService };

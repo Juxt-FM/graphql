@@ -246,32 +246,86 @@ test("resetPassword - should reset a user's password", async () => {
   expect(result).toEqual(message);
 });
 
-test("verifyEmail - should verify a user's email", async () => {
-  const code = "ABCDEFG";
+describe("verifyEmail", () => {
+  it("should verify a user's email and return undefiend", async () => {
+    const code = "ABCDEFG";
 
-  const result = await ds.verifyEmail(code);
+    const result = await ds.verifyEmail(code);
 
-  expect(mockAuthService.verifyEmail).toBeCalledWith(
-    mockContext.user.id,
-    code,
-    !mockContext.user.verified
-  );
+    expect(mockAuthService.verifyEmail).toBeCalledWith(
+      mockContext.user.id,
+      code,
+      !mockContext.user.verified
+    );
 
-  expect(result).toEqual(undefined);
+    expect(result).toEqual(undefined);
+  });
+
+  it("should verify a user's email and reauthenticate", async () => {
+    mockAuthService.verifyEmail.mockReturnValueOnce(mockCredentials);
+
+    const code = "ABCDEFG";
+
+    const ds = new AuthAPI();
+
+    ds.initialize({
+      context: {
+        ...mockContext,
+        user: { ...mockContext.user, verified: false },
+      },
+    });
+
+    const result = await ds.verifyEmail(code);
+
+    expect(mockAuthService.verifyEmail).toBeCalledWith(
+      mockContext.user.id,
+      code,
+      true
+    );
+
+    expect(result.accessToken).toEqual(mockCredentials.accessToken);
+  });
 });
 
-test("verifyPhone - should verify a user's phone", async () => {
-  const code = "ABCDEFG";
+describe("verifyPhone", () => {
+  it("should verify a user's phone and return undefined", async () => {
+    const code = "ABCDEFG";
 
-  const result = await ds.verifyPhone(code);
+    const result = await ds.verifyPhone(code);
 
-  expect(mockAuthService.verifyPhone).toBeCalledWith(
-    mockContext.user.id,
-    code,
-    !mockContext.user.verified
-  );
+    expect(mockAuthService.verifyPhone).toBeCalledWith(
+      mockContext.user.id,
+      code,
+      !mockContext.user.verified
+    );
 
-  expect(result).toEqual(undefined);
+    expect(result).toEqual(undefined);
+  });
+
+  it("should verify a user's phone and reauthenticate", async () => {
+    mockAuthService.verifyPhone.mockReturnValueOnce(mockCredentials);
+
+    const code = "ABCDEFG";
+
+    const ds = new AuthAPI();
+
+    ds.initialize({
+      context: {
+        ...mockContext,
+        user: { ...mockContext.user, verified: false },
+      },
+    });
+
+    const result = await ds.verifyPhone(code);
+
+    expect(mockAuthService.verifyPhone).toBeCalledWith(
+      mockContext.user.id,
+      code,
+      true
+    );
+
+    expect(result.accessToken).toEqual(mockCredentials.accessToken);
+  });
 });
 
 test("deactivateAccount - should deactivate a user's account", async () => {
@@ -291,4 +345,4 @@ const mockCredentials = {
   refreshToken: "sadhfkjasdhfadsjkflashfjasldfhlas",
 };
 
-module.exports = { mockCredentials };
+module.exports = { mockCredentials, mockAuthService };

@@ -4,7 +4,7 @@ enum DevicePlatform {
   web
 }
 
-type User {
+type UserAccount {
   id: ID!
   email: String!
   phone: String
@@ -15,7 +15,7 @@ type User {
   created: String!
 }
 
-type Device {
+type UserDevice {
   id: ID!
   platform: DevicePlatform!
   model: String!
@@ -48,15 +48,15 @@ input LoginInput {
 }
 
 type Query {
-  me: User!
+  me: UserAccount!
 }
 
 type Mutation {
   createUser(data: UserInput!, device: DeviceInput!): AuthCredentials!
   loginUser(data: LoginInput!, device: DeviceInput!): AuthCredentials!
   logoutUser(device: ID!): String!
-  updateEmail(email: String!): User!
-  updatePhone(phone: String!): User!
+  updateEmail(email: String!): UserAccount!
+  updatePhone(phone: String!): UserAccount!
   verifyEmail(code: String!): AuthCredentials
   verifyPhone(code: String!): AuthCredentials
   resetPassword(password: String!, confirmPassword: String!): String!

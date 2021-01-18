@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MUTATION createUser should throw validation error 1`] = `
+Array [
+  [GraphQLError: some validation error],
+]
+`;
+
+exports[`MUTATION loginUser should throw validation error 1`] = `
+Array [
+  [GraphQLError: some validation error],
+]
+`;
+
+exports[`MUTATION resetPassword should throw validation error 1`] = `
+Array [
+  [GraphQLError: some validation error],
+]
+`;
