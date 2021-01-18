@@ -8,9 +8,11 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import expressJwt from "express-jwt";
 
-import graph from "./graphql";
-import { auth as authConfig } from "./settings";
+import { auth } from "./settings";
 import { authErrors } from "./middleware";
+
+import graph from "./graphql";
+
 import * as logger from "./logging";
 
 const app = express();
@@ -33,9 +35,9 @@ if (process.env.PROXY_IN_USE) app.enable("trust proxy");
 
 app.use(
   expressJwt({
-    secret: authConfig.jwtKey,
-    issuer: authConfig.jwtIssuer,
-    audience: authConfig.jwtAudience,
+    secret: auth.jwtKey,
+    issuer: auth.jwtIssuer,
+    audience: auth.jwtAudience,
     algorithms: ["HS256"],
     credentialsRequired: false,
   })
@@ -58,9 +60,8 @@ graph.applyMiddleware({
  *
  * Start the services
  *
- * MongoDB
- * Express
- * Sematext monitoring (production only)
+ * - Express
+ * - Sematext monitoring
  *
  */
 

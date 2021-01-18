@@ -13,8 +13,8 @@ import { applyMiddleware } from "graphql-middleware";
 import { GraphQLError } from "graphql";
 
 import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
-import { AuthService, ProfileService, NotificationService } from "../services";
-import GraphDB, { AuthHandler, ProfileHandler } from "../db";
+import { AuthService, UserService, NotificationService } from "../services";
+import GraphDB, { AuthHandler, UserHandler } from "../db";
 import {
   auth as authConfig,
   mail as mailConfig,
@@ -75,7 +75,7 @@ const context = async (ctx: IContext) => {
     db.registerHandler(AuthHandler)
   );
 
-  const userService = new ProfileService(db.registerHandler(ProfileHandler));
+  const userService = new UserService(db.registerHandler(UserHandler));
 
   return {
     host,
