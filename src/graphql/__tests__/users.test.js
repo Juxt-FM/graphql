@@ -6,9 +6,9 @@
 const { createTestClient } = require("apollo-server-testing");
 const { gql } = require("apollo-server-express");
 
-const { buildTestServer } = require("../__utils");
+const { buildTestServer } = require("./__utils");
 
-const { mockProfile } = require("../../../db/__mocks__/users");
+const { mockProfile } = require("../../db/__mocks__/users");
 
 const USER_PROFILE = gql`
   query Profile($id: ID!) {

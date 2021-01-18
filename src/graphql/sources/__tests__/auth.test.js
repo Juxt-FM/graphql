@@ -43,6 +43,7 @@ const mockExpressContext = {
 
 const mockContext = {
   user: { id: 1, verified: true },
+  client: { name: "web" },
   host: "127.0.0.1",
   authService: mockAuthService,
   notificationService: mockNotificationService,

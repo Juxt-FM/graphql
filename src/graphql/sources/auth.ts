@@ -23,7 +23,10 @@ export class AuthAPI extends BaseAPI {
     return expressCtx.req.signedCookies["device_token"];
   }
 
-  // Puts the token in an HTTP only cookie
+  /**
+   * Puts the token in an HTTP only cookie
+   * @param {string} token
+   */
   private setRefreshCookie(token: string) {
     const { expressCtx } = this.context;
 
@@ -47,9 +50,7 @@ export class AuthAPI extends BaseAPI {
     });
   }
 
-  /**
-   * Returns the logged in user
-   */
+  // Returns the logged in user
   async getCurrentUser() {
     const { user, authService } = this.context;
     return await this.handler(
@@ -65,15 +66,17 @@ export class AuthAPI extends BaseAPI {
    */
   async loginUser(data: LoginInput, device: DeviceInput) {
     return await this.handler("loginUser", async () => {
-      const { authService, host } = this.context;
+      const { host, client, authService } = this.context;
 
       const credentials = await authService.login(data, {
         ...device,
         address: host,
       });
 
-      this.setRefreshCookie(credentials.refreshToken);
-      credentials.refreshToken = undefined;
+      if (client.name === "web") {
+        this.setRefreshCookie(credentials.refreshToken);
+        credentials.refreshToken = undefined;
+      }
 
       return credentials;
     });
@@ -86,14 +89,17 @@ export class AuthAPI extends BaseAPI {
    */
   async registerUser(data: UserInput, device: DeviceInput) {
     return await this.handler("registerUser", async () => {
-      const { authService, notificationService, host } = this.context;
+      const { host, client, authService, notificationService } = this.context;
 
       const { user, credentials, code } = await authService.register(data, {
         ...device,
         address: host,
       });
 
-      this.setRefreshCookie(credentials.refreshToken);
+      if (client.name === "web") {
+        this.setRefreshCookie(credentials.refreshToken);
+        credentials.refreshToken = undefined;
+      }
 
       notificationService.sendEmail(
         [user.email],
@@ -101,7 +107,7 @@ export class AuthAPI extends BaseAPI {
         `Your JUXT verification code: ${code}`
       );
 
-      return { accessToken: credentials.accessToken };
+      return credentials;
     });
   }
 
@@ -150,9 +156,9 @@ export class AuthAPI extends BaseAPI {
    */
   async logoutUser(device: string) {
     return await this.handler("logoutUser", async () => {
-      const { user, authService } = this.context;
+      const { user, client, authService } = this.context;
 
-      this.clearRefreshCookie();
+      if (client.name === "web") this.clearRefreshCookie();
 
       return await authService.logout(user.id, device);
     });
@@ -164,13 +170,15 @@ export class AuthAPI extends BaseAPI {
    */
   async refreshToken(device: string) {
     return await this.handler("refreshToken", async () => {
-      const { authService } = this.context;
+      const { client, authService } = this.context;
       const token = this.getRefreshToken();
 
       const credentials = await authService.refreshToken(device, token);
 
-      this.setRefreshCookie(credentials.refreshToken);
-      credentials.refreshToken = undefined;
+      if (client.name === "web") {
+        this.setRefreshCookie(credentials.refreshToken);
+        credentials.refreshToken = undefined;
+      }
 
       return credentials;
     });
@@ -214,9 +222,7 @@ export class AuthAPI extends BaseAPI {
     });
   }
 
-  /**
-   * Deactivate the current user's account
-   */
+  // Deactivate the current user's account
   async deactivateAccount() {
     return await this.handler("deactivateAccount", async () => {
       const { user, authService } = this.context;

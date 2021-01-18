@@ -1,3 +1,8 @@
+/**
+ * @author Andrew Perera
+ * Copyright (C) 2020 - All rights reserved
+ */
+
 const { ApolloServer } = require("apollo-server-express");
 const { AuthAPI, UserAPI } = require("../sources");
 const { default: typeDefs } = require("../schema");
@@ -33,6 +38,7 @@ const buildTestServer = async (options) => {
 
   const context = {
     user: { id: 1, verified: verifiedUser },
+    client: { name: "web" },
     userService: mockUserService,
     authService: mockAuthService,
     notificationService: mockNotificationService,

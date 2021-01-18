@@ -5,12 +5,12 @@
 
 const { createTestClient } = require("apollo-server-testing");
 const { gql } = require("apollo-server-express");
-const { ValidationError } = require("../../../services");
+const { ValidationError } = require("../../services");
 
-const { buildTestServer } = require("../__utils");
+const { buildTestServer } = require("./__utils");
 
-const { mockCredentials } = require("../../sources/__tests__/auth.test");
-const { mockUser } = require("../../../db/__mocks__/auth");
+const { mockCredentials } = require("../sources/__tests__/auth.test");
+const { mockUser } = require("../../db/__mocks__/auth");
 
 const mockDeviceInput = {
   id: "1",

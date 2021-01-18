@@ -28,6 +28,7 @@ const mockExpressContext = {
 
 const mockContext = {
   user: { id: 1, verified: true },
+  client: { name: "web" },
   host: "127.0.0.1",
   authService: mockAuthService,
   expressCtx: mockExpressContext,
@@ -37,7 +38,7 @@ const ds = new AuthAPI();
 
 ds.initialize({ context: mockContext });
 
-describe("loginUser", () => {
+describe("base API (using login action)", () => {
   it("should authenticate the user", async () => {
     const cookieSetter = jest.spyOn(ds, "setRefreshCookie");
 

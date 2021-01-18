@@ -19,6 +19,10 @@ export interface IContext {
   userService: UserService;
   notificationService: NotificationService;
   host: string;
+  client: {
+    name: "web" | "mobile";
+    version: string;
+  };
   expressCtx: {
     req: Request;
     res: Response;

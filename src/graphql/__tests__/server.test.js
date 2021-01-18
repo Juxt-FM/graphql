@@ -5,21 +5,21 @@
 
 const express = require("express");
 
-const { buildServer } = require("..");
+const { buildGraph } = require("..");
 const { default: GraphDB } = require("../../db");
 
-const startServer = async () => {
+const startServer = () => {
   const app = express();
   const db = new GraphDB("some_host");
-  const server = buildServer({ db });
+  const server = buildGraph({ db });
 
   server.applyMiddleware({ app });
 
-  return await app.listen(0);
+  return app.listen(0);
 };
 
-test("should start server", async () => {
-  const server = await startServer();
+test("should start server", () => {
+  const server = startServer();
 
   server.close();
 });

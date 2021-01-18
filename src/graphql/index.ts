@@ -49,10 +49,10 @@ interface IServerBuilder {
 }
 
 /**
- * Returns a GraphQLServer instance
+ * Returns a GraphQL server instance
  * @param options
  */
-export const buildServer = ({ db }: IServerBuilder) => {
+export const buildGraph = ({ db }: IServerBuilder) => {
   const authService = new AuthService(auth, db.registerHandler(AuthHandler));
   const userService = new UserService(db.registerHandler(UserHandler));
   const notificationService = new NotificationService({
@@ -68,12 +68,10 @@ export const buildServer = ({ db }: IServerBuilder) => {
     blog: new BlogAPI({ uri: process.env.BLOG_SERVICE_URI }),
   });
 
-  const context = async (ctx: IContextBuilder) => {
-    const {
-      req: { user },
-    } = ctx;
+  const context = async ({ req, res }: IContextBuilder) => {
+    const { user } = req;
 
-    const host = ctx.req.headers.forwarded || ctx.req.connection.remoteAddress;
+    const host = req.headers.forwarded || req.connection.remoteAddress;
 
     return {
       host,
@@ -81,9 +79,13 @@ export const buildServer = ({ db }: IServerBuilder) => {
       authService,
       userService,
       notificationService,
+      client: {
+        name: req.headers["client_name"],
+        version: req.headers["client_version"],
+      },
       expressCtx: {
-        req: ctx.req,
-        res: ctx.res,
+        req,
+        res,
       },
     };
   };

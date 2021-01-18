@@ -13,13 +13,13 @@ import GraphDB from "./db";
 import { auth, database } from "./settings";
 import { authErrors } from "./middleware";
 
-import { buildServer } from "./graphql";
+import { buildGraph } from "./graphql";
 
-import * as logger from "./logging";
-
-const db = new GraphDB(database.host);
+export const db = new GraphDB(database.host);
 
 const app = express();
+
+const graph = buildGraph({ db });
 
 /**
  * Need to set the content security policy in development
@@ -49,8 +49,6 @@ app.use(
 
 app.use(authErrors);
 
-const graph = buildServer({ db });
-
 graph.applyMiddleware({
   app,
   cors: {
@@ -62,22 +60,4 @@ graph.applyMiddleware({
   },
 });
 
-/**
- *
- * Start the services
- *
- * - Express
- * - Sematext monitoring
- *
- */
-
-const port = process.env.PORT || 4000;
-
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server started at http://localhost:${port}`);
-});
-
-logger.start();
-
-db.connect();
+export default app;
