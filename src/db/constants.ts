@@ -51,6 +51,16 @@ export interface IUserDevice {
   updated: Date;
 }
 
+export interface IRawProfile {
+  id: string;
+  name?: string;
+  location?: string;
+  summary?: string;
+  coverImageURL?: string;
+  profileImageURL?: string;
+  created: number;
+  updated: number;
+}
 export interface IUserProfile {
   id: string;
   name?: string;

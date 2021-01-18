@@ -11,13 +11,38 @@ export class UserAPI extends BaseAPI {
   }
 
   /**
-   * Returns a user's profile
+   * Returns a user's profile given it's ID
+   * @param {string} id
    */
-  async getUserProfile(id: string) {
-    return this.handler("getUserProfile", async () => {
+  async getProfileByID(id: string) {
+    return this.handler("getProfileByID", async () => {
       const { userService } = this.context;
 
       return await userService.getById(id);
+    });
+  }
+
+  /**
+   * Returns a user's profile given the parent account's ID
+   * @param {string} id
+   */
+  async getProfileByAccount(id: string) {
+    return this.handler("getProfileByAccount", async () => {
+      const { userService } = this.context;
+
+      return await userService.getByUser(id);
+    });
+  }
+
+  /**
+   * Uses the service dataloader to batch profiles
+   * @param {string} id
+   */
+  async loadProfile(id: string) {
+    return this.handler("loadProfile", async () => {
+      const { userService } = this.context;
+
+      return await userService.loadProfile(id);
     });
   }
 }

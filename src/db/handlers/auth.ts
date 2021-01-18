@@ -41,21 +41,21 @@ export interface ICreateUserResult {
 export class AuthHandler extends BaseHandler {
   constructor(graph: GraphDB) {
     super(graph);
+
+    this.transform = this.transform.bind(this);
   }
 
   /**
    * Returns a formatted user object
    * @param {IRawUser} user
    */
-  private transformUser(user: IRawUser): IUserAccount {
-    const toDate = (timestamp: number) => moment(timestamp).toDate();
-
+  private transform(user: IRawUser): IUserAccount {
     return {
       ...user,
-      created: toDate(user.created),
-      updated: toDate(user.updated),
-      deactivated: user.deactivated ? toDate(user.deactivated) : undefined,
-      suspended: user.suspended ? toDate(user.suspended) : undefined,
+      created: this.toDate(user.created),
+      updated: this.toDate(user.updated),
+      deactivated: user.deactivated ? this.toDate(user.deactivated) : undefined,
+      suspended: user.suspended ? this.toDate(user.suspended) : undefined,
     };
   }
 
@@ -130,7 +130,7 @@ export class AuthHandler extends BaseHandler {
 
     const user: any = Object.fromEntries(result.value);
 
-    return { user: this.transformUser(user), code };
+    return { user: this.transform(user), code };
   }
 
   /**
@@ -161,7 +161,7 @@ export class AuthHandler extends BaseHandler {
 
     const user: any = Object.fromEntries(result.value);
 
-    return { user: this.transformUser(user), code };
+    return { user: this.transform(user), code };
   }
 
   /**
@@ -192,7 +192,7 @@ export class AuthHandler extends BaseHandler {
 
     const user: any = Object.fromEntries(result.value);
 
-    return { user: this.transformUser(user), code };
+    return { user: this.transform(user), code };
   }
 
   /**
@@ -208,7 +208,7 @@ export class AuthHandler extends BaseHandler {
 
     const user: any = Object.fromEntries(result.value);
 
-    return this.transformUser(user);
+    return this.transform(user);
   }
 
   /**
@@ -229,7 +229,7 @@ export class AuthHandler extends BaseHandler {
 
     const user: any = Object.fromEntries(result.value);
 
-    return this.transformUser(user);
+    return this.transform(user);
   }
 
   /**
@@ -255,7 +255,7 @@ export class AuthHandler extends BaseHandler {
 
     const user: any = Object.fromEntries(result.value);
 
-    return this.transformUser(user);
+    return this.transform(user);
   }
 
   /**
@@ -416,7 +416,7 @@ export class AuthHandler extends BaseHandler {
 
         const user: any = Object.fromEntries(result.value);
 
-        return this.transformUser(user);
+        return this.transform(user);
       } else throw new ResourceNotFoundError("Invalid code.");
     } else {
       throw new Error();
@@ -451,7 +451,7 @@ export class AuthHandler extends BaseHandler {
 
         const user: any = Object.fromEntries(result.value);
 
-        return this.transformUser(user);
+        return this.transform(user);
       } else throw new ResourceNotFoundError("Invalid code.");
     } else {
       throw new Error();

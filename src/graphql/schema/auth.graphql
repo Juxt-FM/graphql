@@ -8,7 +8,7 @@ type UserAccount {
   id: ID!
   email: String!
   phone: String
-  profile: UserProfile!
+  profile: UserProfile
   verified: Boolean
   suspended: String
   updated: String!
