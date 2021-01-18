@@ -5,21 +5,23 @@
 
 import { rule } from "graphql-shield";
 
+import { IResolverContext } from "../server";
+
 export const isAuthenticated = rule({ cache: "contextual" })(
-  (parent, args, ctx) => {
+  (parent: any, args: any, ctx: IResolverContext) => {
     return typeof ctx.user !== "undefined";
   }
 );
 
-export const isVerified = rule({ cache: "contextual" })((parent, args, ctx) => {
-  return ctx.user ? ctx.user.verified : false;
-});
+export const isVerified = rule({ cache: "contextual" })(
+  (parent: any, args: any, ctx: IResolverContext) => {
+    return ctx.user ? ctx.user.verified : false;
+  }
+);
 
-export const hasAPCACredentials = rule({ cache: "contextual" })(
-  (parent, args, ctx) => {
-    return (
-      typeof ctx.apcaKeyId !== "undefined" &&
-      typeof ctx.apcaSecretKey !== "undefined"
-    );
+export const hasRefreshCredentials = rule({ cache: "contextual" })(
+  (parent: any, args: any, ctx: IResolverContext) => {
+    const token = ctx.expressCtx.req.signedCookies["device_token"];
+    return typeof token !== "undefined";
   }
 );

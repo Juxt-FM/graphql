@@ -8,13 +8,13 @@ import moment from "moment";
 
 import GraphDB from "..";
 import BaseHandler from "./base";
+import { ResourceNotFoundError } from "../errors";
 
-import { IRawUser, IUser, labels, relationships } from "./constants";
+import { IRawUser, IUser, labels, relationships } from "../constants";
 
 const {
   statics: __,
   P: { gt },
-  cardinality: { single },
 } = gremlin.process;
 
 export interface ICreateUserArgs {
@@ -157,7 +157,7 @@ export class AuthHandler extends BaseHandler {
       .elementMap()
       .next();
 
-    if (!result.value) throw this.getNotFoundError();
+    if (!result.value) throw new ResourceNotFoundError();
 
     const user: any = Object.fromEntries(result.value);
 
@@ -188,7 +188,7 @@ export class AuthHandler extends BaseHandler {
       .elementMap()
       .next();
 
-    if (!result.value) throw this.getNotFoundError();
+    if (!result.value) throw new ResourceNotFoundError();
 
     const user: any = Object.fromEntries(result.value);
 
@@ -204,7 +204,7 @@ export class AuthHandler extends BaseHandler {
 
     const result = await query.V(id).elementMap().next();
 
-    if (!result.value) throw this.getNotFoundError();
+    if (!result.value) throw new ResourceNotFoundError();
 
     const user: any = Object.fromEntries(result.value);
 
@@ -225,7 +225,7 @@ export class AuthHandler extends BaseHandler {
       .elementMap()
       .next();
 
-    if (!result.value) throw this.getNotFoundError();
+    if (!result.value) throw new ResourceNotFoundError();
 
     const user: any = Object.fromEntries(result.value);
 
@@ -251,7 +251,7 @@ export class AuthHandler extends BaseHandler {
       .elementMap()
       .next();
 
-    if (!result.value) throw this.getNotFoundError();
+    if (!result.value) throw new ResourceNotFoundError();
 
     const user: any = Object.fromEntries(result.value);
 
@@ -374,7 +374,7 @@ export class AuthHandler extends BaseHandler {
       .elementMap()
       .next();
 
-    if (!result.value) throw this.getNotFoundError();
+    if (!result.value) throw new ResourceNotFoundError();
   }
 
   /**
@@ -403,23 +403,23 @@ export class AuthHandler extends BaseHandler {
       .values("code")
       .next();
 
-    if (codeProp.value === code) {
-      const result = await query
-        .V(userId)
-        .property("verified", true)
-        .as("user")
-        .sideEffect(__.properties("email").properties("code").drop())
-        .select("user")
-        .elementMap()
-        .next();
+    if (codeProp.value) {
+      if (codeProp.value === code) {
+        const result = await query
+          .V(userId)
+          .property("verified", true)
+          .as("user")
+          .sideEffect(__.properties("email").properties("code").drop())
+          .select("user")
+          .elementMap()
+          .next();
 
-      const user: any = Object.fromEntries(result.value);
+        const user: any = Object.fromEntries(result.value);
 
-      return this.transformUser(user);
+        return this.transformUser(user);
+      } else throw new ResourceNotFoundError("Invalid code.");
     } else {
-      const err = new Error("Invalid code.");
-      err.name = "INVALIDCODE";
-      throw err;
+      throw new Error();
     }
   }
 
@@ -438,20 +438,23 @@ export class AuthHandler extends BaseHandler {
       .values("code")
       .next();
 
-    if (codeProp.value === code) {
-      const result = await query
-        .V(userId)
-        .property("verified", true)
-        .elementMap()
-        .next();
+    if (codeProp.value) {
+      if (codeProp.value === code) {
+        const result = await query
+          .V(userId)
+          .property("verified", true)
+          .as("user")
+          .sideEffect(__.properties("phone").properties("code").drop())
+          .select("user")
+          .elementMap()
+          .next();
 
-      const user: any = Object.fromEntries(result.value);
+        const user: any = Object.fromEntries(result.value);
 
-      return this.transformUser(user);
+        return this.transformUser(user);
+      } else throw new ResourceNotFoundError("Invalid code.");
     } else {
-      const err = new Error("Invalid code.");
-      err.name = "INVALIDCODE";
-      throw err;
+      throw new Error();
     }
   }
 

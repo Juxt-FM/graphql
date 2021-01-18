@@ -7,6 +7,8 @@ import GraphDB from "..";
 
 import BaseHandler from "./base";
 
+import { ResourceNotFoundError } from "../errors";
+
 /**
  * Database user profile handler.
  * @param {GraphDB} graph
@@ -24,6 +26,8 @@ export class ProfileHandler extends BaseHandler {
     const query = this.graph.query();
 
     const result = await query.V(id).elementMap().next();
+
+    if (!result.value) throw new ResourceNotFoundError();
 
     const profile: any = Object.fromEntries(result.value);
 

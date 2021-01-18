@@ -15,13 +15,4 @@ export default class BaseHandler {
   constructor(graph: GraphDB) {
     this.graph = graph;
   }
-
-  /**
-   * Returns a generic not found error.
-   */
-  protected getNotFoundError() {
-    const err = new Error("Not found.");
-    err["name"] = "NOTFOUND";
-    return err;
-  }
 }

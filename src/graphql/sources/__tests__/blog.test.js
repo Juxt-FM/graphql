@@ -284,7 +284,7 @@ describe("blog.loadUserReaction", () => {
     const res1 = await ds.loadUserReaction("id1");
 
     expect(res1).toEqual(mockReaction);
-    expect(mocks.get).toBeCalledWith("reactions/load/count", {
+    expect(mocks.get).toBeCalledWith("reactions/load/user", {
       ids: "id1",
     });
   });

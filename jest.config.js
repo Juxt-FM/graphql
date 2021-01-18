@@ -9,4 +9,5 @@ module.exports = {
       { outputDirectory: "test-results/junit", outputName: "results.xml" },
     ],
   ],
+  resetMocks: true,
 };

@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const decodeJWT = require("jwt-decode");
 
 const { AuthService } = require("../auth");
-const { ServiceError } = require("../base");
+const { ServiceError, ValidationError } = require("../errors");
 
 const {
   mockUser,
@@ -98,8 +98,7 @@ describe("validateEmail", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["email"]);
       });
   });
@@ -113,8 +112,7 @@ describe("validateEmail", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["email"]);
       });
   });
@@ -130,8 +128,7 @@ describe("validateEmail", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["email"]);
       });
   });
@@ -169,8 +166,7 @@ describe("validatePhone", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["phone"]);
       });
   });
@@ -184,8 +180,7 @@ describe("validatePhone", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["phone"]);
       });
   });
@@ -201,8 +196,7 @@ describe("validatePhone", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["phone"]);
       });
   });
@@ -229,8 +223,7 @@ describe("validatePassword", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["password", "confirmPassword"]);
       });
   });
@@ -245,8 +238,7 @@ describe("validatePassword", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["password", "confirmPassword"]);
       });
   });
@@ -472,8 +464,7 @@ describe("updateEmail", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["email"]);
       });
   });
@@ -488,8 +479,7 @@ describe("updateEmail", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["email"]);
       });
   });
@@ -520,8 +510,7 @@ describe("updatePhone", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["phone"]);
       });
   });
@@ -536,8 +525,7 @@ describe("updatePhone", () => {
         throw new Error();
       })
       .catch((e) => {
-        expect(e instanceof ServiceError).toBe(true);
-        expect(e.name).toEqual("bad_input");
+        expect(e instanceof ValidationError).toBe(true);
         expect(e.invalidArgs).toEqual(["phone"]);
       });
   });

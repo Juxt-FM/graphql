@@ -7,9 +7,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
 
-import BaseService, { ServiceError } from "./base";
-
-import * as logging from "../logging";
+import { ServiceError, ValidationError } from "./errors";
 
 import { AuthHandler, IUser, IDeviceArgs } from "../db";
 
@@ -43,13 +41,11 @@ interface IAuthConfig {
  * @param {IAuthConfig} config
  * @param {any} dbHandler
  */
-export class AuthService extends BaseService {
+export class AuthService {
   private config: IAuthConfig;
   private dbHandler: AuthHandler;
 
   constructor(config: IAuthConfig, dbHandler: any) {
-    super();
-
     this.config = config;
     this.dbHandler = dbHandler;
   }
@@ -58,7 +54,7 @@ export class AuthService extends BaseService {
    * Returns a default login error response
    */
   private throwDefaultAuthenticationError() {
-    this.throwInputError(
+    throw new ValidationError(
       "We couldn't log you in with the provided credentials",
       ["identifier", "password"]
     );
@@ -100,13 +96,13 @@ export class AuthService extends BaseService {
       const isUnique = await this.dbHandler.isUniqueEmail(email);
 
       if (!isUnique)
-        this.throwInputError("This email address is already in use.", [
+        throw new ValidationError("This email address is already in use.", [
           "email",
         ]);
 
       return email;
     } else {
-      this.throwInputError("Enter a valid email address.", ["email"]);
+      throw new ValidationError("Enter a valid email address.", ["email"]);
     }
   }
 
@@ -123,11 +119,13 @@ export class AuthService extends BaseService {
       const isUnique = await this.dbHandler.isUniquePhone(phoneNumber);
 
       if (!isUnique)
-        this.throwInputError("This phone number is already in use.", ["phone"]);
+        throw new ValidationError("This phone number is already in use.", [
+          "phone",
+        ]);
 
       return phoneNumber;
     } else {
-      this.throwInputError("Enter a valid phone number.", ["phone"]);
+      throw new ValidationError("Enter a valid phone number.", ["phone"]);
     }
   }
 
@@ -139,12 +137,12 @@ export class AuthService extends BaseService {
    */
   private async validatePassword(password: string, confirmPassword: string) {
     if (password !== confirmPassword)
-      this.throwInputError("Your passwords must match.", [
+      throw new ValidationError("Your passwords must match.", [
         "password",
         "confirmPassword",
       ]);
     if (password.length < 8)
-      this.throwInputError("Passwords must be longer than 8 characters.", [
+      throw new ValidationError("Passwords must be longer than 8 characters.", [
         "password",
         "confirmPassword",
       ]);
@@ -187,25 +185,13 @@ export class AuthService extends BaseService {
    * @param {IDeviceArgs} device
    */
   private async authenticationSuccess(user: IUser, device: IDeviceArgs) {
-    try {
-      const credentials = await this.getCredentials(user);
+    const credentials = await this.getCredentials(user);
 
-      await this.dbHandler.deviceLogin(
-        user.id,
-        credentials.refreshToken,
-        device
-      );
+    await this.dbHandler.deviceLogin(user.id, credentials.refreshToken, device);
 
-      // TODO alert user if a new device was created (available from deviceLogin)
+    // TODO alert user if a new device was created (available from deviceLogin)
 
-      return credentials;
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.authenticationSuccess: ${e}`);
-        throw e;
-      }
-    }
+    return credentials;
   }
 
   /**
@@ -213,15 +199,7 @@ export class AuthService extends BaseService {
    * @param {string} id
    */
   async getUser(id: string) {
-    try {
-      return await this.dbHandler.findUserByID(id);
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.getUser: ${e}`);
-        this.throwServerError();
-      }
-    }
+    return await this.dbHandler.findUserByID(id);
   }
 
   /**
@@ -230,25 +208,17 @@ export class AuthService extends BaseService {
    * @param {IDeviceArgs} device
    */
   async register(data: IRegisterArgs, device: IDeviceArgs) {
-    try {
-      const { email, password, confirmPassword } = data;
+    const { email, password, confirmPassword } = data;
 
-      const result = await this.dbHandler.createUser({
-        email: await this.validateEmail(email),
-        password: await this.validatePassword(password, confirmPassword),
-      });
+    const result = await this.dbHandler.createUser({
+      email: await this.validateEmail(email),
+      password: await this.validatePassword(password, confirmPassword),
+    });
 
-      return {
-        ...result,
-        credentials: await this.authenticationSuccess(result.user, device),
-      };
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.register: ${e}`);
-        this.throwServerError();
-      }
-    }
+    return {
+      ...result,
+      credentials: await this.authenticationSuccess(result.user, device),
+    };
   }
 
   /**
@@ -257,21 +227,12 @@ export class AuthService extends BaseService {
    * @param {IDeviceArgs} device
    */
   async login(data: ILoginInput, device: IDeviceArgs) {
-    try {
-      const user = await this.dbHandler.findUserByAttribute(data.identifier);
+    const user = await this.dbHandler.findUserByAttribute(data.identifier);
 
-      if (user.suspended)
-        throw new ServiceError("Your account has been suspended.");
+    if (user.suspended)
+      throw new ServiceError("Your account has been suspended.");
 
-      return await this.authenticate(user, data.password, device);
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else if (e.name === "NOTFOUND") this.throwDefaultAuthenticationError();
-      else {
-        logging.logError(`services.auth.login: ${e}`);
-        this.throwServerError();
-      }
-    }
+    return await this.authenticate(user, data.password, device);
   }
 
   /**
@@ -280,28 +241,20 @@ export class AuthService extends BaseService {
    * @param {string} token
    */
   async refreshToken(deviceId: string, token: string) {
-    try {
-      const user = await this.dbHandler.findUserByAuthStatus(deviceId, token);
+    const user = await this.dbHandler.findUserByAuthStatus(deviceId, token);
 
-      if (user.suspended)
-        throw new ServiceError("Your account has been suspended.");
+    if (user.suspended)
+      throw new ServiceError("Your account has been suspended.");
 
-      const credentials = await this.getCredentials(user);
+    const credentials = await this.getCredentials(user);
 
-      await this.dbHandler.updateAuthStatus(
-        deviceId,
-        user.id,
-        credentials.refreshToken
-      );
+    await this.dbHandler.updateAuthStatus(
+      deviceId,
+      user.id,
+      credentials.refreshToken
+    );
 
-      return credentials;
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.refreshToken: ${e}`);
-        this.throwServerError();
-      }
-    }
+    return credentials;
   }
 
   /**
@@ -310,16 +263,8 @@ export class AuthService extends BaseService {
    * @param {string} device
    */
   async logout(user: string, device: string) {
-    try {
-      await this.dbHandler.deviceLogout(user, device);
-      return "Successfully logged out.";
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.logout: ${e}`);
-        this.throwServerError();
-      }
-    }
+    await this.dbHandler.deviceLogout(user, device);
+    return "Successfully logged out.";
   }
 
   /**
@@ -328,16 +273,8 @@ export class AuthService extends BaseService {
    * @param {string} email
    */
   async updateEmail(user: string, email: string) {
-    try {
-      email = await this.validateEmail(email);
-      return await this.dbHandler.updateEmail(user, email);
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.updateEmail: ${e}`);
-        this.throwServerError();
-      }
-    }
+    email = await this.validateEmail(email);
+    return await this.dbHandler.updateEmail(user, email);
   }
 
   /**
@@ -346,16 +283,8 @@ export class AuthService extends BaseService {
    * @param {string} phone
    */
   async updatePhone(user: string, phone: string) {
-    try {
-      phone = await this.validatePhone(phone);
-      return await this.dbHandler.updatePhone(user, phone);
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.updatePhone: ${e}`);
-        this.throwServerError();
-      }
-    }
+    phone = await this.validatePhone(phone);
+    return await this.dbHandler.updatePhone(user, phone);
   }
 
   /**
@@ -364,20 +293,12 @@ export class AuthService extends BaseService {
    * @param {IPasswordResetInput} data
    */
   async resetPassword(user: string, data: IPasswordResetInput) {
-    try {
-      const password = await this.validatePassword(
-        data.password,
-        data.confirmPassword
-      );
+    const password = await this.validatePassword(
+      data.password,
+      data.confirmPassword
+    );
 
-      await this.dbHandler.resetPassword(user, password);
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.resetPassword: ${e}`);
-        this.throwServerError();
-      }
-    }
+    await this.dbHandler.resetPassword(user, password);
   }
 
   /**
@@ -387,20 +308,10 @@ export class AuthService extends BaseService {
    * @param {boolean} reauthenticate
    */
   async verifyEmail(userId: string, code: string, reauthenticate: boolean) {
-    try {
-      const user = await this.dbHandler.verifyEmail(userId, code);
+    const user = await this.dbHandler.verifyEmail(userId, code);
 
-      if (reauthenticate)
-        return { accessToken: await this.signToken(user.id, user.verified) };
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else if (e.name === "INVALIDCODE")
-        throw new ServiceError("Invalid code.");
-      else {
-        logging.logError(`services.auth.verifyEmail: ${e}`);
-        this.throwServerError();
-      }
-    }
+    if (reauthenticate)
+      return { accessToken: await this.signToken(user.id, user.verified) };
   }
 
   /**
@@ -410,18 +321,10 @@ export class AuthService extends BaseService {
    * @param {boolean} reauthenticate
    */
   async verifyPhone(userId: string, code: string, reauthenticate: boolean) {
-    try {
-      const user = await this.dbHandler.verifyPhone(userId, code);
+    const user = await this.dbHandler.verifyPhone(userId, code);
 
-      if (reauthenticate)
-        return { accessToken: await this.signToken(user.id, user.verified) };
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.verifyPhone: ${e}`);
-        this.throwServerError();
-      }
-    }
+    if (reauthenticate)
+      return { accessToken: await this.signToken(user.id, user.verified) };
   }
 
   /**
@@ -430,15 +333,7 @@ export class AuthService extends BaseService {
    * @param {string} user
    */
   async deactivateAccount(user: string) {
-    try {
-      await this.dbHandler.deactivateAccount(user);
-      return "Account deactivated.";
-    } catch (e) {
-      if (e instanceof ServiceError) throw e;
-      else {
-        logging.logError(`services.auth.deactivateAccount: ${e}`);
-        this.throwServerError();
-      }
-    }
+    await this.dbHandler.deactivateAccount(user);
+    return "Account deactivated.";
   }
 }

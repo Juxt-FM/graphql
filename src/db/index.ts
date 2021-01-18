@@ -3,6 +3,8 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
+export * from "./errors";
+export * from "./constants";
 export * from "./handlers";
 
 import gremlin from "gremlin";
