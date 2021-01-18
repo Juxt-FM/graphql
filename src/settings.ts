@@ -10,7 +10,6 @@ export const auth = {
   jwtIssuer: process.env.JWT_ISSUER || "http://localhost:4000/graphql",
   jwtSubject: process.env.JWT_SUBJECT || "Hedger core API",
   jwtExpiration: process.env.JWT_EXPIRATION || "15 minutes",
-  refreshCookie: process.env.REFRESH_TOKEN_COOKIE || "device_token",
 };
 
 export const database = {

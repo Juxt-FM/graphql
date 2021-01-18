@@ -54,6 +54,7 @@ export interface IUserProfile {
 
 export interface IUserDevice {
   id: string;
+  identifier: string;
   platform: "ios" | "android" | "web";
   model: string;
   address: string;

@@ -23,11 +23,10 @@ export type User = {
   __typename?: 'User';
   id: Scalars['ID'];
   email: Scalars['String'];
-  phone: Scalars['String'];
+  phone?: Maybe<Scalars['String']>;
   profile: UserProfile;
-  verified: Scalars['String'];
-  suspended: Scalars['String'];
-  lastLogin: Scalars['String'];
+  verified?: Maybe<Scalars['String']>;
+  suspended?: Maybe<Scalars['String']>;
   updated: Scalars['String'];
   created: Scalars['String'];
 };
@@ -54,20 +53,15 @@ export type DeviceInput = {
   fcmKey?: Maybe<Scalars['String']>;
 };
 
-export type CreateUserInput = {
+export type UserInput = {
   email: Scalars['String'];
   password: Scalars['String'];
   confirmPassword: Scalars['String'];
 };
 
-export type LoginUserInput = {
+export type LoginInput = {
   identifier: Scalars['String'];
   password: Scalars['String'];
-};
-
-export type PasswordResetInput = {
-  password: Scalars['String'];
-  confirmPassword: Scalars['String'];
 };
 
 export type Query = {
@@ -120,6 +114,8 @@ export type Mutation = {
   createUser: AuthCredentials;
   loginUser: AuthCredentials;
   logoutUser: Scalars['String'];
+  updateEmail: User;
+  updatePhone: User;
   verifyEmail?: Maybe<AuthCredentials>;
   verifyPhone?: Maybe<AuthCredentials>;
   resetPassword: Scalars['String'];
@@ -142,13 +138,13 @@ export type Mutation = {
 
 
 export type MutationCreateUserArgs = {
-  data: CreateUserInput;
+  data: UserInput;
   device: DeviceInput;
 };
 
 
 export type MutationLoginUserArgs = {
-  data: LoginUserInput;
+  data: LoginInput;
   device: DeviceInput;
 };
 
@@ -158,20 +154,29 @@ export type MutationLogoutUserArgs = {
 };
 
 
-export type MutationVerifyEmailArgs = {
+export type MutationUpdateEmailArgs = {
   email: Scalars['String'];
+};
+
+
+export type MutationUpdatePhoneArgs = {
+  phone: Scalars['String'];
+};
+
+
+export type MutationVerifyEmailArgs = {
   code: Scalars['String'];
 };
 
 
 export type MutationVerifyPhoneArgs = {
-  phone: Scalars['String'];
   code: Scalars['String'];
 };
 
 
 export type MutationResetPasswordArgs = {
-  data: PasswordResetInput;
+  password: Scalars['String'];
+  confirmPassword: Scalars['String'];
 };
 
 
@@ -459,9 +464,8 @@ export type ResolversTypes = {
   Device: ResolverTypeWrapper<Device>;
   AuthCredentials: ResolverTypeWrapper<AuthCredentials>;
   DeviceInput: DeviceInput;
-  CreateUserInput: CreateUserInput;
-  LoginUserInput: LoginUserInput;
-  PasswordResetInput: PasswordResetInput;
+  UserInput: UserInput;
+  LoginInput: LoginInput;
   Query: ResolverTypeWrapper<{}>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -490,9 +494,8 @@ export type ResolversParentTypes = {
   Device: Device;
   AuthCredentials: AuthCredentials;
   DeviceInput: DeviceInput;
-  CreateUserInput: CreateUserInput;
-  LoginUserInput: LoginUserInput;
-  PasswordResetInput: PasswordResetInput;
+  UserInput: UserInput;
+  LoginInput: LoginInput;
   Query: {};
   Int: Scalars['Int'];
   Mutation: {};
@@ -514,11 +517,10 @@ export type ResolversParentTypes = {
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  phone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   profile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType>;
-  verified?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  suspended?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  lastLogin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  verified?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  suspended?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -553,9 +555,11 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createUser?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'data' | 'device'>>;
   loginUser?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType, RequireFields<MutationLoginUserArgs, 'data' | 'device'>>;
   logoutUser?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationLogoutUserArgs, 'device'>>;
-  verifyEmail?: Resolver<Maybe<ResolversTypes['AuthCredentials']>, ParentType, ContextType, RequireFields<MutationVerifyEmailArgs, 'email' | 'code'>>;
-  verifyPhone?: Resolver<Maybe<ResolversTypes['AuthCredentials']>, ParentType, ContextType, RequireFields<MutationVerifyPhoneArgs, 'phone' | 'code'>>;
-  resetPassword?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'data'>>;
+  updateEmail?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateEmailArgs, 'email'>>;
+  updatePhone?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdatePhoneArgs, 'phone'>>;
+  verifyEmail?: Resolver<Maybe<ResolversTypes['AuthCredentials']>, ParentType, ContextType, RequireFields<MutationVerifyEmailArgs, 'code'>>;
+  verifyPhone?: Resolver<Maybe<ResolversTypes['AuthCredentials']>, ParentType, ContextType, RequireFields<MutationVerifyPhoneArgs, 'code'>>;
+  resetPassword?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'password' | 'confirmPassword'>>;
   refreshToken?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType>;
   deactivateAccount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updateProfile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<MutationUpdateProfileArgs, 'data'>>;

@@ -3,19 +3,19 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import BaseService, { IBaseConfig } from "./base";
+import BaseService from "./base";
+
 import { ProfileHandler } from "../db";
 
 /**
  * Profile service (post authors, public profiles, etc.)
- * @param {IBaseConfig} baseConfig
- * @param {any} dbHandler
+ * @param {ProfileHandler} dbHandler
  */
 export class ProfileService extends BaseService {
   private dbHandler: ProfileHandler;
 
-  constructor(baseConfig: IBaseConfig, dbHandler: ProfileHandler) {
-    super(baseConfig);
+  constructor(dbHandler: ProfileHandler) {
+    super();
 
     this.dbHandler = dbHandler;
   }

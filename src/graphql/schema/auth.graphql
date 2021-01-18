@@ -9,7 +9,7 @@ type User {
   email: String!
   phone: String
   profile: UserProfile!
-  verified: String
+  verified: Boolean
   suspended: String
   updated: String!
   created: String!
@@ -26,6 +26,7 @@ type Device {
 
 type AuthCredentials {
   accessToken: String!
+  refreshToken: String
 }
 
 input DeviceInput {
@@ -54,9 +55,11 @@ type Mutation {
   createUser(data: UserInput!, device: DeviceInput!): AuthCredentials!
   loginUser(data: LoginInput!, device: DeviceInput!): AuthCredentials!
   logoutUser(device: ID!): String!
+  updateEmail(email: String!): User!
+  updatePhone(phone: String!): User!
   verifyEmail(code: String!): AuthCredentials
   verifyPhone(code: String!): AuthCredentials
   resetPassword(password: String!, confirmPassword: String!): String!
-  refreshToken: AuthCredentials!
+  refreshToken(device: ID!): AuthCredentials!
   deactivateAccount: String!
 }

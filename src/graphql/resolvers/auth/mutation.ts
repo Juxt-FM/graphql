@@ -11,6 +11,8 @@ import {
   MutationVerifyEmailArgs,
   MutationVerifyPhoneArgs,
   MutationLogoutUserArgs,
+  MutationUpdateEmailArgs,
+  MutationUpdatePhoneArgs,
 } from "../../types";
 
 export const createUser = async (
@@ -33,14 +35,34 @@ export const loginUser = async (
   return await auth.loginUser(args.data, args.device);
 };
 
-export const refreshToken = async (
+export const updateEmail = async (
   parent: undefined,
-  args: undefined,
+  args: MutationUpdateEmailArgs,
   context: IResolverContext
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.refreshToken();
+  return await auth.updateEmail(args.email);
+};
+
+export const updatePhone = async (
+  parent: undefined,
+  args: MutationUpdatePhoneArgs,
+  context: IResolverContext
+) => {
+  const { auth } = context.dataSources;
+
+  return await auth.updatePhone(args.phone);
+};
+
+export const refreshToken = async (
+  parent: undefined,
+  args: any,
+  context: IResolverContext
+) => {
+  const { auth } = context.dataSources;
+
+  return await auth.refreshToken(args.device);
 };
 
 export const logoutUser = async (
@@ -60,7 +82,7 @@ export const resetPassword = async (
 ) => {
   const { auth } = context.dataSources;
 
-  return await auth.resetPassword(args.data);
+  return await auth.resetPassword(args);
 };
 
 export const verifyEmail = async (

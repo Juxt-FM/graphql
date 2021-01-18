@@ -5,15 +5,15 @@
 
 import GraphDB from "..";
 
+import BaseHandler from "./base";
+
 /**
  * Database user profile handler.
  * @param {GraphDB} graph
  */
-export class ProfileHandler {
-  private graph: GraphDB;
-
+export class ProfileHandler extends BaseHandler {
   constructor(graph: GraphDB) {
-    this.graph = graph;
+    super(graph);
   }
 
   /**

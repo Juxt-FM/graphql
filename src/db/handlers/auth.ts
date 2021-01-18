@@ -7,23 +7,26 @@ import gremlin from "gremlin";
 import moment from "moment";
 
 import GraphDB from "..";
+import BaseHandler from "./base";
 
-import {
-  IRawUser,
-  IUser,
-  IUserDevice,
-  labels,
-  relationships,
-} from "./constants";
+import { IRawUser, IUser, labels, relationships } from "./constants";
 
 const {
-  t: { id },
   statics: __,
+  P: { gt },
+  cardinality: { single },
 } = gremlin.process;
 
 export interface ICreateUserArgs {
   email: string;
   password: string;
+}
+
+export interface IDeviceArgs {
+  id: string;
+  platform: "ios" | "android" | "web";
+  model: string;
+  address?: string;
 }
 
 export interface ICreateUserResult {
@@ -35,11 +38,9 @@ export interface ICreateUserResult {
  * Database authentication handler.
  * @param {GraphDB} graph
  */
-export class AuthHandler {
-  private graph: GraphDB;
-
+export class AuthHandler extends BaseHandler {
   constructor(graph: GraphDB) {
-    this.graph = graph;
+    super(graph);
   }
 
   /**
@@ -61,8 +62,15 @@ export class AuthHandler {
   /**
    * Returns a 6-digit alphanumeric code
    */
-  private getVerificationCode() {
+  private createRandomCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  /**
+   * Returns an expiration timestamp
+   */
+  private getTokenExpiry() {
+    return moment().valueOf() + 1000 * 60 * 60 * 24 * 7;
   }
 
   /**
@@ -97,7 +105,7 @@ export class AuthHandler {
     const query = this.graph.query();
 
     const now = moment().valueOf();
-    const code = this.getVerificationCode();
+    const code = this.createRandomCode();
 
     const result = await query
       .addV(labels.User)
@@ -106,6 +114,7 @@ export class AuthHandler {
       .property("verified", false)
       .property("created", now)
       .property("updated", now)
+      .as("user")
       .properties("email")
       .property("code", code)
       .addV(labels.Profile)
@@ -125,6 +134,66 @@ export class AuthHandler {
   }
 
   /**
+   * Updates a user's email address
+   * @param {string} id
+   * @param {string} email
+   */
+  async updateEmail(id: string, email: string) {
+    const query = this.graph.query();
+
+    const code = this.createRandomCode();
+
+    const result = await query
+      .V(id)
+      .property("email", email)
+      .as("user")
+      .properties("email")
+      .property(single, "code", code)
+      .sideEffect(
+        __.select("user").properties("email").properties("verified").drop()
+      )
+      .select("user")
+      .elementMap()
+      .next();
+
+    if (!result.value) throw this.getNotFoundError();
+
+    const user: any = Object.fromEntries(result.value);
+
+    return { user: this.transformUser(user), code };
+  }
+
+  /**
+   * Updates a user's phoneNumber
+   * @param {string} id
+   * @param {string} phone
+   */
+  async updatePhone(id: string, phone: string) {
+    const query = this.graph.query();
+
+    const code = this.createRandomCode();
+
+    const result = await query
+      .V(id)
+      .property("phone", phone)
+      .as("user")
+      .properties("phone")
+      .property(single, "code", code)
+      .sideEffect(
+        __.select("user").properties("phone").properties("verified").drop()
+      )
+      .select("user")
+      .elementMap()
+      .next();
+
+    if (!result.value) throw this.getNotFoundError();
+
+    const user: any = Object.fromEntries(result.value);
+
+    return { user: this.transformUser(user), code };
+  }
+
+  /**
    * Fetches a user with the given ID
    * @param {string} id
    */
@@ -132,6 +201,8 @@ export class AuthHandler {
     const query = this.graph.query();
 
     const result = await query.V(id).elementMap().next();
+
+    if (!result.value) throw this.getNotFoundError();
 
     const user: any = Object.fromEntries(result.value);
 
@@ -144,6 +215,7 @@ export class AuthHandler {
    */
   async findUserByAttribute(attribute: string) {
     const query = this.graph.query();
+
     const result = await query
       .V()
       .hasLabel(labels.User)
@@ -151,58 +223,112 @@ export class AuthHandler {
       .elementMap()
       .next();
 
+    if (!result.value) throw this.getNotFoundError();
+
     const user: any = Object.fromEntries(result.value);
 
     return this.transformUser(user);
   }
 
   /**
-   * Adds a logged in status to the device, sets the refresh token,
-   * and adds a relationship that tells us the user uses this device
+   * Fetches a user given a device id and refresh token
+   * @param {string} device
+   * @param {string} token
+   */
+  async findUserByAuthStatus(device: string, token: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V()
+      .has(labels.UserDevice, "identifier", device)
+      .outE(relationships.LoggedIn)
+      .has("expires", gt(moment().valueOf()))
+      .has("token", token)
+      .inV()
+      .hasLabel(labels.User)
+      .elementMap()
+      .next();
+
+    if (!result.value) throw this.getNotFoundError();
+
+    const user: any = Object.fromEntries(result.value);
+
+    return this.transformUser(user);
+  }
+
+  /**
+   * Create a new device
+   * @param {GraphTraversal} query
+   * @param {IDeviceArgs} device
+   * @param {string} userId
+   */
+  async createDevice(
+    query: gremlin.process.GraphTraversalSource<gremlin.process.GraphTraversal>,
+    device: IDeviceArgs,
+    userId: string
+  ) {
+    if (!query) query = this.graph.query();
+
+    return await query
+      .V(userId)
+      .as("user")
+      .addV(labels.UserDevice)
+      .property("identifier", device.id)
+      .property("address", device.address)
+      .property("platform", device.platform)
+      .property("model", device.model)
+      .property("created", moment().valueOf())
+      .property("updated", moment().valueOf())
+      .as("device")
+      .addE(relationships.UsesDevice)
+      .from_("user")
+      .to("device")
+      .select("device")
+      .elementMap()
+      .next();
+  }
+
+  /**
+   * Adds a logged in status to the device and sets the refresh token
    * @param {string} userId
    * @param {string} token
-   * @param {IUserDevice} device
+   * @param {IDeviceArgs} device
    */
-  async deviceLogin(userId: string, token: string, device: IUserDevice) {
+  async deviceLogin(userId: string, token: string, device: IDeviceArgs) {
     const query = this.graph.query();
+
+    let created = false;
 
     let deviceObj: any = await query
       .V()
       .has(labels.UserDevice, "identifier", device.id)
+      .property("address", device.address)
       .elementMap()
       .next();
 
-    if (!deviceObj.value)
-      deviceObj = query
-        .addV(labels.UserDevice)
-        .property("identifier", device.id)
-        .property("address", device.address)
-        .property("platform", device.platform)
-        .property("model", device.model)
-        .property("created", moment().valueOf())
-        .property("updated", moment().valueOf())
-        .elementMap()
-        .next();
+    if (!deviceObj.value) {
+      deviceObj = await this.createDevice(query, device, userId);
+      created = true;
+    }
+
+    deviceObj = Object.fromEntries(deviceObj.value);
 
     await query
       .V(userId)
       .as("user")
-      .V()
-      .has(labels.UserDevice, "identifier", device.id)
+      .V(deviceObj.id)
       .as("device")
-      .addE("uses")
-      .from_("user")
-      .to("device")
       .addE(relationships.LoggedIn)
+      .as("status")
       .from_("device")
       .to("user")
+      .select("status")
       .property("timestamp", moment().valueOf())
+      .property("expires", this.getTokenExpiry())
       .property("token", token)
       .next();
 
-    const result: any = Object.fromEntries(deviceObj.value);
-
-    return result;
+    return { device: deviceObj, created };
   }
 
   /**
@@ -214,13 +340,39 @@ export class AuthHandler {
     const query = this.graph.query();
 
     await query
-      .V(deviceId)
-      .out(relationships.LoggedIn)
-      .has(id, userId)
-      .property("loggedOut", moment().valueOf())
-      .properties("token")
+      .V()
+      .hasLabel(labels.UserDevice)
+      .has("identifier", deviceId)
+      .outE(relationships.LoggedIn)
+      .where(__.inV().hasId(userId))
       .drop()
       .next();
+  }
+
+  /**
+   * Update a user's device authentication status
+   * @param {string} deviceId
+   * @param {string} userId
+   * @param {string} token
+   */
+  async updateAuthStatus(deviceId: string, userId: string, token: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V()
+      .hasLabel(labels.UserDevice)
+      .has("identifier", deviceId)
+      .outE(relationships.LoggedIn)
+      .as("status")
+      .inV()
+      .hasId(userId)
+      .select("status")
+      .property("token", token)
+      .property("expires", this.getTokenExpiry())
+      .elementMap()
+      .next();
+
+    if (!result.value) throw this.getNotFoundError();
   }
 
   /**
@@ -235,7 +387,7 @@ export class AuthHandler {
   }
 
   /**
-   * Verifies a user's email
+   * Verifies a user's email address
    * @param {string} userId
    * @param {string} code
    */

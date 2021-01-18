@@ -14,6 +14,7 @@ export default class GraphDB {
 
   constructor(host: string) {
     this.host = host;
+
     this.query = this.query.bind(this);
   }
 

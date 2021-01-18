@@ -12,6 +12,7 @@ export interface IContext {
   authService: AuthService;
   profileService: ProfileService;
   notificationService: NotificationService;
+  host: string;
   expressCtx: {
     req: Request;
     res: Response;

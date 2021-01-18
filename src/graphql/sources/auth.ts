@@ -6,7 +6,12 @@
 import { DataSource, DataSourceConfig } from "apollo-datasource";
 
 import { IContext } from "../server";
-import { CreateUserInput, LoginUserInput } from "../types";
+import {
+  UserInput,
+  DeviceInput,
+  LoginInput,
+  MutationResetPasswordArgs,
+} from "../types";
 
 export class AuthAPI extends DataSource {
   context: IContext;
@@ -17,6 +22,30 @@ export class AuthAPI extends DataSource {
 
   initialize(config: DataSourceConfig<IContext>) {
     this.context = config.context;
+  }
+
+  // Puts the token in an HTTP only cookie
+  private setRefreshCookie(token: string) {
+    const { expressCtx } = this.context;
+
+    expressCtx.res.cookie("device_token", token, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      path: "/",
+      signed: true,
+    });
+  }
+
+  // Deletes the refresh token cookie
+  private clearRefreshCookie() {
+    const { expressCtx } = this.context;
+
+    expressCtx.res.cookie("device_token", undefined, {
+      expires: new Date(),
+      httpOnly: true,
+      path: "/",
+      signed: true,
+    });
   }
 
   /**
@@ -33,12 +62,22 @@ export class AuthAPI extends DataSource {
 
   /**
    * Attempt to log in a user
-   * @param data
+   * @param {LoginInput} data
+   * @param {DeviceInput} device
    */
-  async loginUser(data: LoginUserInput, device: any) {
-    const { authService } = this.context;
+  async loginUser(data: LoginInput, device: DeviceInput) {
+    const { authService, host } = this.context;
+
     try {
-      return await authService.login(data, device);
+      const credentials = await authService.login(data, {
+        ...device,
+        address: host,
+      });
+
+      this.setRefreshCookie(credentials.refreshToken);
+      credentials.refreshToken = undefined;
+
+      return credentials;
     } catch (e) {
       return e;
     }
@@ -46,15 +85,21 @@ export class AuthAPI extends DataSource {
 
   /**
    * Create a new user and return the result
-   * @param data
+   * @param {UserInput} data
+   * @param {DeviceInput} device
    */
-  async registerUser(data: CreateUserInput, device: any) {
-    const { authService, notificationService } = this.context;
+  async registerUser(data: UserInput, device: DeviceInput) {
+    const { authService, notificationService, host } = this.context;
     try {
-      const { user, credentials, code } = await authService.register(
-        data,
-        device
-      );
+      let { user, credentials, code } = await authService.register(data, {
+        ...device,
+        address: host,
+      });
+
+      if (device.platform === "web") {
+        this.setRefreshCookie(credentials.refreshToken);
+        credentials.refreshToken = undefined;
+      }
 
       notificationService.sendEmail(
         [user.email],
@@ -69,11 +114,58 @@ export class AuthAPI extends DataSource {
   }
 
   /**
-   * Clears the credentials for this user
+   * Update a user's email address
+   * @param {string} email
    */
-  async logoutUser(device: any) {
+  async updateEmail(email: string) {
+    try {
+      const { user, authService, notificationService } = this.context;
+
+      const result = await authService.updateEmail(user.id, email);
+
+      notificationService.sendEmail(
+        [result.user.email],
+        "Email Verification",
+        `Your JUXT verification code: ${result.code}`
+      );
+
+      return result.user;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  /**
+   * Update a user's phone number
+   * @param {string} phone
+   */
+  async updatePhone(phone: string) {
+    try {
+      const { user, authService, notificationService } = this.context;
+
+      const result = await authService.updatePhone(user.id, phone);
+
+      notificationService.sendSMS(
+        [result.user.email],
+        `Your JUXT verification code: ${result.code}`
+      );
+
+      return result.user;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  /**
+   * Clears the credentials for this user
+   * @param {string} device
+   */
+  async logoutUser(device: string) {
     try {
       const { user, authService } = this.context;
+
+      this.clearRefreshCookie();
+
       return await authService.logout(user.id, device);
     } catch (e) {
       return e;
@@ -81,13 +173,20 @@ export class AuthAPI extends DataSource {
   }
 
   /**
-   * Refresh a user's token
-   * @param data
+   * Refresh a user's token.
+   * @param {string} device
    */
-  async refreshToken() {
-    const { authService } = this.context;
+  async refreshToken(device: string) {
+    const { authService, expressCtx } = this.context;
     try {
-      return "Refresh access token.";
+      const token = expressCtx.req.signedCookies["device_token"];
+
+      const credentials = await authService.refreshToken(device, token);
+
+      this.setRefreshCookie(credentials.refreshToken);
+      credentials.refreshToken = undefined;
+
+      return credentials;
     } catch (e) {
       return e;
     }
@@ -95,12 +194,12 @@ export class AuthAPI extends DataSource {
 
   /**
    * Reset logged in user's password
-   * @param data
+   * @param {MutationResetPasswordArgs} args
    */
-  async resetPassword(data: any) {
+  async resetPassword(args: MutationResetPasswordArgs) {
     const { user, authService } = this.context;
     try {
-      return await authService.resetPassword(user.id, data);
+      return await authService.resetPassword(user.id, args);
     } catch (e) {
       return e;
     }
@@ -109,7 +208,7 @@ export class AuthAPI extends DataSource {
   /**
    * Verifies a user's identity with the code
    * that was sent to their email address
-   * @param code
+   * @param {string} code
    */
   async verifyEmail(code: string) {
     const { user, authService } = this.context;
@@ -123,7 +222,7 @@ export class AuthAPI extends DataSource {
   /**
    * Verifies a user's identity with the code
    * that was sent to their phone number
-   * @param code
+   * @param {string} code
    */
   async verifyPhone(code: string) {
     const { user, authService } = this.context;
@@ -135,9 +234,7 @@ export class AuthAPI extends DataSource {
   }
 
   /**
-   * Verifies a user's identity with the code
-   * that was sent to their phone number
-   * @param code
+   * Deactivate the current user's account
    */
   async deactivateAccount() {
     const { user, authService } = this.context;

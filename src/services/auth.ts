@@ -8,8 +8,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
 
-import BaseService, { IBaseConfig } from "./base";
-import { AuthHandler, IUser, IUserDevice } from "../db";
+import BaseService from "./base";
+import { AuthHandler, IUser, IDeviceArgs } from "../db";
 
 interface IRegisterArgs {
   email: string;
@@ -34,21 +34,19 @@ interface IAuthConfig {
   jwtIssuer: string;
   jwtSubject: string;
   jwtExpiration: string;
-  refreshCookie: string;
 }
 
 /**
  * Authentication service (register, login, etc.)
  * @param {IAuthConfig} config
- * @param {IBaseConfig} baseConfig
  * @param {any} dbHandler
  */
 export class AuthService extends BaseService {
   private config: IAuthConfig;
   private dbHandler: AuthHandler;
 
-  constructor(config: IAuthConfig, baseConfig: IBaseConfig, dbHandler: any) {
-    super(baseConfig);
+  constructor(config: IAuthConfig, dbHandler: any) {
+    super();
 
     this.config = config;
     this.dbHandler = dbHandler;
@@ -86,32 +84,6 @@ export class AuthService extends BaseService {
         }
       );
     });
-
-  /**
-   * Signs and returns a JWT, and generates a refresh token
-   * to be stored in an HTTP only cookie
-   * @param {IUser} user
-   */
-  private async getCredentials(user: IUser) {
-    return {
-      refreshToken: uid(256),
-      accessToken: await this.signToken(user.id, user.verified),
-    };
-  }
-
-  /**
-   * Hashes a user's password for safe
-   * storage in database
-   * @param {string} password
-   */
-  private hashPassword(password: string) {
-    return new Promise<string>((resolve, reject) => {
-      bcrypt.hash(password, 10, (error, pass) => {
-        if (error) reject(error);
-        resolve(pass);
-      });
-    });
-  }
 
   /**
    * Returns true if valid, else false
@@ -165,7 +137,7 @@ export class AuthService extends BaseService {
    * @param {string} password
    * @param {string} confirmPassword
    */
-  private validatePassword(password: string, confirmPassword: string) {
+  private async validatePassword(password: string, confirmPassword: string) {
     if (password !== confirmPassword)
       throw new UserInputError("Your passwords must match.", {
         invalidArgs: ["password", "confirmPassword"],
@@ -174,19 +146,32 @@ export class AuthService extends BaseService {
       throw new UserInputError("Passwords must be longer than 8 characters.", {
         invalidArgs: ["password", "confirmPassword"],
       });
-    return this.hashPassword(password);
+
+    return await bcrypt.hash(password, 10);
+  }
+
+  /**
+   * Signs and returns a JWT, and generates a refresh token
+   * to be stored in an HTTP only cookie
+   * @param {IUser} user
+   */
+  private async getCredentials(user: IUser) {
+    return {
+      refreshToken: uid(256),
+      accessToken: await this.signToken(user.id, user.verified),
+    };
   }
 
   /**
    * Authenticates a user and returns a signed JWT
    * @param {IUser} user
    * @param {string} password
-   * @param {IUserDevice} device
+   * @param {IDeviceArgs} device
    */
   private async authenticate(
     user: IUser,
     password: string,
-    device: IUserDevice
+    device: IDeviceArgs
   ) {
     if (await bcrypt.compare(password, user.password)) {
       return this.authenticationSuccess(user, device);
@@ -196,19 +181,19 @@ export class AuthService extends BaseService {
   /**
    * Retrieve credentials and perform any necessary actions.
    * @param {IUser} user
-   * @param {IUserDevice} device
+   * @param {IDeviceArgs} device
    */
-  private async authenticationSuccess(user: IUser, device: IUserDevice) {
+  private async authenticationSuccess(user: IUser, device: IDeviceArgs) {
     try {
       const credentials = await this.getCredentials(user);
 
-      device.address = this.getHost();
-
-      await this.dbHandler.deviceLogin(
+      const { created } = await this.dbHandler.deviceLogin(
         user.id,
         credentials.refreshToken,
         device
       );
+
+      // TODO alert user if a new device is being used
 
       return credentials;
     } catch (e) {
@@ -239,9 +224,9 @@ export class AuthService extends BaseService {
   /**
    * Creates a new user and returns a signed JWT
    * @param {IRegisterArgs} data
-   * @param {IUserDevice} device
+   * @param {IDeviceArgs} device
    */
-  async register(data: IRegisterArgs, device: IUserDevice) {
+  async register(data: IRegisterArgs, device: IDeviceArgs) {
     try {
       let { email, password, confirmPassword } = data;
 
@@ -266,9 +251,9 @@ export class AuthService extends BaseService {
   /**
    * Logs in a user and returns a signed JWT
    * @param {ILoginInput} data
-   * @param {IUserDevice} device
+   * @param {IDeviceArgs} device
    */
-  async login(data: ILoginInput, device: IUserDevice) {
+  async login(data: ILoginInput, device: IDeviceArgs) {
     try {
       const user = await this.dbHandler.findUserByAttribute(data.identifier);
 
@@ -278,8 +263,40 @@ export class AuthService extends BaseService {
       return await this.authenticate(user, data.password, device);
     } catch (e) {
       if (e instanceof ApolloError) throw e;
+      else if (e.name === "NOTFOUND")
+        throw this.getDefaultAuthenticationError();
       else {
         console.log(`Server error during login: ${e}`);
+        throw this.getDefaultError();
+      }
+    }
+  }
+
+  /**
+   * Refresh a user's access token, and update authentication statuses
+   * @param {string} deviceId
+   * @param {string} token
+   */
+  async refreshToken(deviceId: string, token: string) {
+    try {
+      const user = await this.dbHandler.findUserByAuthStatus(deviceId, token);
+
+      if (user.suspended)
+        throw new ApolloError("Your account has been suspended.");
+
+      const credentials = await this.getCredentials(user);
+
+      await this.dbHandler.updateAuthStatus(
+        deviceId,
+        user.id,
+        credentials.refreshToken
+      );
+
+      return credentials;
+    } catch (e) {
+      if (e instanceof ApolloError) throw e;
+      else {
+        console.log(`Server error during token refresh: ${e}`);
         throw this.getDefaultError();
       }
     }
@@ -298,6 +315,42 @@ export class AuthService extends BaseService {
       if (e instanceof ApolloError) throw e;
       else {
         console.log(`Server error during logout: ${e}`);
+        throw this.getDefaultError();
+      }
+    }
+  }
+
+  /**
+   * Updates a user's email address
+   * @param {string} userId
+   * @param {string} email
+   */
+  async updateEmail(user: string, email: string) {
+    try {
+      email = await this.validateEmail(email);
+      return await this.dbHandler.updateEmail(user, email);
+    } catch (e) {
+      if (e instanceof ApolloError) throw e;
+      else {
+        console.log(`Server error while updating email address: ${e}`);
+        throw this.getDefaultError();
+      }
+    }
+  }
+
+  /**
+   * Updates a user's phone number
+   * @param {string} userId
+   * @param {string} phone
+   */
+  async updatePhone(user: string, phone: string) {
+    try {
+      phone = await this.validatePhone(phone);
+      return await this.dbHandler.updatePhone(user, phone);
+    } catch (e) {
+      if (e instanceof ApolloError) throw e;
+      else {
+        console.log(`Server error while updating phone number: ${e}`);
         throw this.getDefaultError();
       }
     }
@@ -336,7 +389,7 @@ export class AuthService extends BaseService {
       const user = await this.dbHandler.verifyEmail(userId, code);
 
       if (reauthenticate)
-        return { accessToken: this.signToken(user.id, Boolean(user.verified)) };
+        return { accessToken: await this.signToken(user.id, user.verified) };
     } catch (e) {
       if (e instanceof ApolloError) throw e;
       else if (e.name === "INVALIDCODE") throw new ApolloError("Invalid code.");
@@ -358,7 +411,7 @@ export class AuthService extends BaseService {
       const user = await this.dbHandler.verifyPhone(userId, code);
 
       if (reauthenticate)
-        return { accessToken: this.signToken(user.id, Boolean(user.verified)) };
+        return { accessToken: await this.signToken(user.id, user.verified) };
     } catch (e) {
       if (e instanceof ApolloError) throw e;
       else {

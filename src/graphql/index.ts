@@ -68,18 +68,17 @@ const context = async (ctx: IContext) => {
     req: { user },
   } = ctx;
 
+  const host = ctx.req.headers.forwarded || ctx.req.connection.remoteAddress;
+
   const authService = new AuthService(
     authConfig,
-    ctx,
     db.registerHandler(AuthHandler)
   );
 
-  const userService = new ProfileService(
-    ctx,
-    db.registerHandler(ProfileHandler)
-  );
+  const userService = new ProfileService(db.registerHandler(ProfileHandler));
 
   return {
+    host,
     user,
     authService,
     userService,
@@ -103,7 +102,7 @@ if (process.env.NODE_ENV === "development") {
   introspection = true;
   playground = {
     settings: {
-      // include credentials: refresh token, apca credentials, etc.
+      // include credentials: refresh token, etc.
       "request.credentials": "include",
     },
   };
