@@ -13,6 +13,27 @@ const mockDeviceInput = {
   model: "iPhone X",
 };
 
+const AUTH_USER = gql`
+  query {
+    me {
+      id
+    }
+  }
+`;
+
+test("QUERY me", async () => {
+  const { server, mockAuthService } = await buildTestServer();
+
+  mockAuthService.getUser.mockReturnValueOnce(mockUser);
+
+  const { mutate } = createTestClient(server);
+  const res = await mutate({
+    query: AUTH_USER,
+  });
+
+  expect(res.data.me.id).toEqual(mockUser.id);
+});
+
 const CREATE_USER = gql`
   mutation CreateUser($data: UserInput!, $device: DeviceInput!) {
     createUser(data: $data, device: $device) {

@@ -6,8 +6,8 @@
 import _ from "lodash";
 
 import auth from "./auth";
-import profiles from "./profiles";
+import users from "./users";
 import market from "./market";
 import blog from "./blog";
 
-export default _.merge(auth, profiles, market, blog);
+export default _.merge(auth, users, market, blog);

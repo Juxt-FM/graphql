@@ -19,7 +19,7 @@ input ProfileInput {
 }
 
 extend type Query {
-  profile(id: ID!): UserProfile!
+  userProfile(id: ID!): UserProfile!
 }
 
 extend type Mutation {

@@ -5,7 +5,7 @@
 
 import { IResolverContext } from "../../server";
 
-export const profile = async (
+export const userProfile = async (
   parent: undefined,
   args: any,
   context: IResolverContext
