@@ -10,7 +10,7 @@ import GraphDB from "..";
 import BaseHandler from "./base";
 import { ResourceNotFoundError } from "../errors";
 
-import { IRawUser, IUser, labels, relationships } from "../constants";
+import { IRawUser, IUserAccount, labels, relationships } from "../constants";
 
 const {
   statics: __,
@@ -30,7 +30,7 @@ export interface IDeviceArgs {
 }
 
 export interface ICreateUserResult {
-  user: IUser;
+  user: IUserAccount;
   code: string;
 }
 
@@ -47,7 +47,7 @@ export class AuthHandler extends BaseHandler {
    * Returns a formatted user object
    * @param {IRawUser} user
    */
-  private transformUser(user: IRawUser): IUser {
+  private transformUser(user: IRawUser): IUserAccount {
     const toDate = (timestamp: number) => moment(timestamp).toDate();
 
     return {
@@ -108,7 +108,7 @@ export class AuthHandler extends BaseHandler {
     const code = this.createRandomCode();
 
     const result = await query
-      .addV(labels.User)
+      .addV(labels.UserAccount)
       .property("email", data.email)
       .property("password", data.password)
       .property("verified", false)
@@ -117,7 +117,7 @@ export class AuthHandler extends BaseHandler {
       .as("user")
       .properties("email")
       .property("code", code)
-      .addV(labels.Profile)
+      .addV(labels.UserProfile)
       .property("created", now)
       .property("updated", now)
       .as("profile")
@@ -220,7 +220,7 @@ export class AuthHandler extends BaseHandler {
 
     const result = await query
       .V()
-      .hasLabel(labels.User)
+      .hasLabel(labels.UserAccount)
       .or(__.has("phone", attribute), __.has("email", attribute))
       .elementMap()
       .next();
@@ -247,7 +247,7 @@ export class AuthHandler extends BaseHandler {
       .has("expires", gt(moment().valueOf()))
       .has("token", token)
       .inV()
-      .hasLabel(labels.User)
+      .hasLabel(labels.UserAccount)
       .elementMap()
       .next();
 

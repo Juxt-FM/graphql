@@ -13,7 +13,7 @@ import { ResourceNotFoundError } from "../errors";
  * Database user profile handler.
  * @param {GraphDB} graph
  */
-export class ProfileHandler extends BaseHandler {
+export class UserHandler extends BaseHandler {
   constructor(graph: GraphDB) {
     super(graph);
   }

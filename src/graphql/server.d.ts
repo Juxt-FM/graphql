@@ -1,4 +1,4 @@
-import { AuthService, NotificationService, ProfileService } from "../services";
+import { AuthService, NotificationService, UserService } from "../services";
 import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
 import { Request, Response } from "express";
 
@@ -10,7 +10,7 @@ export interface IAuthenticatedUser {
 export interface IContext {
   user: IAuthenticatedUser | undefined;
   authService: AuthService;
-  profileService: ProfileService;
+  userService: UserService;
   notificationService: NotificationService;
   host: string;
   expressCtx: {

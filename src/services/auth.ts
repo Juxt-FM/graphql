@@ -9,7 +9,7 @@ import { uid } from "rand-token";
 
 import { ServiceError, ValidationError } from "./errors";
 
-import { AuthHandler, IUser, IDeviceArgs } from "../db";
+import { AuthHandler, IUserAccount, IDeviceArgs } from "../db";
 
 interface IRegisterArgs {
   email: string;
@@ -153,9 +153,9 @@ export class AuthService {
   /**
    * Signs and returns a JWT, and generates a refresh token
    * to be stored in an HTTP only cookie
-   * @param {IUser} user
+   * @param {IUserAccount} user
    */
-  private async getCredentials(user: IUser) {
+  private async getCredentials(user: IUserAccount) {
     return {
       refreshToken: uid(256),
       accessToken: await this.signToken(user.id, user.verified),
@@ -164,12 +164,12 @@ export class AuthService {
 
   /**
    * Authenticates a user and returns a signed JWT
-   * @param {IUser} user
+   * @param {IUserAccount} user
    * @param {string} password
    * @param {IDeviceArgs} device
    */
   private async authenticate(
-    user: IUser,
+    user: IUserAccount,
     password: string,
     device: IDeviceArgs
   ) {
@@ -181,10 +181,10 @@ export class AuthService {
   /**
    * Retrieve credentials and update the device auth status
    * in the graph.
-   * @param {IUser} user
+   * @param {IUserAccount} user
    * @param {IDeviceArgs} device
    */
-  private async authenticationSuccess(user: IUser, device: IDeviceArgs) {
+  private async authenticationSuccess(user: IUserAccount, device: IDeviceArgs) {
     const credentials = await this.getCredentials(user);
 
     await this.dbHandler.deviceLogin(user.id, credentials.refreshToken, device);

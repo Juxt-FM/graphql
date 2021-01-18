@@ -4,8 +4,8 @@
  */
 
 export const labels = {
-  User: "user",
-  Profile: "profile",
+  UserAccount: "user_account",
+  UserProfile: "user_profile",
   UserDevice: "user_device",
 };
 
@@ -29,7 +29,7 @@ export interface IRawUser {
   suspended?: number;
 }
 
-export interface IUser {
+export interface IUserAccount {
   id: string;
   email: string;
   phone?: string;

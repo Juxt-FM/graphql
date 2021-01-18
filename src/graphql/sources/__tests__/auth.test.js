@@ -92,87 +92,27 @@ test("getCurrentUser - should return the logged in user", async () => {
   expect(result).toEqual(mockUser);
 });
 
-describe("loginUser", () => {
-  it("should authenticate the user", async () => {
-    const cookieSetter = jest.spyOn(ds, "setRefreshCookie");
+test("loginUser - should authenticate the user", async () => {
+  const cookieSetter = jest.spyOn(ds, "setRefreshCookie");
 
-    mockAuthService.login.mockReturnValueOnce(mockCredentials);
+  mockAuthService.login.mockReturnValueOnce(mockCredentials);
 
-    const expectedCredentials = Object.assign({}, mockCredentials);
+  const expectedCredentials = Object.assign({}, mockCredentials);
 
-    const data = {
-      identifier: "test@email.com",
-      password: "ab12cd34",
-    };
+  const data = {
+    identifier: "test@email.com",
+    password: "ab12cd34",
+  };
 
-    const result = await ds.loginUser(data, mockDeviceArgs);
+  const result = await ds.loginUser(data, mockDeviceArgs);
 
-    expect(mockAuthService.login).toBeCalledWith(data, {
-      ...mockDeviceArgs,
-      address: mockContext.host,
-    });
-    expect(cookieSetter).toBeCalledTimes(1);
-    expect(cookieSetter).toBeCalledWith(expectedCredentials.refreshToken);
-    expect(result.accessToken).toEqual(expectedCredentials.accessToken);
+  expect(mockAuthService.login).toBeCalledWith(data, {
+    ...mockDeviceArgs,
+    address: mockContext.host,
   });
-
-  it("should handle service error - bad input", async () => {
-    const errorMsg = "some error";
-
-    mockAuthService.login.mockImplementationOnce(() => {
-      const err = new ValidationError(errorMsg);
-      err.invalidArgs = ["identifier", "password"];
-
-      throw err;
-    });
-
-    const data = {
-      identifier: "test@email.com",
-      password: "ab12cd34",
-    };
-
-    const result = await ds.loginUser(data, mockDeviceArgs);
-
-    expect(result instanceof UserInputError).toEqual(true);
-    expect(result.message).toEqual(errorMsg);
-    expect(result.invalidArgs).toEqual(["identifier", "password"]);
-  });
-
-  it("should handle service error - other", async () => {
-    const errorMsg = "some error";
-
-    mockAuthService.login.mockImplementationOnce(() => {
-      throw new ServiceError(errorMsg);
-    });
-
-    const data = {
-      identifier: "test@email.com",
-      password: "ab12cd34",
-    };
-
-    const result = await ds.loginUser(data, mockDeviceArgs);
-
-    expect(result instanceof ApolloError).toEqual(true);
-    expect(result.message).toEqual(errorMsg);
-  });
-
-  it("should handle unknown error", async () => {
-    mockAuthService.login.mockImplementationOnce(() => {
-      throw new Error("unknown error");
-    });
-
-    const data = {
-      identifier: "test@email.com",
-      password: "ab12cd34",
-    };
-
-    const result = await ds.loginUser(data, mockDeviceArgs);
-
-    expect(result instanceof ApolloError).toEqual(true);
-    expect(result.message).toEqual(
-      "An error occurred while processing your request."
-    );
-  });
+  expect(cookieSetter).toBeCalledTimes(1);
+  expect(cookieSetter).toBeCalledWith(expectedCredentials.refreshToken);
+  expect(result.accessToken).toEqual(expectedCredentials.accessToken);
 });
 
 test("registerUser - should create and authenticate the user", async () => {
@@ -350,3 +290,5 @@ const mockCredentials = {
   accessToken: "fdsjkafhdsajklfhdjsakfhjlksadfaf",
   refreshToken: "sadhfkjasdhfadsjkflashfjasldfhlas",
 };
+
+module.exports = { mockCredentials };

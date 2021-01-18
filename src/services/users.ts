@@ -3,16 +3,16 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import { ProfileHandler } from "../db";
+import { UserHandler } from "../db";
 
 /**
  * Profile service (post authors, public profiles, etc.)
- * @param {ProfileHandler} dbHandler
+ * @param {UserHandler} dbHandler
  */
-export class ProfileService {
-  private dbHandler: ProfileHandler;
+export class UserService {
+  private dbHandler: UserHandler;
 
-  constructor(dbHandler: ProfileHandler) {
+  constructor(dbHandler: UserHandler) {
     this.dbHandler = dbHandler;
   }
 

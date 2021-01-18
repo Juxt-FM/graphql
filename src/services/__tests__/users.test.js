@@ -3,15 +3,15 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { ProfileService } = require("../profiles");
+const { UserService } = require("../users");
 
-const { mockProfile } = require("../../db/__mocks__/profile");
+const { mockProfile } = require("../../db/__mocks__/users");
 
 const mockDbHandler = {
   findById: jest.fn(),
 };
 
-const service = new ProfileService(mockDbHandler);
+const service = new UserService(mockDbHandler);
 
 test("getById - should return a user's profile", async () => {
   mockDbHandler.findById.mockReturnValueOnce(mockProfile);
