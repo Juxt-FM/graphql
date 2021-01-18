@@ -4,6 +4,10 @@
  */
 
 import { DataSource, DataSourceConfig } from "apollo-datasource";
+import { ApolloError, UserInputError } from "apollo-server-express";
+import { ServiceError } from "../../services/base";
+
+import * as logging from "../../logging";
 
 import { IContext } from "../server";
 import {
@@ -56,7 +60,16 @@ export class AuthAPI extends DataSource {
     try {
       return await authService.getUser(user.id);
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.getCurrentUser: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -79,7 +92,16 @@ export class AuthAPI extends DataSource {
 
       return credentials;
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.loginUser: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -91,15 +113,12 @@ export class AuthAPI extends DataSource {
   async registerUser(data: UserInput, device: DeviceInput) {
     const { authService, notificationService, host } = this.context;
     try {
-      let { user, credentials, code } = await authService.register(data, {
+      const { user, credentials, code } = await authService.register(data, {
         ...device,
         address: host,
       });
 
-      if (device.platform === "web") {
-        this.setRefreshCookie(credentials.refreshToken);
-        credentials.refreshToken = undefined;
-      }
+      this.setRefreshCookie(credentials.refreshToken);
 
       notificationService.sendEmail(
         [user.email],
@@ -107,9 +126,18 @@ export class AuthAPI extends DataSource {
         `Your JUXT verification code: ${code}`
       );
 
-      return credentials;
+      return { accessToken: credentials.accessToken };
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.registerUser: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -131,7 +159,16 @@ export class AuthAPI extends DataSource {
 
       return result.user;
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.updateEmail: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -146,13 +183,22 @@ export class AuthAPI extends DataSource {
       const result = await authService.updatePhone(user.id, phone);
 
       notificationService.sendSMS(
-        [result.user.email],
+        [result.user.phone],
         `Your JUXT verification code: ${result.code}`
       );
 
       return result.user;
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.updatePhone: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -168,7 +214,16 @@ export class AuthAPI extends DataSource {
 
       return await authService.logout(user.id, device);
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.logoutUser: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -188,7 +243,16 @@ export class AuthAPI extends DataSource {
 
       return credentials;
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.refreshToken: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -201,7 +265,16 @@ export class AuthAPI extends DataSource {
     try {
       return await authService.resetPassword(user.id, args);
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.resetPassword: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -215,7 +288,16 @@ export class AuthAPI extends DataSource {
     try {
       return await authService.verifyEmail(user.id, code, !user.verified);
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.verifyEmail: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -229,7 +311,16 @@ export class AuthAPI extends DataSource {
     try {
       return await authService.verifyPhone(user.id, code, !user.verified);
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        if (e.name === "bad_input")
+          return new UserInputError(e.message, { invalidArgs: e.invalidArgs });
+        else return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.verifyPhone: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 
@@ -241,7 +332,14 @@ export class AuthAPI extends DataSource {
     try {
       return await authService.deactivateAccount(user.id);
     } catch (e) {
-      return e;
+      if (e instanceof ServiceError) {
+        return new ApolloError(e.message);
+      } else {
+        logging.logError(`graphql.sources.auth.deactivateAccount: ${e}`);
+        return new ApolloError(
+          "An error occurred while processing your request."
+        );
+      }
     }
   }
 }

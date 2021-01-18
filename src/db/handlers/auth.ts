@@ -145,10 +145,11 @@ export class AuthHandler extends BaseHandler {
 
     const result = await query
       .V(id)
-      .property("email", email)
+      .not(__.has("email", email))
       .as("user")
+      .property("email", email)
       .properties("email")
-      .property(single, "code", code)
+      .property("code", code)
       .sideEffect(
         __.select("user").properties("email").properties("verified").drop()
       )
@@ -175,10 +176,11 @@ export class AuthHandler extends BaseHandler {
 
     const result = await query
       .V(id)
-      .property("phone", phone)
+      .not(__.has("phone", phone))
       .as("user")
+      .property("phone", phone)
       .properties("phone")
-      .property(single, "code", code)
+      .property("code", code)
       .sideEffect(
         __.select("user").properties("phone").properties("verified").drop()
       )

@@ -3,12 +3,14 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import { ApolloError, UserInputError } from "apollo-server-express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
 
-import BaseService from "./base";
+import BaseService, { ServiceError } from "./base";
+
+import * as logging from "../logging";
+
 import { AuthHandler, IUser, IDeviceArgs } from "../db";
 
 interface IRegisterArgs {
@@ -55,10 +57,10 @@ export class AuthService extends BaseService {
   /**
    * Returns a default login error response
    */
-  private getDefaultAuthenticationError() {
-    return new UserInputError(
+  private throwDefaultAuthenticationError() {
+    this.throwInputError(
       "We couldn't log you in with the provided credentials",
-      { invalidArgs: ["identifier", "password"] }
+      ["identifier", "password"]
     );
   }
 
@@ -91,20 +93,20 @@ export class AuthService extends BaseService {
    */
   private async validateEmail(email: string) {
     email = email.trim();
+
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
     if (re.test(email)) {
       const isUnique = await this.dbHandler.isUniqueEmail(email);
 
       if (!isUnique)
-        throw new UserInputError("This email address is already in use.", {
-          invalidArgs: ["email"],
-        });
+        this.throwInputError("This email address is already in use.", [
+          "email",
+        ]);
 
       return email;
     } else {
-      throw new UserInputError("Enter a valid email address.", {
-        invalidArgs: ["email"],
-      });
+      this.throwInputError("Enter a valid email address.", ["email"]);
     }
   }
 
@@ -114,20 +116,18 @@ export class AuthService extends BaseService {
    */
   private async validatePhone(phoneNumber: string) {
     phoneNumber = phoneNumber.trim();
+
     const re = /^\+[1-9]\d{10,14}$/;
+
     if (re.test(phoneNumber)) {
       const isUnique = await this.dbHandler.isUniquePhone(phoneNumber);
 
       if (!isUnique)
-        throw new UserInputError("This phone number is already in use.", {
-          invalidArgs: ["phone"],
-        });
+        this.throwInputError("This phone number is already in use.", ["phone"]);
 
       return phoneNumber;
     } else {
-      throw new UserInputError("Enter a valid phone number.", {
-        invalidArgs: ["phone"],
-      });
+      this.throwInputError("Enter a valid phone number.", ["phone"]);
     }
   }
 
@@ -139,13 +139,15 @@ export class AuthService extends BaseService {
    */
   private async validatePassword(password: string, confirmPassword: string) {
     if (password !== confirmPassword)
-      throw new UserInputError("Your passwords must match.", {
-        invalidArgs: ["password", "confirmPassword"],
-      });
+      this.throwInputError("Your passwords must match.", [
+        "password",
+        "confirmPassword",
+      ]);
     if (password.length < 8)
-      throw new UserInputError("Passwords must be longer than 8 characters.", {
-        invalidArgs: ["password", "confirmPassword"],
-      });
+      this.throwInputError("Passwords must be longer than 8 characters.", [
+        "password",
+        "confirmPassword",
+      ]);
 
     return await bcrypt.hash(password, 10);
   }
@@ -175,11 +177,12 @@ export class AuthService extends BaseService {
   ) {
     if (await bcrypt.compare(password, user.password)) {
       return this.authenticationSuccess(user, device);
-    } else throw this.getDefaultAuthenticationError();
+    } else this.throwDefaultAuthenticationError();
   }
 
   /**
-   * Retrieve credentials and perform any necessary actions.
+   * Retrieve credentials and update the device auth status
+   * in the graph.
    * @param {IUser} user
    * @param {IDeviceArgs} device
    */
@@ -187,19 +190,19 @@ export class AuthService extends BaseService {
     try {
       const credentials = await this.getCredentials(user);
 
-      const { created } = await this.dbHandler.deviceLogin(
+      await this.dbHandler.deviceLogin(
         user.id,
         credentials.refreshToken,
         device
       );
 
-      // TODO alert user if a new device is being used
+      // TODO alert user if a new device was created (available from deviceLogin)
 
       return credentials;
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error finalizing authentication: ${e}`);
+        logging.logError(`services.auth.authenticationSuccess: ${e}`);
         throw e;
       }
     }
@@ -213,10 +216,10 @@ export class AuthService extends BaseService {
     try {
       return await this.dbHandler.findUserByID(id);
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log("Server error while getting user: ${e}");
-        throw this.getDefaultError();
+        logging.logError(`services.auth.getUser: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -228,7 +231,7 @@ export class AuthService extends BaseService {
    */
   async register(data: IRegisterArgs, device: IDeviceArgs) {
     try {
-      let { email, password, confirmPassword } = data;
+      const { email, password, confirmPassword } = data;
 
       const result = await this.dbHandler.createUser({
         email: await this.validateEmail(email),
@@ -240,10 +243,10 @@ export class AuthService extends BaseService {
         credentials: await this.authenticationSuccess(result.user, device),
       };
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error during registration: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.register: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -258,16 +261,15 @@ export class AuthService extends BaseService {
       const user = await this.dbHandler.findUserByAttribute(data.identifier);
 
       if (user.suspended)
-        throw new ApolloError("Your account has been suspended.");
+        throw new ServiceError("Your account has been suspended.");
 
       return await this.authenticate(user, data.password, device);
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
-      else if (e.name === "NOTFOUND")
-        throw this.getDefaultAuthenticationError();
+      if (e instanceof ServiceError) throw e;
+      else if (e.name === "NOTFOUND") this.throwDefaultAuthenticationError();
       else {
-        console.log(`Server error during login: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.login: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -282,7 +284,7 @@ export class AuthService extends BaseService {
       const user = await this.dbHandler.findUserByAuthStatus(deviceId, token);
 
       if (user.suspended)
-        throw new ApolloError("Your account has been suspended.");
+        throw new ServiceError("Your account has been suspended.");
 
       const credentials = await this.getCredentials(user);
 
@@ -294,10 +296,10 @@ export class AuthService extends BaseService {
 
       return credentials;
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error during token refresh: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.refreshToken: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -312,10 +314,10 @@ export class AuthService extends BaseService {
       await this.dbHandler.deviceLogout(user, device);
       return "Successfully logged out.";
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error during logout: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.logout: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -330,10 +332,10 @@ export class AuthService extends BaseService {
       email = await this.validateEmail(email);
       return await this.dbHandler.updateEmail(user, email);
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error while updating email address: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.updateEmail: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -348,10 +350,10 @@ export class AuthService extends BaseService {
       phone = await this.validatePhone(phone);
       return await this.dbHandler.updatePhone(user, phone);
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error while updating phone number: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.updatePhone: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -370,10 +372,10 @@ export class AuthService extends BaseService {
 
       await this.dbHandler.resetPassword(user, password);
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error during password reset: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.resetPassword: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -391,11 +393,12 @@ export class AuthService extends BaseService {
       if (reauthenticate)
         return { accessToken: await this.signToken(user.id, user.verified) };
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
-      else if (e.name === "INVALIDCODE") throw new ApolloError("Invalid code.");
+      if (e instanceof ServiceError) throw e;
+      else if (e.name === "INVALIDCODE")
+        throw new ServiceError("Invalid code.");
       else {
-        console.log(`Server error during password reset: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.verifyEmail: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -413,10 +416,10 @@ export class AuthService extends BaseService {
       if (reauthenticate)
         return { accessToken: await this.signToken(user.id, user.verified) };
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error during password reset: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.verifyPhone: ${e}`);
+        this.throwServerError();
       }
     }
   }
@@ -431,10 +434,10 @@ export class AuthService extends BaseService {
       await this.dbHandler.deactivateAccount(user);
       return "Account deactivated.";
     } catch (e) {
-      if (e instanceof ApolloError) throw e;
+      if (e instanceof ServiceError) throw e;
       else {
-        console.log(`Server error during password reset: ${e}`);
-        throw this.getDefaultError();
+        logging.logError(`services.auth.deactivateAccount: ${e}`);
+        this.throwServerError();
       }
     }
   }

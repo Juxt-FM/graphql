@@ -3,7 +3,9 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import BaseService from "./base";
+import BaseService, { ServiceError } from "./base";
+
+import * as logging from "../logging";
 
 import { ProfileHandler } from "../db";
 
@@ -28,7 +30,11 @@ export class ProfileService extends BaseService {
     try {
       return await this.dbHandler.findById(id);
     } catch (e) {
-      console.log(`Error getting user profile: ${e}`);
+      if (e.name === "NOTFOUND") this.throwNotFound();
+      else {
+        logging.logError(`services.profiles.getById: ${e}`);
+        this.throwServerError();
+      }
     }
   }
 }
