@@ -35,7 +35,7 @@ export interface ICreateUserResult {
 }
 
 /**
- * Database authentication handler.
+ * Authentication database handler.
  * @param {GraphDB} graph
  */
 export class AuthHandler extends BaseHandler {
@@ -59,16 +59,12 @@ export class AuthHandler extends BaseHandler {
     };
   }
 
-  /**
-   * Returns a 6-digit alphanumeric code
-   */
+  //Returns a 6-digit alphanumeric code
   private createRandomCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 
-  /**
-   * Returns an expiration timestamp
-   */
+  // Returns an expiration timestamp
   private getTokenExpiry() {
     return moment().valueOf() + 1000 * 60 * 60 * 24 * 7;
   }

@@ -11,7 +11,7 @@ import { labels, IRawProfile, IUserProfile } from "../constants";
 import { ResourceNotFoundError } from "../errors";
 
 /**
- * Database user profile handler.
+ * User profile database handler.
  * @param {GraphDB} graph
  */
 export class UserHandler extends BaseHandler {

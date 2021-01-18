@@ -7,6 +7,9 @@ export const labels = {
   UserAccount: "user_account",
   UserProfile: "user_profile",
   UserDevice: "user_device",
+  Company: "company",
+  BusinessSector: "business_sector",
+  BusinessIndustry: "business_industry",
 };
 
 export const relationships = {
@@ -14,6 +17,8 @@ export const relationships = {
   UsesDevice: "uses_device",
   HasProfile: "has_profile",
   Verification: "needs_verification",
+  InSector: "in_sector",
+  InIndustry: "in_industry",
 };
 
 export interface IRawUser {
@@ -61,6 +66,7 @@ export interface IRawProfile {
   created: number;
   updated: number;
 }
+
 export interface IUserProfile {
   id: string;
   name?: string;
@@ -70,4 +76,38 @@ export interface IUserProfile {
   profileImageURL?: string;
   created: Date;
   updated: Date;
+}
+
+export interface ICompany {
+  id: string;
+  symbol: string;
+  companyName: string;
+  exchange: string;
+  industry: string;
+  website: string;
+  description: string;
+  CEO: string;
+  securityName: string;
+  issueType: string;
+  sector: string;
+  primarySicCode: number;
+  employees: number;
+  tags: string[];
+  address: string;
+  address2?: string;
+  state: string;
+  city: string;
+  zip: string;
+  country: string;
+  phone: string;
+}
+
+export interface IBusinessSector {
+  id: string;
+  name: string;
+}
+
+export interface IBusinessIndustry {
+  id: string;
+  name: string;
 }

@@ -19,6 +19,7 @@
     "apollo-datasource": "^0.7.2",
     "apollo-datasource-rest": "^0.9.5",
     "apollo-server-express": "^2.19.0",
+    "aws-sdk": "^2.828.0",
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",

@@ -8,12 +8,14 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import expressJwt from "express-jwt";
 
-import GraphDB from "./db";
+import GraphDB, { MarketHandler } from "./db";
 
 import { auth, database } from "./settings";
 import { authErrors } from "./middleware";
 
 import { buildGraph } from "./graphql";
+
+import * as logging from "./logging";
 
 export const db = new GraphDB(database.host);
 
@@ -58,6 +60,20 @@ graph.applyMiddleware({
     methods: "POST",
     preflightContinue: false,
   },
+});
+
+app.get("/health", async (req, res) => {
+  try {
+    const handler: MarketHandler = db.registerHandler(MarketHandler);
+
+    const results = await handler.findAllSectors();
+
+    return res.status(200).json({ results });
+  } catch (e) {
+    logging.logError(`Health check error: ${e}`);
+    const error = { error: "An error occurred while processing your request." };
+    return res.status(500).json(error);
+  }
 });
 
 export default app;
