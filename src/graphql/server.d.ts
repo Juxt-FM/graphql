@@ -1,10 +1,16 @@
+import { Request, Response } from "express";
+import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
+
 import { AuthService, NotificationService, UserService } from "../services";
 import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
-import { Request, Response } from "express";
 
 export interface IAuthenticatedUser {
   id: string;
   verified: string;
+}
+
+interface IContextBuilder extends ExpressContext {
+  req: Request & { user: any };
 }
 
 export interface IContext {

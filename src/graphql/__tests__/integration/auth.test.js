@@ -1,3 +1,8 @@
+/**
+ * @author Andrew Perera
+ * Copyright (C) 2020 - All rights reserved
+ */
+
 const { createTestClient } = require("apollo-server-testing");
 const { gql } = require("apollo-server-express");
 const { ValidationError } = require("../../../services");

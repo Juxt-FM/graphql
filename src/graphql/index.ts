@@ -4,91 +4,22 @@
  */
 
 import {
-  ApolloError,
   ApolloServer,
   PlaygroundConfig,
   makeExecutableSchema,
 } from "apollo-server-express";
 import { applyMiddleware } from "graphql-middleware";
-import { GraphQLError } from "graphql";
 
 import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
 import { AuthService, UserService, NotificationService } from "../services";
 import GraphDB, { AuthHandler, UserHandler } from "../db";
-import {
-  auth as authConfig,
-  mail as mailConfig,
-  database as dbConfig,
-} from "../settings";
+import { auth, mail } from "../settings";
 
 import typeDefs from "./schema";
 import resolvers from "./resolvers";
 import permissions from "./permissions";
 
-import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
-import { Request } from "express";
-
-/**
- * Connect to database
- */
-const db = new GraphDB(dbConfig.host);
-
-db.connect();
-
-/**
- * Setup the email service
- */
-const notificationService = new NotificationService({
-  from: mailConfig.fromEmail,
-});
-
-notificationService.initialize();
-
-/**
- * Our datasources are defined separately from
- * the application context
- */
-const dataSources = () => ({
-  auth: new AuthAPI(),
-  users: new UserAPI(),
-  market: new MarketAPI({ uri: process.env.MARKET_SERVICE_URI }),
-  blog: new BlogAPI({ uri: process.env.BLOG_SERVICE_URI }),
-});
-
-interface IContext extends ExpressContext {
-  req: Request & { user: any };
-}
-
-/**
- * Build services and get the authenticated user ID
- * @param ctx
- */
-const context = async (ctx: IContext) => {
-  const {
-    req: { user },
-  } = ctx;
-
-  const host = ctx.req.headers.forwarded || ctx.req.connection.remoteAddress;
-
-  const authService = new AuthService(
-    authConfig,
-    db.registerHandler(AuthHandler)
-  );
-
-  const userService = new UserService(db.registerHandler(UserHandler));
-
-  return {
-    host,
-    user,
-    authService,
-    userService,
-    notificationService,
-    expressCtx: {
-      req: ctx.req,
-      res: ctx.res,
-    },
-  };
-};
+import { IContextBuilder } from "./server";
 
 /**
  * Introspection controls whether or not the GraphQL schema
@@ -108,23 +39,60 @@ if (process.env.NODE_ENV === "development") {
   };
 }
 
-const formatError = (err: GraphQLError) => {
-  if (err.message.includes("ECONNREFUSED"))
-    return new ApolloError("Internal server error.");
-
-  return err;
-};
-
 const schema = applyMiddleware(
   makeExecutableSchema({ typeDefs, resolvers }),
   permissions
 );
 
-export default new ApolloServer({
-  schema,
-  dataSources,
-  context,
-  introspection,
-  playground,
-  formatError,
-});
+interface IServerBuilder {
+  db: GraphDB;
+}
+
+/**
+ * Returns a GraphQLServer instance
+ * @param options
+ */
+export const buildServer = ({ db }: IServerBuilder) => {
+  const authService = new AuthService(auth, db.registerHandler(AuthHandler));
+  const userService = new UserService(db.registerHandler(UserHandler));
+  const notificationService = new NotificationService({
+    from: mail.fromEmail,
+  });
+
+  notificationService.initialize();
+
+  const dataSources = () => ({
+    auth: new AuthAPI(),
+    users: new UserAPI(),
+    market: new MarketAPI({ uri: process.env.MARKET_SERVICE_URI }),
+    blog: new BlogAPI({ uri: process.env.BLOG_SERVICE_URI }),
+  });
+
+  const context = async (ctx: IContextBuilder) => {
+    const {
+      req: { user },
+    } = ctx;
+
+    const host = ctx.req.headers.forwarded || ctx.req.connection.remoteAddress;
+
+    return {
+      host,
+      user,
+      authService,
+      userService,
+      notificationService,
+      expressCtx: {
+        req: ctx.req,
+        res: ctx.res,
+      },
+    };
+  };
+
+  return new ApolloServer({
+    schema,
+    dataSources,
+    context,
+    introspection,
+    playground,
+  });
+};

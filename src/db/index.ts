@@ -10,8 +10,8 @@ export * from "./handlers";
 import gremlin from "gremlin";
 
 export default class GraphDB {
-  host: string;
-  graph: gremlin.structure.Graph;
+  private host: string;
+  private graph: gremlin.structure.Graph;
   conn: gremlin.driver.DriverRemoteConnection;
 
   constructor(host: string) {

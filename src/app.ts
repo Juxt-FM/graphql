@@ -8,12 +8,16 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import expressJwt from "express-jwt";
 
-import { auth } from "./settings";
+import GraphDB from "./db";
+
+import { auth, database } from "./settings";
 import { authErrors } from "./middleware";
 
-import graph from "./graphql";
+import { buildServer } from "./graphql";
 
 import * as logger from "./logging";
+
+const db = new GraphDB(database.host);
 
 const app = express();
 
@@ -45,6 +49,8 @@ app.use(
 
 app.use(authErrors);
 
+const graph = buildServer({ db });
+
 graph.applyMiddleware({
   app,
   cors: {
@@ -73,3 +79,5 @@ app.listen(port, () => {
 });
 
 logger.start();
+
+db.connect();

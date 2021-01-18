@@ -1,3 +1,8 @@
+/**
+ * @author Andrew Perera
+ * Copyright (C) 2020 - All rights reserved
+ */
+
 const { ApolloError, UserInputError } = require("apollo-server-express");
 
 const { AuthAPI } = require("../auth");

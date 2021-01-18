@@ -1,3 +1,8 @@
+/**
+ * @author Andrew Perera
+ * Copyright (C) 2020 - All rights reserved
+ */
+
 const { MarketAPI } = require("../market");
 const moment = require("moment");
 

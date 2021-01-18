@@ -1,6 +1,9 @@
-const { ApolloError, UserInputError } = require("apollo-server-express");
+/**
+ * @author Andrew Perera
+ * Copyright (C) 2020 - All rights reserved
+ */
+
 const { AuthAPI } = require("../auth");
-const { ServiceError, ValidationError } = require("../../../services");
 
 const {
   mockUser,
