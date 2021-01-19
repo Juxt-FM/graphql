@@ -86,7 +86,7 @@ export class UserContentHandler extends BaseHandler {
    * @param {string} user
    * @param {IIdeaInput} data
    */
-  async createIdea(user: string, data: IIdeaInput) {
+  async createIdea(user: string, data: IIdeaInput): Promise<IIdea> {
     const query = this.graph.query();
 
     const result = await query
@@ -115,7 +115,7 @@ export class UserContentHandler extends BaseHandler {
         .to(data.replyStatus)
         .next();
 
-    return this.transform(record);
+    return this.transform(record) as IIdea;
   }
 
   /**
@@ -124,7 +124,7 @@ export class UserContentHandler extends BaseHandler {
    * @param {string} user
    * @param {string} message
    */
-  async updateIdea(id: string, user: string, message: string) {
+  async updateIdea(id: string, user: string, message: string): Promise<IIdea> {
     const query = this.graph.query();
 
     const result = await query
@@ -144,7 +144,7 @@ export class UserContentHandler extends BaseHandler {
 
     const record: any = Object.fromEntries(result.value);
 
-    return this.transform(record);
+    return this.transform(record) as IIdea;
   }
 
   /**
@@ -175,7 +175,7 @@ export class UserContentHandler extends BaseHandler {
    * @param {string} user
    * @param {IPostInput} data
    */
-  async createPost(user: string, data: IPostInput) {
+  async createPost(user: string, data: IPostInput): Promise<IPost> {
     const query = this.graph.query();
 
     const result = await query
@@ -202,7 +202,7 @@ export class UserContentHandler extends BaseHandler {
 
     const record: any = Object.fromEntries(result.value);
 
-    return this.transform(record);
+    return this.transform(record) as IPost;
   }
 
   /**
@@ -214,7 +214,7 @@ export class UserContentHandler extends BaseHandler {
    * @param {string} user
    * @param {IPostInput} data
    */
-  async updatePost(id: string, user: string, data: IPostInput) {
+  async updatePost(id: string, user: string, data: IPostInput): Promise<IPost> {
     const query = this.graph.query();
 
     const result = await query
@@ -239,7 +239,7 @@ export class UserContentHandler extends BaseHandler {
 
     const record: any = Object.fromEntries(result.value);
 
-    return this.transform(record);
+    return this.transform(record) as IPost;
   }
 
   /**
@@ -266,7 +266,8 @@ export class UserContentHandler extends BaseHandler {
   }
 
   /**
-   * Creates and returns a new reaction
+   * Creates and returns a new reaction. Deletes the
+   * existing reaction if needed.
    * @param {string} user
    * @param {IIdeaInput} data
    */
@@ -277,41 +278,16 @@ export class UserContentHandler extends BaseHandler {
       .V(data.to)
       .or(__.hasLabel(labels.IDEA), __.hasLabel(labels.POST))
       .as("to")
+      .V(user)
+      .as("user")
+      .sideEffect(
+        __.outE(relationships.REACTED_TO).where(__.inV().hasId(data.to)).drop()
+      )
       .addE(relationships.REACTED_TO)
       .property("reaction", data.reaction)
       .property("created", moment().valueOf())
       .as("rel")
-      .from_(user)
-      .to("to")
-      .select("rel")
-      .elementMap()
-      .next();
-
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const record: any = Object.fromEntries(result.value);
-
-    return this.transform(record);
-  }
-
-  /**
-   * Updates and returns a reaction
-   * @param {string} user
-   * @param {IIdeaInput} data
-   */
-  async updateReaction(user: string, data: IUpdateReactionInput) {
-    const query = this.graph.query();
-
-    const result = await query
-      .E(data.id)
-      .as("rel")
-      .outV()
-      .hasId(user)
-      .select("rel")
-      .property("reaction", data.reaction)
-      .property("created", moment().valueOf())
-      .as("rel")
-      .from_(user)
+      .from_("user")
       .to("to")
       .select("rel")
       .elementMap()
@@ -346,6 +322,25 @@ export class UserContentHandler extends BaseHandler {
     const record: any = Object.fromEntries(result.value);
 
     return this.transform(record);
+  }
+
+  /**
+   * Reports a post or idea
+   * @param {string} user
+   * @param {id} id
+   */
+  async reportContent(user: string, id: string) {
+    const query = this.graph.query();
+
+    await query
+      .V(id)
+      .or(__.hasLabel(labels.POST), __.hasLabel(labels.IDEA))
+      .as("content")
+      .addE(relationships.REPORTED)
+      .property("timestamp", moment().valueOf())
+      .to("content")
+      .from_(user)
+      .next();
   }
 
   /**

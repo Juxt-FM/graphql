@@ -27,14 +27,19 @@ export const relationships = {
   AUTHORED: "authored",
   REPLY_TO: "reply_to",
   REACTED_TO: "reacted_to",
+  REPORTED: "reported",
 };
 
-interface IGraphObject {
+interface IVertex {
+  id: string;
   label: string;
 }
 
-export interface IUserAccount extends IGraphObject {
+interface IEdge {
   id: string;
+}
+
+export interface IUserAccount extends IVertex {
   email: string;
   phone?: string;
   password: string;
@@ -45,8 +50,7 @@ export interface IUserAccount extends IGraphObject {
   suspended?: Date | number;
 }
 
-export interface IUserDevice extends IGraphObject {
-  id: string;
+export interface IUserDevice extends IVertex {
   identifier: string;
   platform: "ios" | "android" | "web";
   model: string;
@@ -55,8 +59,7 @@ export interface IUserDevice extends IGraphObject {
   updated: Date | number;
 }
 
-export interface IRawProfile extends IGraphObject {
-  id: string;
+export interface IRawProfile extends IVertex {
   name?: string;
   location?: string;
   summary?: string;
@@ -66,8 +69,7 @@ export interface IRawProfile extends IGraphObject {
   updated: number;
 }
 
-export interface IUserProfile extends IGraphObject {
-  id: string;
+export interface IUserProfile extends IVertex {
   name?: string;
   location?: string;
   summary?: string;
@@ -77,8 +79,7 @@ export interface IUserProfile extends IGraphObject {
   updated: Date | number;
 }
 
-export interface ICompany extends IGraphObject {
-  id: string;
+export interface ICompany extends IVertex {
   symbol: string;
   companyName: string;
   exchange: string;
@@ -101,17 +102,15 @@ export interface ICompany extends IGraphObject {
   phone: string;
 }
 
-export interface IBusinessSector extends IGraphObject {
-  id: string;
+export interface IBusinessSector extends IVertex {
   name: string;
 }
 
-export interface IBusinessIndustry extends IGraphObject {
-  id: string;
+export interface IBusinessIndustry extends IVertex {
   name: string;
 }
 
-export interface IPost extends IGraphObject {
+export interface IPost extends IVertex {
   author: string;
   publicationStatus: "public" | "draft";
   contentFormat: "markdown" | "html";
@@ -123,9 +122,14 @@ export interface IPost extends IGraphObject {
   updated: number | Date;
 }
 
-export interface IIdea extends IGraphObject {
+export interface IIdea extends IVertex {
   author: string;
   message: string;
   created: number | Date;
   updated: number | Date;
+}
+
+export interface IReaction extends IEdge {
+  reaction: "like" | "dislike" | "love" | "hate";
+  created: number | Date;
 }
