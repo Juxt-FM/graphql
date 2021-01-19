@@ -30,6 +30,8 @@ export class UserContentService {
 
     this.reactionCountLoader = this.buildReactionCountLoader();
     this.replyCountLoader = this.buildReplyCountLoader();
+
+    this.buildReactionLoader = this.buildReactionLoader.bind(this);
   }
 
   /**

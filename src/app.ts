@@ -7,7 +7,7 @@ import express from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import expressJwt from "express-jwt";
-import rateLimit from "express-rate-limit";
+// import rateLimit from "express-rate-limit";
 
 import GraphDB, { MarketHandler } from "./db";
 
@@ -41,14 +41,15 @@ app.use(cookieParser(process.env.COOKIE_SECRET || "some_secret_key"));
 if (process.env.PROXY_IN_USE) app.enable("trust proxy");
 
 // Basic rate limiting, will add redis store in production
+/*
 app.use(
   rateLimit({
     windowMs: 60 * 1000,
     max: 100,
   })
 );
+ */
 
-// Authenticate w/ JWT
 app.use(
   expressJwt({
     secret: auth.jwtKey,

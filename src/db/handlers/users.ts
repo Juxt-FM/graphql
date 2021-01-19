@@ -7,7 +7,7 @@ import GraphDB from "..";
 
 import BaseHandler from "./base";
 
-import { labels, IRawProfile, IUserProfile } from "../constants";
+import { IRawProfile, IUserProfile } from "../constants";
 import { ResourceNotFoundError } from "../errors";
 
 /**

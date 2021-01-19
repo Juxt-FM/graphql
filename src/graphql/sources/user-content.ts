@@ -24,7 +24,9 @@ export class UserContentAPI extends BaseAPI {
      */
     const { buildReactionLoader } = this.context.userContentService;
 
-    buildReactionLoader(this.context.user.profile);
+    if (this.context.user) {
+      buildReactionLoader(this.context.user.profile);
+    }
   }
 
   /**
@@ -180,6 +182,8 @@ export class UserContentAPI extends BaseAPI {
    * @param {string} id
    */
   async loadReactionStatus(id: string) {
+    if (!this.context.user) return null;
+
     return this.handler("loadReactionStatuses", async () => {
       const { userContentService } = this.context;
 

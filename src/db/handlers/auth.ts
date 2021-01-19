@@ -125,7 +125,12 @@ export class AuthHandler extends BaseHandler {
       .by(__.id())
       .next();
 
-    const user: any = Object.fromEntries(result.value);
+    const parsed: any = Object.fromEntries(result.value);
+
+    const user: any = {
+      ...Object.fromEntries(parsed.user),
+      profile: parsed.profile,
+    };
 
     return { user: this.transform(user), code };
   }
@@ -161,7 +166,12 @@ export class AuthHandler extends BaseHandler {
 
     if (!result.value) throw new ResourceNotFoundError();
 
-    const user: any = Object.fromEntries(result.value);
+    const parsed: any = Object.fromEntries(result.value);
+
+    const user: any = {
+      ...Object.fromEntries(parsed.user),
+      profile: parsed.profile,
+    };
 
     return { user: this.transform(user), code };
   }
@@ -197,7 +207,12 @@ export class AuthHandler extends BaseHandler {
 
     if (!result.value) throw new ResourceNotFoundError();
 
-    const user: any = Object.fromEntries(result.value);
+    const parsed: any = Object.fromEntries(result.value);
+
+    const user: any = {
+      ...Object.fromEntries(parsed.user),
+      profile: parsed.profile,
+    };
 
     return { user: this.transform(user), code };
   }
@@ -221,7 +236,12 @@ export class AuthHandler extends BaseHandler {
 
     if (!result.value) throw new ResourceNotFoundError();
 
-    const user: any = Object.fromEntries(result.value);
+    const parsed: any = Object.fromEntries(result.value);
+
+    const user: any = {
+      ...Object.fromEntries(parsed.user),
+      profile: parsed.profile,
+    };
 
     return this.transform(user);
   }
@@ -247,7 +267,12 @@ export class AuthHandler extends BaseHandler {
 
     if (!result.value) throw new ResourceNotFoundError();
 
-    const user: any = Object.fromEntries(result.value);
+    const parsed: any = Object.fromEntries(result.value);
+
+    const user: any = {
+      ...Object.fromEntries(parsed.user),
+      profile: parsed.profile,
+    };
 
     return this.transform(user);
   }
@@ -278,7 +303,12 @@ export class AuthHandler extends BaseHandler {
 
     if (!result.value) throw new ResourceNotFoundError();
 
-    const user: any = Object.fromEntries(result.value);
+    const parsed: any = Object.fromEntries(result.value);
+
+    const user: any = {
+      ...Object.fromEntries(parsed.user),
+      profile: parsed.profile,
+    };
 
     return this.transform(user);
   }
