@@ -1,3 +1,35 @@
+type Company {
+  id: ID!
+  symbol: String!
+  companyName: String!
+  exchange: String!
+  industry: Industry!
+  website: String
+  description: String
+  CEO: String
+  securityName: String
+  issueType: String
+  sector: Sector!
+  primarySicCode: Int
+  employees: Int
+  tags: [Industry!]!
+  address: String
+  address2: String
+  state: String
+  city: String
+  zip: String
+  country: String
+  phone: String
+}
+
+type Sector {
+  name: String!
+}
+
+type Industry {
+  name: String!
+}
+
 type Watchlist {
   id: ID!
   name: String!

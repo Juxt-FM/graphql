@@ -54,7 +54,7 @@ export class UserHandler extends BaseHandler {
 
     const result = await query
       .V(id)
-      .outE(labels.UserProfile)
+      .outE(labels.USER_PROFILE)
       .inV()
       .elementMap()
       .next();

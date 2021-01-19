@@ -10,7 +10,7 @@ import GraphDB from "..";
 import BaseHandler from "./base";
 import { ResourceNotFoundError } from "../errors";
 
-import { IRawUser, IUserAccount, labels, relationships } from "../constants";
+import { IUserAccount, labels, relationships } from "../constants";
 
 const {
   statics: __,
@@ -49,7 +49,7 @@ export class AuthHandler extends BaseHandler {
    * Returns a formatted user object
    * @param {IRawUser} user
    */
-  private transform(user: IRawUser): IUserAccount {
+  private transform(user: IUserAccount): IUserAccount {
     return {
       ...user,
       created: this.toDate(user.created),
@@ -104,7 +104,7 @@ export class AuthHandler extends BaseHandler {
     const code = this.createRandomCode();
 
     const result = await query
-      .addV(labels.UserAccount)
+      .addV(labels.USER_ACCOUNT)
       .property("email", data.email)
       .property("password", data.password)
       .property("verified", false)
@@ -113,11 +113,11 @@ export class AuthHandler extends BaseHandler {
       .as("user")
       .properties("email")
       .property("code", code)
-      .addV(labels.UserProfile)
+      .addV(labels.USER_PROFILE)
       .property("created", now)
       .property("updated", now)
       .as("profile")
-      .addE(relationships.HasProfile)
+      .addE(relationships.HAS_PROFILE)
       .from_("user")
       .to("profile")
       .select("user")
@@ -144,6 +144,7 @@ export class AuthHandler extends BaseHandler {
       .not(__.has("email", email))
       .as("user")
       .property("email", email)
+      .property("updated", moment().valueOf())
       .properties("email")
       .property("code", code)
       .sideEffect(
@@ -175,6 +176,7 @@ export class AuthHandler extends BaseHandler {
       .not(__.has("phone", phone))
       .as("user")
       .property("phone", phone)
+      .property("updated", moment().valueOf())
       .properties("phone")
       .property("code", code)
       .sideEffect(
@@ -216,7 +218,7 @@ export class AuthHandler extends BaseHandler {
 
     const result = await query
       .V()
-      .hasLabel(labels.UserAccount)
+      .hasLabel(labels.USER_ACCOUNT)
       .or(__.has("phone", attribute), __.has("email", attribute))
       .elementMap()
       .next();
@@ -238,12 +240,12 @@ export class AuthHandler extends BaseHandler {
 
     const result = await query
       .V()
-      .has(labels.UserDevice, "identifier", device)
-      .outE(relationships.LoggedIn)
+      .has(labels.USER_DEVICE, "identifier", device)
+      .outE(relationships.LOGGED_IN)
       .has("expires", gt(moment().valueOf()))
       .has("token", token)
       .inV()
-      .hasLabel(labels.UserAccount)
+      .hasLabel(labels.USER_ACCOUNT)
       .elementMap()
       .next();
 
@@ -270,7 +272,7 @@ export class AuthHandler extends BaseHandler {
     return await query
       .V(userId)
       .as("user")
-      .addV(labels.UserDevice)
+      .addV(labels.USER_DEVICE)
       .property("identifier", device.id)
       .property("address", device.address)
       .property("platform", device.platform)
@@ -278,7 +280,7 @@ export class AuthHandler extends BaseHandler {
       .property("created", moment().valueOf())
       .property("updated", moment().valueOf())
       .as("device")
-      .addE(relationships.UsesDevice)
+      .addE(relationships.USES_DEVICE)
       .from_("user")
       .to("device")
       .select("device")
@@ -299,7 +301,7 @@ export class AuthHandler extends BaseHandler {
 
     let deviceObj: any = await query
       .V()
-      .has(labels.UserDevice, "identifier", device.id)
+      .has(labels.USER_DEVICE, "identifier", device.id)
       .property("address", device.address)
       .elementMap()
       .next();
@@ -316,7 +318,7 @@ export class AuthHandler extends BaseHandler {
       .as("user")
       .V(deviceObj.id)
       .as("device")
-      .addE(relationships.LoggedIn)
+      .addE(relationships.LOGGED_IN)
       .as("status")
       .from_("device")
       .to("user")
@@ -339,9 +341,9 @@ export class AuthHandler extends BaseHandler {
 
     await query
       .V()
-      .hasLabel(labels.UserDevice)
+      .hasLabel(labels.USER_DEVICE)
       .has("identifier", deviceId)
-      .outE(relationships.LoggedIn)
+      .outE(relationships.LOGGED_IN)
       .where(__.inV().hasId(userId))
       .drop()
       .next();
@@ -358,9 +360,9 @@ export class AuthHandler extends BaseHandler {
 
     const result = await query
       .V()
-      .hasLabel(labels.UserDevice)
+      .hasLabel(labels.USER_DEVICE)
       .has("identifier", deviceId)
-      .outE(relationships.LoggedIn)
+      .outE(relationships.LOGGED_IN)
       .as("status")
       .inV()
       .hasId(userId)
@@ -381,7 +383,11 @@ export class AuthHandler extends BaseHandler {
   async resetPassword(userId: string, password: string) {
     const query = this.graph.query();
 
-    await query.V(userId).property("password", password).next();
+    await query
+      .V(userId)
+      .property("password", password)
+      .property("updated", moment().valueOf())
+      .next();
   }
 
   /**
@@ -404,6 +410,7 @@ export class AuthHandler extends BaseHandler {
         const result = await query
           .V(userId)
           .property("verified", true)
+          .property("updated", moment().valueOf())
           .as("user")
           .sideEffect(__.properties("email").properties("code").drop())
           .select("user")
@@ -439,6 +446,7 @@ export class AuthHandler extends BaseHandler {
         const result = await query
           .V(userId)
           .property("verified", true)
+          .property("updated", moment().valueOf())
           .as("user")
           .sideEffect(__.properties("phone").properties("code").drop())
           .select("user")

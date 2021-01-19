@@ -1,0 +1,421 @@
+/**
+ * @author Andrew Perera
+ * Copyright (C) 2020 - All rights reserved
+ */
+
+import gremlin from "gremlin";
+import moment from "moment";
+
+import GraphDB from "..";
+
+import BaseHandler from "./base";
+
+import { ResourceNotFoundError } from "../errors";
+import { labels, relationships, IPost, IIdea } from "../constants";
+
+const {
+  statics: __,
+  t: { id },
+} = gremlin.process;
+
+export interface IPostInput {
+  publicationStatus: "public" | "draft";
+  contentFormat: "markdown" | "html";
+  title: string;
+  summary: string;
+  imageURL: string;
+  content: string;
+}
+
+export interface IIdeaInput {
+  replyStatus?: string;
+  message: string;
+}
+
+export interface IReactionInput {
+  to: string;
+  reaction: "like" | "dislike" | "love" | "hate";
+}
+
+export interface IUpdateReactionInput {
+  id: string;
+  reaction: "like" | "dislike" | "love" | "hate";
+}
+
+/**
+ * User content database handler.
+ * @param {GraphDB} graph
+ */
+export class UserContentHandler extends BaseHandler {
+  constructor(graph: GraphDB) {
+    super(graph);
+
+    this.transform = this.transform.bind(this);
+  }
+
+  private transform(content: IPost | IIdea): IPost | IIdea {
+    return {
+      ...content,
+      created: this.toDate(content.created),
+      updated: this.toDate(content.updated),
+    };
+  }
+
+  /**
+   * Fetches content by it's ID
+   * @param {string} id
+   */
+  async findById(id: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .or(__.hasLabel(labels.POST), __.hasLabel(labels.IDEA))
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    return this.transform(record);
+  }
+
+  /**
+   * Creates and returns a new idea
+   * @param {string} user
+   * @param {IIdeaInput} data
+   */
+  async createIdea(user: string, data: IIdeaInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .addV(labels.POST)
+      .property("message", data.message)
+      .property("created", moment().valueOf())
+      .property("updated", moment().valueOf())
+      .as("idea")
+      .V(user)
+      .as("user")
+      .addE(relationships.AUTHORED)
+      .from_("user")
+      .to("idea")
+      .select("idea")
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    if (data.replyStatus)
+      await query
+        .addE(relationships.REPLY_TO)
+        .from_(record.id)
+        .to(data.replyStatus)
+        .next();
+
+    return this.transform(record);
+  }
+
+  /**
+   * Updates and returns an idea
+   * @param {string} id
+   * @param {string} user
+   * @param {string} message
+   */
+  async updateIdea(id: string, user: string, message: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .hasLabel(labels.IDEA)
+      .as("idea")
+      .hasNot("deleted")
+      .in_(relationships.AUTHORED)
+      .hasId(user)
+      .select("idea")
+      .property("message", message)
+      .property("updated", moment().valueOf())
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    return this.transform(record);
+  }
+
+  /**
+   * Updates and returns an idea
+   * @param {string} id
+   * @param {string} user
+   */
+  async deleteIdea(id: string, user: string) {
+    const query = this.graph.query();
+
+    await query
+      .V(id)
+      .hasLabel(labels.IDEA)
+      .hasNot("deleted")
+      .as("idea")
+      .in_(relationships.AUTHORED)
+      .hasId(user)
+      .select("idea")
+      .properties()
+      .drop()
+      .select("idea")
+      .property("deleted", moment().valueOf())
+      .next();
+  }
+
+  /**
+   * Creates and returns a new post
+   * @param {string} user
+   * @param {IPostInput} data
+   */
+  async createPost(user: string, data: IPostInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .addV(labels.POST)
+      .property("publicationStatus", data.publicationStatus)
+      .property("contentFormat", data.contentFormat)
+      .property("title", data.title)
+      .property("summary", data.summary)
+      .property("imageURL", data.imageURL)
+      .property("content", data.content)
+      .property("created", moment().valueOf())
+      .property("updated", moment().valueOf())
+      .as("post")
+      .V(user)
+      .as("user")
+      .addE(relationships.AUTHORED)
+      .from_("user")
+      .to("post")
+      .select("post")
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    return this.transform(record);
+  }
+
+  /**
+   * Updates and returns a post
+   *
+   * NEED TO ADD SUPPORT FOR VERSIONING
+   *
+   * @param {string} id
+   * @param {string} user
+   * @param {IPostInput} data
+   */
+  async updatePost(id: string, user: string, data: IPostInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .hasLabel(labels.IDEA)
+      .hasNot("deleted")
+      .as("idea")
+      .in_(relationships.AUTHORED)
+      .hasId(user)
+      .select("idea")
+      .property("publicationStatus", data.publicationStatus)
+      .property("contentFormat", data.contentFormat)
+      .property("title", data.title)
+      .property("summary", data.summary)
+      .property("imageURL", data.imageURL)
+      .property("content", data.content)
+      .property("updated", moment().valueOf())
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    return this.transform(record);
+  }
+
+  /**
+   * Updates and returns an idea
+   * @param {string} id
+   * @param {string} user
+   */
+  async deletePost(id: string, user: string) {
+    const query = this.graph.query();
+
+    await query
+      .V(id)
+      .hasLabel(labels.POST)
+      .hasNot("deleted")
+      .as("post")
+      .in_(relationships.AUTHORED)
+      .hasId(user)
+      .select("post")
+      .properties()
+      .drop()
+      .select("post")
+      .property("deleted", moment().valueOf())
+      .next();
+  }
+
+  /**
+   * Creates and returns a new reaction
+   * @param {string} user
+   * @param {IIdeaInput} data
+   */
+  async createReaction(user: string, data: IReactionInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(data.to)
+      .or(__.hasLabel(labels.IDEA), __.hasLabel(labels.POST))
+      .as("to")
+      .addE(relationships.REACTED_TO)
+      .property("reaction", data.reaction)
+      .property("created", moment().valueOf())
+      .as("rel")
+      .from_(user)
+      .to("to")
+      .select("rel")
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    return this.transform(record);
+  }
+
+  /**
+   * Updates and returns a reaction
+   * @param {string} user
+   * @param {IIdeaInput} data
+   */
+  async updateReaction(user: string, data: IUpdateReactionInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .E(data.id)
+      .as("rel")
+      .outV()
+      .hasId(user)
+      .select("rel")
+      .property("reaction", data.reaction)
+      .property("created", moment().valueOf())
+      .as("rel")
+      .from_(user)
+      .to("to")
+      .select("rel")
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    return this.transform(record);
+  }
+
+  /**
+   * Deletes a reaction
+   * @param {string} user
+   * @param {IIdeaInput} data
+   */
+  async deleteReaction(user: string, id: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .E(id)
+      .as("rel")
+      .outV()
+      .hasId(user)
+      .select("rel")
+      .drop()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const record: any = Object.fromEntries(result.value);
+
+    return this.transform(record);
+  }
+
+  /**
+   * Finds replies to a post or idea
+   * @param {string} id
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async findReplies(id: string, limit: number, offset: number) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .or(__.hasLabel(labels.POST), __.hasLabel(labels.IDEA))
+      .in_(relationships.REPLY_TO)
+      .elementMap()
+      .fold()
+      .by(__.range(__.local, limit + offset, offset))
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const records: any = Object.fromEntries(result.value);
+
+    return records.map(this.transform);
+  }
+
+  /**
+   * Load reply counts
+   * @param {string} ids
+   */
+  async loadReplyCounts(ids: string[]) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(...ids)
+      .hasLabel(labels.IDEA)
+      .as("parent")
+      .local(
+        __.repeat(__.in_(relationships.REPLY_TO))
+          .count()
+          .as("count")
+          .values(id, "count")
+          .fold()
+      )
+      .next();
+
+    return result.value;
+  }
+
+  /**
+   * Load reaction counts
+   * @param {string} ids
+   */
+  async loadReactionCounts(ids: string[]) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(...ids)
+      .hasLabel(labels.IDEA)
+      .as("parent")
+      .local(
+        __.in_(relationships.REACTED_TO)
+          .count()
+          .as("count")
+          .values(id, "count")
+          .fold()
+      )
+      .next();
+
+    return result.value;
+  }
+}

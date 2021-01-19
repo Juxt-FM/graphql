@@ -4,59 +4,58 @@
  */
 
 export const labels = {
-  UserAccount: "user_account",
-  UserProfile: "user_profile",
-  UserDevice: "user_device",
-  Company: "company",
-  BusinessSector: "business_sector",
-  BusinessIndustry: "business_industry",
+  USER_ACCOUNT: "user_account",
+  USER_PROFILE: "user_profile",
+  USER_DEVICE: "user_device",
+  COMPANY: "company",
+  BUSINESS_SECTOR: "business_sector",
+  BUSINESS_INDUSTRY: "business_industry",
+  USER_CREATED_LIST: "user_created_list",
+  POST: "post",
+  IDEA: "idea",
 };
 
 export const relationships = {
-  LoggedIn: "logged_in",
-  UsesDevice: "uses_device",
-  HasProfile: "has_profile",
-  Verification: "needs_verification",
-  InSector: "in_sector",
-  InIndustry: "in_industry",
+  LOGGED_IN: "logged_in",
+  USES_DEVICE: "uses_device",
+  HAS_PROFILE: "has_profile",
+  IN_SECTOR: "in_sector",
+  IN_INDUSTRY: "in_industry",
+  CREATED_LIST: "created_list",
+  IN_LIST: "in_list",
+  FOLLOWING: "following",
+  AUTHORED: "authored",
+  REPLY_TO: "reply_to",
+  REACTED_TO: "reacted_to",
 };
 
-export interface IRawUser {
-  id: string;
+interface IGraphObject {
   label: string;
-  password: string;
-  email: string;
-  phone: string;
-  created: number;
-  updated: number;
-  verified?: boolean;
-  deactivated?: number;
-  suspended?: number;
 }
 
-export interface IUserAccount {
+export interface IUserAccount extends IGraphObject {
   id: string;
   email: string;
   phone?: string;
   password: string;
   verified?: boolean;
-  created: Date;
-  updated: Date;
-  deactivated?: Date;
-  suspended?: Date;
+  created: Date | number;
+  updated: Date | number;
+  deactivated?: Date | number;
+  suspended?: Date | number;
 }
 
-export interface IUserDevice {
+export interface IUserDevice extends IGraphObject {
   id: string;
   identifier: string;
   platform: "ios" | "android" | "web";
   model: string;
   address: string;
-  created: Date;
-  updated: Date;
+  created: Date | number;
+  updated: Date | number;
 }
 
-export interface IRawProfile {
+export interface IRawProfile extends IGraphObject {
   id: string;
   name?: string;
   location?: string;
@@ -67,18 +66,18 @@ export interface IRawProfile {
   updated: number;
 }
 
-export interface IUserProfile {
+export interface IUserProfile extends IGraphObject {
   id: string;
   name?: string;
   location?: string;
   summary?: string;
   coverImageURL?: string;
   profileImageURL?: string;
-  created: Date;
-  updated: Date;
+  created: Date | number;
+  updated: Date | number;
 }
 
-export interface ICompany {
+export interface ICompany extends IGraphObject {
   id: string;
   symbol: string;
   companyName: string;
@@ -102,12 +101,31 @@ export interface ICompany {
   phone: string;
 }
 
-export interface IBusinessSector {
+export interface IBusinessSector extends IGraphObject {
   id: string;
   name: string;
 }
 
-export interface IBusinessIndustry {
+export interface IBusinessIndustry extends IGraphObject {
   id: string;
   name: string;
+}
+
+export interface IPost extends IGraphObject {
+  author: string;
+  publicationStatus: "public" | "draft";
+  contentFormat: "markdown" | "html";
+  title: string;
+  summary: String;
+  imageURL: String;
+  content: string;
+  created: number | Date;
+  updated: number | Date;
+}
+
+export interface IIdea extends IGraphObject {
+  author: string;
+  message: string;
+  created: number | Date;
+  updated: number | Date;
 }

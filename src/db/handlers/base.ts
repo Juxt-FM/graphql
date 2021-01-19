@@ -22,8 +22,9 @@ export default class BaseHandler {
    * Converts a millisecond timestamp into a JS Date
    * @param {number} timestamp
    */
-  protected toDate(timestamp: number) {
-    return moment(timestamp).toDate();
+  protected toDate(timestamp: number | Date) {
+    if (typeof timestamp === "number") return moment(timestamp).toDate();
+    else return timestamp;
   }
 
   /**

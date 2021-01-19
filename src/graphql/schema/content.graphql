@@ -1,0 +1,107 @@
+enum PublicationStatus {
+  public
+  draft
+}
+
+enum PostContentFormat {
+  html
+  markdown
+}
+
+enum ReactionType {
+  like
+  dislike
+  love
+  hate
+}
+
+type ReactableContent = Post | Idea
+
+type Post {
+  id: ID!
+  author: UserProfile
+  publicationStatus: PublicationStatus!
+  contentFormat: PostContentFormat!
+  title: String!
+  summary: String
+  imageURL: String
+  content: String!
+  ideas(limit: Int!, offset: Int!): [Idea!]!
+  reactions(limit: Int!, offset: Int!): [Reaction!]!
+  reactionCount: Int!
+  reactionStatus: Reaction
+  created: String!
+  updated: String!
+}
+
+type Idea {
+  id: ID!
+  author: UserProfile
+  message: String!
+  attachments: [Attachment!]
+  replyStatus: Idea
+  replies(limit: Int!, offset: Int!): [Idea!]
+  reactionCount: Int!
+  reactionStatus: Reaction
+  created: String!
+  updated: String!
+}
+
+type Attachment {
+  type: AttachmentType!
+  url: String
+}
+
+type Reaction {
+  id: ID!
+  from: UserProfile
+  to: ReactableContent!
+  reaction: String!
+  updated: String!
+  created: String!
+}
+
+input PostInput {
+  publicationStatus: PublicationStatus
+  contentFormat: PostContentFormat
+  symbols: [String!]!
+  tags: [String!]!
+  title: String!
+  imageURL: String
+  summary: String
+  content: String!
+}
+
+input IdeaInput {
+  post: ID!
+  replyStatus: ID
+  message: String!
+}
+
+input PostFilters {
+  user: ID
+  query: String
+  symbols: [String!]
+  limit: Int!
+  offset: Int!
+}
+
+extend type Mutation {
+  createPost(data: PostInput!): Post!
+  updatePost(id: ID!, data: PostInput!): Post!
+  deletePost(id: ID!): String!
+  createIdea(data: IdeaInput!): Idea!
+  updateIdea(id: ID!, data: IdeaInput!): Idea!
+  deleteIdea(id: ID!): Idea!
+  createReaction(to: ID!, reaction: ReactionType!): Reaction!
+  updateReaction(id: ID!, data: ReactionInput!): Reaction!
+  deleteReaction(id: ID!): String!
+  reportContent(id:ID!): String!
+}
+
+extend type Query {
+  singlePost(id: ID!): Post!
+  filterPosts(filters: PostFilters!): [Post!]!
+  reactions(id: ID!, limit: Int!, offset: Int!): [Reaction!]!
+  myDrafts(limit: Int, offset: Int): [Post!]!
+}
