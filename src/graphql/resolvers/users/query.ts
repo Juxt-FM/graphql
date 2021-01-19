@@ -3,6 +3,7 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
+import { S3 } from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 
 import { IResolverContext } from "../../server";
@@ -22,7 +23,13 @@ export const imageUploadURL = async (
   args: undefined,
   context: IResolverContext
 ) => {
-  const { uploadService } = context;
+  const s3 = new S3();
 
-  return await uploadService.getFileUploadURL("images", uuidv4());
+  const options = {
+    Bucket: "images",
+    Key: uuidv4(),
+    Expires: 60,
+  };
+
+  return await s3.getSignedUrlPromise("putObject", options);
 };

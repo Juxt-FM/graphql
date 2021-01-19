@@ -5,6 +5,10 @@
 
 import { stMonitor, stLogger } from "sematext-agent-express";
 
+/**
+ * Log message with INFO priority
+ * @param {string} msg
+ */
 export const logInfo = (msg: string) => {
   try {
     stLogger.info(msg);
@@ -14,6 +18,10 @@ export const logInfo = (msg: string) => {
   }
 };
 
+/**
+ * Log message with ERROR priority
+ * @param {string} msg
+ */
 export const logError = (msg: string) => {
   try {
     stLogger.error(msg);

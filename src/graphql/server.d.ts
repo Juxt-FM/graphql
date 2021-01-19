@@ -2,12 +2,7 @@ import { Request, Response } from "express";
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 
 import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
-import {
-  AuthService,
-  NotificationService,
-  UserService,
-  FileUploadService,
-} from "../services";
+import { AuthService, NotificationService, UserService } from "../services";
 
 export interface IAuthenticatedUser {
   id: string;
@@ -23,7 +18,6 @@ export interface IContext {
   authService: AuthService;
   userService: UserService;
   notificationService: NotificationService;
-  uploadService: FileUploadService;
   host: string;
   client: {
     name: "web" | "mobile";
