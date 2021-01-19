@@ -3,6 +3,7 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -19,20 +20,20 @@ export enum DevicePlatform {
   Web = 'web'
 }
 
-export type User = {
-  __typename?: 'User';
+export type UserAccount = {
+  __typename?: 'UserAccount';
   id: Scalars['ID'];
   email: Scalars['String'];
   phone?: Maybe<Scalars['String']>;
-  profile: UserProfile;
-  verified?: Maybe<Scalars['String']>;
+  profile?: Maybe<UserProfile>;
+  verified?: Maybe<Scalars['Boolean']>;
   suspended?: Maybe<Scalars['String']>;
   updated: Scalars['String'];
   created: Scalars['String'];
 };
 
-export type Device = {
-  __typename?: 'Device';
+export type UserDevice = {
+  __typename?: 'UserDevice';
   id: Scalars['ID'];
   platform: DevicePlatform;
   model: Scalars['String'];
@@ -44,6 +45,7 @@ export type Device = {
 export type AuthCredentials = {
   __typename?: 'AuthCredentials';
   accessToken: Scalars['String'];
+  refreshToken?: Maybe<Scalars['String']>;
 };
 
 export type DeviceInput = {
@@ -66,47 +68,41 @@ export type LoginInput = {
 
 export type Query = {
   __typename?: 'Query';
-  me: User;
-  profile: UserProfile;
-  singleBlogPost: BlogPost;
-  filterBlogPosts: Array<BlogPost>;
-  reactions: Array<Reaction>;
-  myDrafts: Array<BlogPost>;
-  commentThread: Array<Comment>;
+  me: UserAccount;
+  userProfile: UserProfile;
+  imageUploadURL: Scalars['String'];
+  postByID: Post;
+  ideaByID: Idea;
+  postDrafts: Array<Post>;
+  suggestedPosts: Array<Post>;
+  suggestedIdeas: Array<Idea>;
 };
 
 
-export type QueryProfileArgs = {
+export type QueryUserProfileArgs = {
   id: Scalars['ID'];
 };
 
 
-export type QuerySingleBlogPostArgs = {
+export type QueryPostByIdArgs = {
   id: Scalars['ID'];
 };
 
 
-export type QueryFilterBlogPostsArgs = {
-  filters: BlogPostFilters;
-};
-
-
-export type QueryReactionsArgs = {
+export type QueryIdeaByIdArgs = {
   id: Scalars['ID'];
-  limit: Scalars['Int'];
-  offset: Scalars['Int'];
 };
 
 
-export type QueryMyDraftsArgs = {
+export type QuerySuggestedPostsArgs = {
   limit?: Maybe<Scalars['Int']>;
   offset?: Maybe<Scalars['Int']>;
 };
 
 
-export type QueryCommentThreadArgs = {
-  parent: Scalars['ID'];
-  filters: CommentThreadFilters;
+export type QuerySuggestedIdeasArgs = {
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
 };
 
 export type Mutation = {
@@ -114,23 +110,23 @@ export type Mutation = {
   createUser: AuthCredentials;
   loginUser: AuthCredentials;
   logoutUser: Scalars['String'];
-  updateEmail: User;
-  updatePhone: User;
+  updateEmail: UserAccount;
+  updatePhone: UserAccount;
   verifyEmail?: Maybe<AuthCredentials>;
   verifyPhone?: Maybe<AuthCredentials>;
   resetPassword: Scalars['String'];
   refreshToken: AuthCredentials;
   deactivateAccount: Scalars['String'];
   updateProfile: UserProfile;
-  createBlogPost: BlogPost;
-  updateBlogPost: BlogPost;
-  deleteBlogPost: Scalars['String'];
-  createComment: Comment;
-  updateComment: Comment;
-  deleteComment: Comment;
+  createPost: Post;
+  updatePost: Post;
+  deletePost: Scalars['String'];
+  createIdea: Idea;
+  updateIdea: Idea;
+  deleteIdea: Idea;
   createReaction: Reaction;
-  updateReaction: Reaction;
   deleteReaction: Scalars['String'];
+  reportContent: Scalars['String'];
   createWatchlist: Watchlist;
   updateWatchlist: Watchlist;
   deleteWatchlist: Scalars['String'];
@@ -180,55 +176,61 @@ export type MutationResetPasswordArgs = {
 };
 
 
+export type MutationRefreshTokenArgs = {
+  device: Scalars['ID'];
+};
+
+
 export type MutationUpdateProfileArgs = {
-  data: UpdateProfileInput;
+  data: ProfileInput;
 };
 
 
-export type MutationCreateBlogPostArgs = {
-  data: BlogPostInput;
+export type MutationCreatePostArgs = {
+  data: PostInput;
 };
 
 
-export type MutationUpdateBlogPostArgs = {
+export type MutationUpdatePostArgs = {
   id: Scalars['ID'];
-  data: BlogPostInput;
+  data: PostInput;
 };
 
 
-export type MutationDeleteBlogPostArgs = {
+export type MutationDeletePostArgs = {
   id: Scalars['ID'];
 };
 
 
-export type MutationCreateCommentArgs = {
-  data: CommentInput;
-};
-
-
-export type MutationUpdateCommentArgs = {
+export type MutationCreateIdeaArgs = {
   id: Scalars['ID'];
-  data: CommentInput;
+  data: IdeaInput;
 };
 
 
-export type MutationDeleteCommentArgs = {
+export type MutationUpdateIdeaArgs = {
+  id: Scalars['ID'];
+  message: Scalars['String'];
+};
+
+
+export type MutationDeleteIdeaArgs = {
   id: Scalars['ID'];
 };
 
 
 export type MutationCreateReactionArgs = {
-  data: ReactionInput;
-};
-
-
-export type MutationUpdateReactionArgs = {
-  id: Scalars['ID'];
-  data: ReactionInput;
+  to: Scalars['ID'];
+  reaction: ReactionType;
 };
 
 
 export type MutationDeleteReactionArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationReportContentArgs = {
   id: Scalars['ID'];
 };
 
@@ -257,13 +259,13 @@ export type UserProfile = {
   profileImageURL?: Maybe<Scalars['String']>;
   coverImageURL?: Maybe<Scalars['String']>;
   watchlists: Array<Watchlist>;
-  posts: Array<BlogPost>;
-  comments: Array<Comment>;
+  posts: Array<Post>;
+  ideas: Array<Idea>;
   created: Scalars['String'];
   updated: Scalars['String'];
 };
 
-export type UpdateProfileInput = {
+export type ProfileInput = {
   name?: Maybe<Scalars['String']>;
   summary?: Maybe<Scalars['String']>;
   location?: Maybe<Scalars['String']>;
@@ -279,79 +281,110 @@ export enum PostContentFormat {
   Markdown = 'markdown'
 }
 
-export type BlogPost = {
-  __typename?: 'BlogPost';
+export enum ReactionType {
+  Like = 'like',
+  Dislike = 'dislike',
+  Love = 'love',
+  Hate = 'hate'
+}
+
+export enum AttachmentType {
+  Media = 'media',
+  Web = 'web'
+}
+
+export type ActionableContent = Post | Idea;
+
+export type Post = {
+  __typename?: 'Post';
   id: Scalars['ID'];
+  author?: Maybe<UserProfile>;
   publicationStatus: PublicationStatus;
   contentFormat: PostContentFormat;
-  author: Scalars['ID'];
   title: Scalars['String'];
-  subtitle?: Maybe<Scalars['String']>;
+  summary?: Maybe<Scalars['String']>;
   imageURL?: Maybe<Scalars['String']>;
   content: Scalars['String'];
-  symbols: Array<Scalars['String']>;
-  tags: Array<Scalars['String']>;
-  comments: Array<Comment>;
+  ideas: Array<Idea>;
+  reactions: Array<Reaction>;
   reactionCount: Scalars['Int'];
   reactionStatus?: Maybe<Reaction>;
-  createdAt: Scalars['String'];
-  updatedAt: Scalars['String'];
+  created: Scalars['String'];
+  updated: Scalars['String'];
 };
 
 
-export type BlogPostCommentsArgs = {
-  depth: Scalars['Int'];
+export type PostIdeasArgs = {
   limit: Scalars['Int'];
   offset: Scalars['Int'];
 };
 
-export type Comment = {
-  __typename?: 'Comment';
+
+export type PostReactionsArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+export type Idea = {
+  __typename?: 'Idea';
   id: Scalars['ID'];
-  post: Scalars['ID'];
-  replyStatus: Scalars['ID'];
-  author: Scalars['ID'];
+  author?: Maybe<UserProfile>;
   message: Scalars['String'];
-  replies?: Maybe<Array<Comment>>;
+  attachments?: Maybe<Array<Attachment>>;
+  replyStatus?: Maybe<Idea>;
+  replies?: Maybe<Array<Idea>>;
+  reactions: Array<Reaction>;
   reactionCount: Scalars['Int'];
   reactionStatus?: Maybe<Reaction>;
-  createdAt: Scalars['String'];
-  updatedAt: Scalars['String'];
+  created: Scalars['String'];
+  updated: Scalars['String'];
+};
+
+
+export type IdeaRepliesArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+
+export type IdeaReactionsArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+export type Attachment = {
+  __typename?: 'Attachment';
+  type: AttachmentType;
+  url?: Maybe<Scalars['String']>;
 };
 
 export type Reaction = {
   __typename?: 'Reaction';
   id: Scalars['ID'];
-  to: Scalars['ID'];
+  from?: Maybe<UserProfile>;
+  to: ActionableContent;
   reaction: Scalars['String'];
-  updatedAt: Scalars['String'];
-  createdAt: Scalars['String'];
+  updated: Scalars['String'];
+  created: Scalars['String'];
 };
 
-export type BlogPostInput = {
-  publicationStatus?: Maybe<PublicationStatus>;
-  contentFormat?: Maybe<PostContentFormat>;
+export type PostInput = {
+  publicationStatus: PublicationStatus;
+  contentFormat: PostContentFormat;
   symbols: Array<Scalars['String']>;
   tags: Array<Scalars['String']>;
   title: Scalars['String'];
   imageURL?: Maybe<Scalars['String']>;
-  subtitle?: Maybe<Scalars['String']>;
+  summary?: Maybe<Scalars['String']>;
   content: Scalars['String'];
 };
 
-export type CommentInput = {
-  post: Scalars['ID'];
+export type IdeaInput = {
   replyStatus?: Maybe<Scalars['ID']>;
   message: Scalars['String'];
 };
 
-export type ReactionInput = {
-  to: Scalars['String'];
-  toType: Scalars['String'];
-  reaction: Scalars['String'];
-};
-
-export type BlogPostFilters = {
+export type PostFilters = {
   user?: Maybe<Scalars['ID']>;
   query?: Maybe<Scalars['String']>;
   symbols?: Maybe<Array<Scalars['String']>>;
@@ -359,10 +392,39 @@ export type BlogPostFilters = {
   offset: Scalars['Int'];
 };
 
-export type CommentThreadFilters = {
-  depth: Scalars['Int'];
-  limit: Scalars['Int'];
-  offset: Scalars['Int'];
+export type Company = {
+  __typename?: 'Company';
+  id: Scalars['ID'];
+  symbol: Scalars['String'];
+  companyName: Scalars['String'];
+  exchange: Scalars['String'];
+  industry: Industry;
+  website?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  CEO?: Maybe<Scalars['String']>;
+  securityName?: Maybe<Scalars['String']>;
+  issueType?: Maybe<Scalars['String']>;
+  sector: Sector;
+  primarySicCode?: Maybe<Scalars['Int']>;
+  employees?: Maybe<Scalars['Int']>;
+  tags: Array<Industry>;
+  address?: Maybe<Scalars['String']>;
+  address2?: Maybe<Scalars['String']>;
+  state?: Maybe<Scalars['String']>;
+  city?: Maybe<Scalars['String']>;
+  zip?: Maybe<Scalars['String']>;
+  country?: Maybe<Scalars['String']>;
+  phone?: Maybe<Scalars['String']>;
+};
+
+export type Sector = {
+  __typename?: 'Sector';
+  name: Scalars['String'];
+};
+
+export type Industry = {
+  __typename?: 'Industry';
+  name: Scalars['String'];
 };
 
 export type Watchlist = {
@@ -458,10 +520,11 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   DevicePlatform: DevicePlatform;
-  User: ResolverTypeWrapper<User>;
+  UserAccount: ResolverTypeWrapper<UserAccount>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   String: ResolverTypeWrapper<Scalars['String']>;
-  Device: ResolverTypeWrapper<Device>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  UserDevice: ResolverTypeWrapper<UserDevice>;
   AuthCredentials: ResolverTypeWrapper<AuthCredentials>;
   DeviceInput: DeviceInput;
   UserInput: UserInput;
@@ -470,28 +533,33 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   UserProfile: ResolverTypeWrapper<UserProfile>;
-  UpdateProfileInput: UpdateProfileInput;
+  ProfileInput: ProfileInput;
   PublicationStatus: PublicationStatus;
   PostContentFormat: PostContentFormat;
-  BlogPost: ResolverTypeWrapper<BlogPost>;
-  Comment: ResolverTypeWrapper<Comment>;
-  Reaction: ResolverTypeWrapper<Reaction>;
-  BlogPostInput: BlogPostInput;
-  CommentInput: CommentInput;
-  ReactionInput: ReactionInput;
-  BlogPostFilters: BlogPostFilters;
-  CommentThreadFilters: CommentThreadFilters;
+  ReactionType: ReactionType;
+  AttachmentType: AttachmentType;
+  ActionableContent: ResolversTypes['Post'] | ResolversTypes['Idea'];
+  Post: ResolverTypeWrapper<Post>;
+  Idea: ResolverTypeWrapper<Idea>;
+  Attachment: ResolverTypeWrapper<Attachment>;
+  Reaction: ResolverTypeWrapper<Omit<Reaction, 'to'> & { to: ResolversTypes['ActionableContent'] }>;
+  PostInput: PostInput;
+  IdeaInput: IdeaInput;
+  PostFilters: PostFilters;
+  Company: ResolverTypeWrapper<Company>;
+  Sector: ResolverTypeWrapper<Sector>;
+  Industry: ResolverTypeWrapper<Industry>;
   Watchlist: ResolverTypeWrapper<Watchlist>;
   WatchlistInput: WatchlistInput;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  User: User;
+  UserAccount: UserAccount;
   ID: Scalars['ID'];
   String: Scalars['String'];
-  Device: Device;
+  Boolean: Scalars['Boolean'];
+  UserDevice: UserDevice;
   AuthCredentials: AuthCredentials;
   DeviceInput: DeviceInput;
   UserInput: UserInput;
@@ -500,33 +568,35 @@ export type ResolversParentTypes = {
   Int: Scalars['Int'];
   Mutation: {};
   UserProfile: UserProfile;
-  UpdateProfileInput: UpdateProfileInput;
-  BlogPost: BlogPost;
-  Comment: Comment;
-  Reaction: Reaction;
-  BlogPostInput: BlogPostInput;
-  CommentInput: CommentInput;
-  ReactionInput: ReactionInput;
-  BlogPostFilters: BlogPostFilters;
-  CommentThreadFilters: CommentThreadFilters;
+  ProfileInput: ProfileInput;
+  ActionableContent: ResolversParentTypes['Post'] | ResolversParentTypes['Idea'];
+  Post: Post;
+  Idea: Idea;
+  Attachment: Attachment;
+  Reaction: Omit<Reaction, 'to'> & { to: ResolversParentTypes['ActionableContent'] };
+  PostInput: PostInput;
+  IdeaInput: IdeaInput;
+  PostFilters: PostFilters;
+  Company: Company;
+  Sector: Sector;
+  Industry: Industry;
   Watchlist: Watchlist;
   WatchlistInput: WatchlistInput;
-  Boolean: Scalars['Boolean'];
 };
 
-export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+export type UserAccountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserAccount'] = ResolversParentTypes['UserAccount']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  profile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType>;
-  verified?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  profile?: Resolver<Maybe<ResolversTypes['UserProfile']>, ParentType, ContextType>;
+  verified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   suspended?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type DeviceResolvers<ContextType = any, ParentType extends ResolversParentTypes['Device'] = ResolversParentTypes['Device']> = {
+export type UserDeviceResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserDevice'] = ResolversParentTypes['UserDevice']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   platform?: Resolver<ResolversTypes['DevicePlatform'], ParentType, ContextType>;
   model?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -538,40 +608,42 @@ export type DeviceResolvers<ContextType = any, ParentType extends ResolversParen
 
 export type AuthCredentialsResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthCredentials'] = ResolversParentTypes['AuthCredentials']> = {
   accessToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  refreshToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  me?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  profile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<QueryProfileArgs, 'id'>>;
-  singleBlogPost?: Resolver<ResolversTypes['BlogPost'], ParentType, ContextType, RequireFields<QuerySingleBlogPostArgs, 'id'>>;
-  filterBlogPosts?: Resolver<Array<ResolversTypes['BlogPost']>, ParentType, ContextType, RequireFields<QueryFilterBlogPostsArgs, 'filters'>>;
-  reactions?: Resolver<Array<ResolversTypes['Reaction']>, ParentType, ContextType, RequireFields<QueryReactionsArgs, 'id' | 'limit' | 'offset'>>;
-  myDrafts?: Resolver<Array<ResolversTypes['BlogPost']>, ParentType, ContextType, RequireFields<QueryMyDraftsArgs, never>>;
-  commentThread?: Resolver<Array<ResolversTypes['Comment']>, ParentType, ContextType, RequireFields<QueryCommentThreadArgs, 'parent' | 'filters'>>;
+  me?: Resolver<ResolversTypes['UserAccount'], ParentType, ContextType>;
+  userProfile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<QueryUserProfileArgs, 'id'>>;
+  imageUploadURL?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  postByID?: Resolver<ResolversTypes['Post'], ParentType, ContextType, RequireFields<QueryPostByIdArgs, 'id'>>;
+  ideaByID?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<QueryIdeaByIdArgs, 'id'>>;
+  postDrafts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType>;
+  suggestedPosts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<QuerySuggestedPostsArgs, 'limit' | 'offset'>>;
+  suggestedIdeas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<QuerySuggestedIdeasArgs, 'limit' | 'offset'>>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createUser?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'data' | 'device'>>;
   loginUser?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType, RequireFields<MutationLoginUserArgs, 'data' | 'device'>>;
   logoutUser?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationLogoutUserArgs, 'device'>>;
-  updateEmail?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateEmailArgs, 'email'>>;
-  updatePhone?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdatePhoneArgs, 'phone'>>;
+  updateEmail?: Resolver<ResolversTypes['UserAccount'], ParentType, ContextType, RequireFields<MutationUpdateEmailArgs, 'email'>>;
+  updatePhone?: Resolver<ResolversTypes['UserAccount'], ParentType, ContextType, RequireFields<MutationUpdatePhoneArgs, 'phone'>>;
   verifyEmail?: Resolver<Maybe<ResolversTypes['AuthCredentials']>, ParentType, ContextType, RequireFields<MutationVerifyEmailArgs, 'code'>>;
   verifyPhone?: Resolver<Maybe<ResolversTypes['AuthCredentials']>, ParentType, ContextType, RequireFields<MutationVerifyPhoneArgs, 'code'>>;
   resetPassword?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'password' | 'confirmPassword'>>;
-  refreshToken?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType>;
+  refreshToken?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType, RequireFields<MutationRefreshTokenArgs, 'device'>>;
   deactivateAccount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updateProfile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<MutationUpdateProfileArgs, 'data'>>;
-  createBlogPost?: Resolver<ResolversTypes['BlogPost'], ParentType, ContextType, RequireFields<MutationCreateBlogPostArgs, 'data'>>;
-  updateBlogPost?: Resolver<ResolversTypes['BlogPost'], ParentType, ContextType, RequireFields<MutationUpdateBlogPostArgs, 'id' | 'data'>>;
-  deleteBlogPost?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteBlogPostArgs, 'id'>>;
-  createComment?: Resolver<ResolversTypes['Comment'], ParentType, ContextType, RequireFields<MutationCreateCommentArgs, 'data'>>;
-  updateComment?: Resolver<ResolversTypes['Comment'], ParentType, ContextType, RequireFields<MutationUpdateCommentArgs, 'id' | 'data'>>;
-  deleteComment?: Resolver<ResolversTypes['Comment'], ParentType, ContextType, RequireFields<MutationDeleteCommentArgs, 'id'>>;
-  createReaction?: Resolver<ResolversTypes['Reaction'], ParentType, ContextType, RequireFields<MutationCreateReactionArgs, 'data'>>;
-  updateReaction?: Resolver<ResolversTypes['Reaction'], ParentType, ContextType, RequireFields<MutationUpdateReactionArgs, 'id' | 'data'>>;
+  createPost?: Resolver<ResolversTypes['Post'], ParentType, ContextType, RequireFields<MutationCreatePostArgs, 'data'>>;
+  updatePost?: Resolver<ResolversTypes['Post'], ParentType, ContextType, RequireFields<MutationUpdatePostArgs, 'id' | 'data'>>;
+  deletePost?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeletePostArgs, 'id'>>;
+  createIdea?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<MutationCreateIdeaArgs, 'id' | 'data'>>;
+  updateIdea?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<MutationUpdateIdeaArgs, 'id' | 'message'>>;
+  deleteIdea?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<MutationDeleteIdeaArgs, 'id'>>;
+  createReaction?: Resolver<ResolversTypes['Reaction'], ParentType, ContextType, RequireFields<MutationCreateReactionArgs, 'to' | 'reaction'>>;
   deleteReaction?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteReactionArgs, 'id'>>;
+  reportContent?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationReportContentArgs, 'id'>>;
   createWatchlist?: Resolver<ResolversTypes['Watchlist'], ParentType, ContextType, RequireFields<MutationCreateWatchlistArgs, 'data'>>;
   updateWatchlist?: Resolver<ResolversTypes['Watchlist'], ParentType, ContextType, RequireFields<MutationUpdateWatchlistArgs, 'id' | 'data'>>;
   deleteWatchlist?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteWatchlistArgs, 'id'>>;
@@ -585,52 +657,98 @@ export type UserProfileResolvers<ContextType = any, ParentType extends Resolvers
   profileImageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   coverImageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   watchlists?: Resolver<Array<ResolversTypes['Watchlist']>, ParentType, ContextType>;
-  posts?: Resolver<Array<ResolversTypes['BlogPost']>, ParentType, ContextType>;
-  comments?: Resolver<Array<ResolversTypes['Comment']>, ParentType, ContextType>;
+  posts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType>;
+  ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type BlogPostResolvers<ContextType = any, ParentType extends ResolversParentTypes['BlogPost'] = ResolversParentTypes['BlogPost']> = {
+export type ActionableContentResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionableContent'] = ResolversParentTypes['ActionableContent']> = {
+  __resolveType: TypeResolveFn<'Post' | 'Idea', ParentType, ContextType>;
+};
+
+export type PostResolvers<ContextType = any, ParentType extends ResolversParentTypes['Post'] = ResolversParentTypes['Post']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  author?: Resolver<Maybe<ResolversTypes['UserProfile']>, ParentType, ContextType>;
   publicationStatus?: Resolver<ResolversTypes['PublicationStatus'], ParentType, ContextType>;
   contentFormat?: Resolver<ResolversTypes['PostContentFormat'], ParentType, ContextType>;
-  author?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  subtitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  summary?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   imageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  symbols?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-  tags?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-  comments?: Resolver<Array<ResolversTypes['Comment']>, ParentType, ContextType, RequireFields<BlogPostCommentsArgs, 'depth' | 'limit' | 'offset'>>;
+  ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<PostIdeasArgs, 'limit' | 'offset'>>;
+  reactions?: Resolver<Array<ResolversTypes['Reaction']>, ParentType, ContextType, RequireFields<PostReactionsArgs, 'limit' | 'offset'>>;
   reactionCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   reactionStatus?: Resolver<Maybe<ResolversTypes['Reaction']>, ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type CommentResolvers<ContextType = any, ParentType extends ResolversParentTypes['Comment'] = ResolversParentTypes['Comment']> = {
+export type IdeaResolvers<ContextType = any, ParentType extends ResolversParentTypes['Idea'] = ResolversParentTypes['Idea']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  post?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  replyStatus?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  author?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  author?: Resolver<Maybe<ResolversTypes['UserProfile']>, ParentType, ContextType>;
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  replies?: Resolver<Maybe<Array<ResolversTypes['Comment']>>, ParentType, ContextType>;
+  attachments?: Resolver<Maybe<Array<ResolversTypes['Attachment']>>, ParentType, ContextType>;
+  replyStatus?: Resolver<Maybe<ResolversTypes['Idea']>, ParentType, ContextType>;
+  replies?: Resolver<Maybe<Array<ResolversTypes['Idea']>>, ParentType, ContextType, RequireFields<IdeaRepliesArgs, 'limit' | 'offset'>>;
+  reactions?: Resolver<Array<ResolversTypes['Reaction']>, ParentType, ContextType, RequireFields<IdeaReactionsArgs, 'limit' | 'offset'>>;
   reactionCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   reactionStatus?: Resolver<Maybe<ResolversTypes['Reaction']>, ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AttachmentResolvers<ContextType = any, ParentType extends ResolversParentTypes['Attachment'] = ResolversParentTypes['Attachment']> = {
+  type?: Resolver<ResolversTypes['AttachmentType'], ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ReactionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Reaction'] = ResolversParentTypes['Reaction']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  to?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  from?: Resolver<Maybe<ResolversTypes['UserProfile']>, ParentType, ContextType>;
+  to?: Resolver<ResolversTypes['ActionableContent'], ParentType, ContextType>;
   reaction?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CompanyResolvers<ContextType = any, ParentType extends ResolversParentTypes['Company'] = ResolversParentTypes['Company']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  companyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  exchange?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  industry?: Resolver<ResolversTypes['Industry'], ParentType, ContextType>;
+  website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  CEO?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  securityName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  issueType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sector?: Resolver<ResolversTypes['Sector'], ParentType, ContextType>;
+  primarySicCode?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  employees?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  tags?: Resolver<Array<ResolversTypes['Industry']>, ParentType, ContextType>;
+  address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  address2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  city?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  zip?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SectorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Sector'] = ResolversParentTypes['Sector']> = {
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IndustryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Industry'] = ResolversParentTypes['Industry']> = {
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -644,15 +762,20 @@ export type WatchlistResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type Resolvers<ContextType = any> = {
-  User?: UserResolvers<ContextType>;
-  Device?: DeviceResolvers<ContextType>;
+  UserAccount?: UserAccountResolvers<ContextType>;
+  UserDevice?: UserDeviceResolvers<ContextType>;
   AuthCredentials?: AuthCredentialsResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   UserProfile?: UserProfileResolvers<ContextType>;
-  BlogPost?: BlogPostResolvers<ContextType>;
-  Comment?: CommentResolvers<ContextType>;
+  ActionableContent?: ActionableContentResolvers<ContextType>;
+  Post?: PostResolvers<ContextType>;
+  Idea?: IdeaResolvers<ContextType>;
+  Attachment?: AttachmentResolvers<ContextType>;
   Reaction?: ReactionResolvers<ContextType>;
+  Company?: CompanyResolvers<ContextType>;
+  Sector?: SectorResolvers<ContextType>;
+  Industry?: IndustryResolvers<ContextType>;
   Watchlist?: WatchlistResolvers<ContextType>;
 };
 

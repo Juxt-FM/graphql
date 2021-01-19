@@ -23,18 +23,6 @@ export class UserAPI extends BaseAPI {
   }
 
   /**
-   * Returns a user's profile given the parent account's ID
-   * @param {string} id
-   */
-  async getProfileByAccount(id: string) {
-    return this.handler("getProfileByAccount", async () => {
-      const { userService } = this.context;
-
-      return await userService.getByUser(id);
-    });
-  }
-
-  /**
    * Uses the service dataloader to batch profiles
    * @param {string} id
    */

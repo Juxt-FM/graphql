@@ -9,7 +9,6 @@ const { mockProfile } = require("../../../db/__mocks__/users");
 
 const mockUserService = {
   getById: jest.fn(),
-  getByUser: jest.fn(),
   loadProfile: jest.fn(),
 };
 
@@ -38,15 +37,6 @@ test("loadProfile - should return a user's profile", async () => {
   const result = await ds.loadProfile("1");
 
   expect(mockUserService.loadProfile).toBeCalledWith("1");
-  expect(result).toEqual(mockProfile);
-});
-
-test("getProfileByAccount - should return a user's profile", async () => {
-  mockUserService.getByUser.mockReturnValueOnce(mockProfile);
-
-  const result = await ds.getProfileByAccount("1");
-
-  expect(mockUserService.getByUser).toBeCalledWith("1");
   expect(result).toEqual(mockProfile);
 });
 

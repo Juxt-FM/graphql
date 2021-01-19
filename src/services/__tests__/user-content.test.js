@@ -11,6 +11,7 @@ const { ValidationError } = require("../errors");
 const mockDbHandler = {
   loadReactionCounts: jest.fn(),
   loadReplyCounts: jest.fn(),
+  loadReactions: jest.fn(),
   findById: jest.fn(),
   findReplies: jest.fn(),
   createPost: jest.fn(),
@@ -146,13 +147,22 @@ describe("validateIdeaMessage", () => {
   });
 });
 
-test("getById - should return an idea", async () => {
+test("getByID - should return an idea", async () => {
   mockDbHandler.findById.mockReturnValueOnce(mockIdea);
 
-  const result = await service.getById(mockIdea.id);
+  const result = await service.getByID(mockIdea.id, "idea");
 
-  expect(mockDbHandler.findById).toBeCalledWith(mockIdea.id);
+  expect(mockDbHandler.findById).toBeCalledWith(mockIdea.id, "idea");
   expect(result).toEqual(mockIdea);
+});
+
+test("getByID - should return an post", async () => {
+  mockDbHandler.findById.mockReturnValueOnce(mockPost);
+
+  const result = await service.getByID(mockPost.id, "post");
+
+  expect(mockDbHandler.findById).toBeCalledWith(mockPost.id, "post");
+  expect(result).toEqual(mockPost);
 });
 
 test("getReplies - should return an idea's replies", async () => {
@@ -242,6 +252,43 @@ test("reportContent - should report content", async () => {
 
   expect(mockDbHandler.reportContent).toBeCalledWith("1", "1");
   expect(typeof result).toEqual("string");
+});
+
+describe("loadReactions", () => {
+  test("should load a user's reactions", async () => {
+    const mockUser = "1";
+    const mockReaction = "like";
+    const contentID = "1";
+
+    const mockResponse = [{ id: contentID, reaction: mockReaction }];
+
+    mockDbHandler.loadReactions.mockReturnValueOnce(mockResponse);
+
+    service.buildReactionLoader(mockUser);
+
+    const result = await service.loadReaction(contentID);
+
+    expect(mockDbHandler.loadReactions).toBeCalledWith([contentID], mockUser);
+
+    expect(result).toEqual(mockResponse[0].reaction);
+  });
+
+  test("should return null", async () => {
+    const mockUser = "1";
+    const contentID = "1";
+
+    const mockResponse = [];
+
+    mockDbHandler.loadReactions.mockReturnValueOnce(mockResponse);
+
+    service.buildReactionLoader(mockUser);
+
+    const result = await service.loadReaction(contentID);
+
+    expect(mockDbHandler.loadReactions).toBeCalledWith([contentID], mockUser);
+
+    expect(result).toEqual(null);
+  });
 });
 
 describe("loadReactionCount", () => {

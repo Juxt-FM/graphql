@@ -10,9 +10,14 @@ import {
 } from "apollo-server-express";
 import { applyMiddleware } from "graphql-middleware";
 
-import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
-import { AuthService, UserService, NotificationService } from "../services";
-import GraphDB, { AuthHandler, UserHandler } from "../db";
+import { UserAPI, AuthAPI, MarketAPI, UserContentAPI } from "./sources";
+import {
+  AuthService,
+  UserService,
+  NotificationService,
+  UserContentService,
+} from "../services";
+import GraphDB, { AuthHandler, UserContentHandler, UserHandler } from "../db";
 import { auth, mail } from "../settings";
 
 import typeDefs from "./schema";
@@ -55,6 +60,9 @@ interface IServerBuilder {
 export const buildGraph = ({ db }: IServerBuilder) => {
   const authService = new AuthService(auth, db.registerHandler(AuthHandler));
   const userService = new UserService(db.registerHandler(UserHandler));
+  const userContentService = new UserContentService(
+    db.registerHandler(UserContentHandler)
+  );
 
   const notificationService = new NotificationService({
     from: mail.fromEmail,
@@ -65,8 +73,8 @@ export const buildGraph = ({ db }: IServerBuilder) => {
   const dataSources = () => ({
     auth: new AuthAPI(),
     users: new UserAPI(),
+    userContent: new UserContentAPI(),
     market: new MarketAPI({ uri: process.env.MARKET_SERVICE_URI }),
-    blog: new BlogAPI({ uri: process.env.BLOG_SERVICE_URI }),
   });
 
   const context = async ({ req, res }: IContextBuilder) => {
@@ -79,6 +87,7 @@ export const buildGraph = ({ db }: IServerBuilder) => {
       user,
       authService,
       userService,
+      userContentService,
       notificationService,
       client: {
         name: req.headers["client_name"],

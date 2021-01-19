@@ -3,51 +3,25 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import {
-  QueryFilterBlogPostsArgs,
-  QuerySingleBlogPostArgs,
-  QueryMyDraftsArgs,
-  QueryCommentThreadArgs,
-  QueryReactionsArgs,
-} from "../../types";
+import { QueryIdeaByIdArgs, QueryPostByIdArgs } from "src/graphql/types";
 import { IResolverContext } from "../../server";
 
-export const singlePost = async (
+export const postByID = async (
   parent: undefined,
-  args: QuerySingleBlogPostArgs,
+  args: QueryPostByIdArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.getById(args.id);
+  return await userContent.getPostByID(args.id);
 };
 
-export const filterPosts = async (
+export const ideaByID = async (
   parent: undefined,
-  args: QueryFilterBlogPostsArgs,
+  args: QueryIdeaByIdArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.filter(args.filters);
-};
-
-export const myDrafts = async (
-  parent: undefined,
-  args: QueryMyDraftsArgs,
-  context: IResolverContext
-) => {
-  const { blog } = context.dataSources;
-
-  return await blog.drafts(args);
-};
-
-export const reactions = async (
-  parent: undefined,
-  args: QueryReactionsArgs,
-  context: IResolverContext
-) => {
-  const { blog } = context.dataSources;
-
-  return await blog.getReactions(args);
+  return await userContent.getIdeaByID(args.id);
 };

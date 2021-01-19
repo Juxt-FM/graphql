@@ -10,7 +10,6 @@ const { mockProfile } = require("../../db/__mocks__/users");
 
 const mockDbHandler = {
   findById: jest.fn(),
-  findByAccountId: jest.fn(),
   loadFromIds: jest.fn(),
 };
 
@@ -47,14 +46,4 @@ describe("loadProfile", () => {
     expect(mockDbHandler.loadFromIds).toHaveBeenLastCalledWith([id]);
     expect(result).toEqual(null);
   });
-});
-
-test("getByUser - should return a user's profile", async () => {
-  mockDbHandler.findByAccountId.mockReturnValueOnce(mockProfile);
-
-  const result = await service.getByUser(mockUser.id);
-
-  expect(mockDbHandler.findByAccountId).toHaveBeenLastCalledWith(mockUser.id);
-
-  expect(result).toEqual(mockProfile);
 });

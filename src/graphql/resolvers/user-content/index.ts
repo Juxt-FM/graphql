@@ -7,7 +7,7 @@ import * as Query from "./query";
 import * as Mutation from "./mutation";
 
 import { IResolverContext } from "../../server";
-import { BlogPostCommentsArgs } from "../../types";
+import { PostIdeasArgs, IdeaRepliesArgs } from "../../types";
 
 export default {
   Query,
@@ -19,63 +19,80 @@ export default {
     },
   },
   Post: {
-    ideas: async (
+    author: async (
       parent: any,
-      args: BlogPostCommentsArgs,
+      args: undefined,
       context: IResolverContext
     ) => {
-      const { blog } = context.dataSources;
-      const { id } = parent;
+      const { users } = context.dataSources;
 
-      return await blog.getPostComments(id, args);
+      return await users.loadProfile(parent.author);
+    },
+    ideas: async (
+      parent: any,
+      args: PostIdeasArgs,
+      context: IResolverContext
+    ) => {
+      const { userContent } = context.dataSources;
+
+      return await userContent.getReplies(parent.id, args.limit, args.offset);
     },
     reactionCount: async (
       parent: any,
       args: undefined,
       context: IResolverContext
     ) => {
-      const { blog } = context.dataSources;
+      const { userContent } = context.dataSources;
 
-      return await blog.loadReactionCount(parent.id);
+      return await userContent.loadReactionCount(parent.id);
     },
     reactionStatus: async (
       parent: any,
       args: undefined,
       context: IResolverContext
-    ) => {
-      const { blog } = context.dataSources;
+    ): Promise<any> => {
+      const { userContent } = context.dataSources;
 
-      return await blog.loadUserReaction(parent.id);
+      return await userContent.loadReactionStatus(parent.id);
     },
   },
   Idea: {
-    replies: async (
+    author: async (
       parent: any,
-      args: BlogPostCommentsArgs,
+      args: undefined,
       context: IResolverContext
     ) => {
-      const { blog } = context.dataSources;
-      const { id } = parent;
+      const { users } = context.dataSources;
 
-      return await blog.getCommentThread(id, args);
+      return await users.loadProfile(parent.author);
+    },
+    replies: async (
+      parent: any,
+      args: IdeaRepliesArgs,
+      context: IResolverContext
+    ) => {
+      const { userContent } = context.dataSources;
+
+      return await userContent.getReplies(parent.id, args.limit, args.offset);
     },
     reactionCount: async (
       parent: any,
       args: undefined,
       context: IResolverContext
     ) => {
-      const { blog } = context.dataSources;
+      const { userContent } = context.dataSources;
 
-      return await blog.loadReactionCount(parent.id);
+      return await userContent.loadReactionCount(parent.id);
     },
     reactionStatus: async (
       parent: any,
       args: undefined,
       context: IResolverContext
-    ) => {
-      const { blog } = context.dataSources;
+    ): Promise<any> => {
+      const { userContent } = context.dataSources;
 
-      return await blog.loadUserReaction(parent.id);
+      return await userContent.loadReactionStatus(parent.id);
     },
+    attachments: (): any[] => []
   },
 };

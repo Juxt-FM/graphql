@@ -55,12 +55,13 @@ test("getDefaultAuthenticationError - should return the default authentication e
 });
 
 test("signToken - should properly sign a JWT", async () => {
-  const token = await service.signToken("1", true);
+  const token = await service.signToken(mockUser);
 
   const decoded = decodeJWT(token);
 
-  expect(decoded.id).toEqual("1");
-  expect(decoded.verified).toBe(true);
+  expect(decoded.id).toEqual(mockUser.id);
+  expect(decoded.verified).toBe(mockUser.verified);
+  expect(decoded.profile).toBe(mockUser.profile);
   expect(decoded.iss).toEqual(mockConfig.jwtIssuer);
   expect(decoded.sub).toEqual(mockConfig.jwtSubject);
   expect(decoded.aud).toEqual(mockConfig.jwtAudience);

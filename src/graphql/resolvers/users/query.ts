@@ -7,10 +7,11 @@ import { S3 } from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 
 import { IResolverContext } from "../../server";
+import { QueryUserProfileArgs } from "../../types";
 
 export const userProfile = async (
   parent: undefined,
-  args: any,
+  args: QueryUserProfileArgs,
   context: IResolverContext
 ) => {
   const { users } = context.dataSources;
@@ -18,11 +19,7 @@ export const userProfile = async (
   return await users.getProfileByID(args.id);
 };
 
-export const imageUploadURL = async (
-  parent: undefined,
-  args: undefined,
-  context: IResolverContext
-) => {
+export const imageUploadURL = async () => {
   const s3 = new S3();
 
   const options = {

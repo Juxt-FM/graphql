@@ -46,27 +46,6 @@ export class UserHandler extends BaseHandler {
   }
 
   /**
-   * Fetches a user with the given ID
-   * @param {string} id
-   */
-  async findByAccountId(id: string) {
-    const query = this.graph.query();
-
-    const result = await query
-      .V(id)
-      .outE(labels.USER_PROFILE)
-      .inV()
-      .elementMap()
-      .next();
-
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const profile: any = Object.fromEntries(result.value);
-
-    return this.transform(profile);
-  }
-
-  /**
    * Fetches all user profiles in the list of ID's
    * @param {string[]} ids
    */

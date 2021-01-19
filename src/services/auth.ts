@@ -65,10 +65,10 @@ export class AuthService {
    * @param {string} id
    * @param {boolean} verified
    */
-  protected signToken = (id: string, verified: boolean) =>
+  protected signToken = (user: IUserAccount) =>
     new Promise<string>((resolve, reject) => {
       jwt.sign(
-        { id, verified },
+        { id: user.id, profile: user.profile, verified: user.verified },
         this.config.jwtKey,
         {
           expiresIn: this.config.jwtExpiration,
@@ -158,7 +158,7 @@ export class AuthService {
   private async getCredentials(user: IUserAccount) {
     return {
       refreshToken: uid(256),
-      accessToken: await this.signToken(user.id, user.verified),
+      accessToken: await this.signToken(user),
     };
   }
 
@@ -310,8 +310,7 @@ export class AuthService {
   async verifyEmail(userId: string, code: string, reauthenticate: boolean) {
     const user = await this.dbHandler.verifyEmail(userId, code);
 
-    if (reauthenticate)
-      return { accessToken: await this.signToken(user.id, user.verified) };
+    if (reauthenticate) return { accessToken: await this.signToken(user) };
   }
 
   /**
@@ -323,8 +322,7 @@ export class AuthService {
   async verifyPhone(userId: string, code: string, reauthenticate: boolean) {
     const user = await this.dbHandler.verifyPhone(userId, code);
 
-    if (reauthenticate)
-      return { accessToken: await this.signToken(user.id, user.verified) };
+    if (reauthenticate) return { accessToken: await this.signToken(user) };
   }
 
   /**

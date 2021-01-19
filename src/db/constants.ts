@@ -40,6 +40,7 @@ interface IEdge {
 }
 
 export interface IUserAccount extends IVertex {
+  profile: string;
   email: string;
   phone?: string;
   password: string;
@@ -115,8 +116,8 @@ export interface IPost extends IVertex {
   publicationStatus: "public" | "draft";
   contentFormat: "markdown" | "html";
   title: string;
-  summary: String;
-  imageURL: String;
+  summary: string;
+  imageURL: string;
   content: string;
   created: number | Date;
   updated: number | Date;

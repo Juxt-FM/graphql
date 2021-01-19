@@ -16,19 +16,34 @@ import {
 } from "../db";
 
 /**
- * User service (post authors, public profiles, etc.)
+ * profile service (post authors, public profiles, etc.)
  * @param {UserContentHandler} dbHandler
  */
 export class UserContentService {
   private dbHandler: UserContentHandler;
   private reactionCountLoader: DataLoader<any, any, any>;
   private replyCountLoader: DataLoader<any, any, any>;
+  private reactionLoader: DataLoader<any, any, any>;
 
   constructor(dbHandler: UserContentHandler) {
     this.dbHandler = dbHandler;
 
     this.reactionCountLoader = this.buildReactionCountLoader();
     this.replyCountLoader = this.buildReplyCountLoader();
+  }
+
+  /**
+   * Loads a profile's reactions to topics
+   * @param {string} profile
+   */
+  buildReactionLoader(profile: string) {
+    this.reactionLoader = new DataLoader(async (ids: string[]) => {
+      const result = await this.dbHandler.loadReactions(ids, profile);
+
+      const reactions = _.keyBy(result, "id");
+
+      return ids.map((id) => (reactions[id] ? reactions[id].reaction : null));
+    });
   }
 
   private buildReactionCountLoader() {
@@ -105,11 +120,12 @@ export class UserContentService {
   }
 
   /**
-   * Returns the object for the given ID
+   * Returns the content with the given ID
    * @param {string} id
+   * @param {string} label
    */
-  async getById(id: string) {
-    return await this.dbHandler.findById(id);
+  async getByID(id: string, label: "post" | "idea") {
+    return await this.dbHandler.findById(id, label);
   }
 
   /**
@@ -124,44 +140,44 @@ export class UserContentService {
 
   /**
    * Creates and returns a new post
-   * @param {string} user
+   * @param {string} profile
    * @param {IPostInput} data
    */
-  async createPost(user: string, data: IPostInput) {
+  async createPost(profile: string, data: IPostInput) {
     const validated = this.validatePost(data);
 
-    return await this.dbHandler.createPost(user, validated);
+    return await this.dbHandler.createPost(profile, validated);
   }
 
   /**
    * Updates and returns a post
    * @param {string} id
-   * @param {string} user
+   * @param {string} profile
    * @param {IPostInput} data
    */
-  async updatePost(id: string, user: string, data: IPostInput) {
+  async updatePost(id: string, profile: string, data: IPostInput) {
     const validated = this.validatePost(data);
 
-    return await this.dbHandler.updatePost(id, user, validated);
+    return await this.dbHandler.updatePost(id, profile, validated);
   }
 
   /**
    * Deletes a post
    * @param {string} id
-   * @param {string} user
+   * @param {string} profile
    */
-  async deletePost(id: string, user: string) {
-    await this.dbHandler.deletePost(id, user);
+  async deletePost(id: string, profile: string) {
+    await this.dbHandler.deletePost(id, profile);
     return "Successfully deleted post.";
   }
 
   /**
    * Creates and returns a new idea
-   * @param {string} user
+   * @param {string} profile
    * @param {IIdeaInput} data
    */
-  async createIdea(user: string, data: IIdeaInput) {
-    return await this.dbHandler.createIdea(user, {
+  async createIdea(profile: string, data: IIdeaInput) {
+    return await this.dbHandler.createIdea(profile, {
       ...data,
       message: this.validateIdeaMessage(data.message),
     });
@@ -170,13 +186,13 @@ export class UserContentService {
   /**
    * Updates and returns an idea
    * @param {string} id
-   * @param {string} user
+   * @param {string} profile
    * @param {string} message
    */
-  async updateIdea(id: string, user: string, message: string) {
+  async updateIdea(id: string, profile: string, message: string) {
     return await this.dbHandler.updateIdea(
       id,
-      user,
+      profile,
       this.validateIdeaMessage(message)
     );
   }
@@ -184,40 +200,48 @@ export class UserContentService {
   /**
    * Deletes an idea
    * @param {string} id
-   * @param {string} user
+   * @param {string} profile
    */
-  async deleteIdea(id: string, user: string) {
-    await this.dbHandler.deleteIdea(id, user);
+  async deleteIdea(id: string, profile: string) {
+    await this.dbHandler.deleteIdea(id, profile);
     return "Successfully deleted idea.";
   }
 
   /**
    * Creates and returns a new reaction
-   * @param {string} user
+   * @param {string} profile
    * @param {IReactionInput} data
    */
-  async createReaction(user: string, data: IReactionInput) {
-    return await this.dbHandler.createReaction(user, data);
+  async createReaction(profile: string, data: IReactionInput) {
+    return await this.dbHandler.createReaction(profile, data);
   }
 
   /**
    * Deletes a reaction
-   * @param {string} user
+   * @param {string} profile
    * @param {string} id
    */
-  async deleteReaction(user: string, id: string) {
-    await this.dbHandler.deleteReaction(user, id);
+  async deleteReaction(profile: string, id: string) {
+    await this.dbHandler.deleteReaction(profile, id);
     return "Successfully deleted reaction.";
   }
 
   /**
    * Reports content
-   * @param {string} user
+   * @param {string} profile
    * @param {string} id
    */
-  async reportContent(user: string, id: string) {
-    await this.dbHandler.reportContent(user, id);
+  async reportContent(profile: string, id: string) {
+    await this.dbHandler.reportContent(profile, id);
     return "Reported content.";
+  }
+
+  /**
+   * Loads the profile's reaction to content with the given ID
+   * @param {string} id
+   */
+  async loadReaction(id: string) {
+    return await this.reactionLoader.load(id);
   }
 
   /**

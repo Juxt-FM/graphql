@@ -3,77 +3,77 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import {
-  MutationCreateBlogPostArgs,
-  MutationCreateCommentArgs,
-  MutationCreateReactionArgs,
-  MutationDeleteCommentArgs,
-  MutationUpdateBlogPostArgs,
-  MutationUpdateCommentArgs,
-  MutationUpdateReactionArgs,
-  MutationDeleteReactionArgs,
-  MutationDeleteBlogPostArgs,
-} from "../../types";
 import { IResolverContext } from "../../server";
+import {
+  MutationCreatePostArgs,
+  MutationCreateIdeaArgs,
+  MutationCreateReactionArgs,
+  MutationDeleteIdeaArgs,
+  MutationUpdatePostArgs,
+  MutationUpdateIdeaArgs,
+  MutationDeleteReactionArgs,
+  MutationDeletePostArgs,
+  MutationReportContentArgs,
+} from "../../types";
 
 export const createPost = async (
   parent: undefined,
-  args: MutationCreateBlogPostArgs,
+  args: MutationCreatePostArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.createPost(args.data);
+  return await userContent.createPost(args.data);
 };
 
 export const updatePost = async (
   parent: undefined,
-  args: MutationUpdateBlogPostArgs,
+  args: MutationUpdatePostArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.updatePost(args.id, args.data);
+  return await userContent.updatePost(args.id, args.data);
 };
 
 export const deletePost = async (
   parent: undefined,
-  args: MutationDeleteBlogPostArgs,
+  args: MutationDeletePostArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.deletePost(args.id);
+  return await userContent.deletePost(args.id);
 };
 
 export const createIdea = async (
   parent: undefined,
-  args: MutationCreateCommentArgs,
+  args: MutationCreateIdeaArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.createComment(args.data);
+  return await userContent.createIdea(args.data);
 };
 
 export const updateIdea = async (
   parent: undefined,
-  args: MutationUpdateCommentArgs,
+  args: MutationUpdateIdeaArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.updateComment(args.id, args.data);
+  return await userContent.updateIdea(args.id, args.message);
 };
 
 export const deleteIdea = async (
   parent: undefined,
-  args: MutationDeleteCommentArgs,
+  args: MutationDeleteIdeaArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.deleteComment(args.id);
+  return await userContent.deleteIdea(args.id);
 };
 
 export const createReaction = async (
@@ -81,19 +81,9 @@ export const createReaction = async (
   args: MutationCreateReactionArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.createReaction(args.data);
-};
-
-export const updateReaction = async (
-  parent: undefined,
-  args: MutationUpdateReactionArgs,
-  context: IResolverContext
-) => {
-  const { blog } = context.dataSources;
-
-  return await blog.updateReaction(args.id, args.data);
+  return await userContent.createReaction(args);
 };
 
 export const deleteReaction = async (
@@ -101,7 +91,17 @@ export const deleteReaction = async (
   args: MutationDeleteReactionArgs,
   context: IResolverContext
 ) => {
-  const { blog } = context.dataSources;
+  const { userContent } = context.dataSources;
 
-  return await blog.deleteReaction(args.id);
+  return await userContent.deleteReaction(args.id);
+};
+
+export const reportContent = async (
+  parent: undefined,
+  args: MutationReportContentArgs,
+  context: IResolverContext
+) => {
+  const { userContent } = context.dataSources;
+
+  return await userContent.reportContent(args.id);
 };

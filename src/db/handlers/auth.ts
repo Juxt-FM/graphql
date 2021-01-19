@@ -120,8 +120,9 @@ export class AuthHandler extends BaseHandler {
       .addE(relationships.HAS_PROFILE)
       .from_("user")
       .to("profile")
-      .select("user")
-      .elementMap()
+      .select("user", "profile")
+      .by(__.elementMap())
+      .by(__.id())
       .next();
 
     const user: any = Object.fromEntries(result.value);
@@ -151,7 +152,11 @@ export class AuthHandler extends BaseHandler {
         __.select("user").properties("email").properties("verified").drop()
       )
       .select("user")
-      .elementMap()
+      .out(relationships.HAS_PROFILE)
+      .as("profile")
+      .select("user", "profile")
+      .by(__.elementMap())
+      .by(__.id())
       .next();
 
     if (!result.value) throw new ResourceNotFoundError();
@@ -183,7 +188,11 @@ export class AuthHandler extends BaseHandler {
         __.select("user").properties("phone").properties("verified").drop()
       )
       .select("user")
-      .elementMap()
+      .out(relationships.HAS_PROFILE)
+      .as("profile")
+      .select("user", "profile")
+      .by(__.elementMap())
+      .by(__.id())
       .next();
 
     if (!result.value) throw new ResourceNotFoundError();
@@ -200,7 +209,15 @@ export class AuthHandler extends BaseHandler {
   async findUserByID(id: string) {
     const query = this.graph.query();
 
-    const result = await query.V(id).elementMap().next();
+    const result = await query
+      .V(id)
+      .as("user")
+      .out(relationships.HAS_PROFILE)
+      .as("profile")
+      .select("user", "profile")
+      .by(__.elementMap())
+      .by(__.id())
+      .next();
 
     if (!result.value) throw new ResourceNotFoundError();
 
@@ -220,7 +237,12 @@ export class AuthHandler extends BaseHandler {
       .V()
       .hasLabel(labels.USER_ACCOUNT)
       .or(__.has("phone", attribute), __.has("email", attribute))
-      .elementMap()
+      .as("user")
+      .out(relationships.HAS_PROFILE)
+      .as("profile")
+      .select("user", "profile")
+      .by(__.elementMap())
+      .by(__.id())
       .next();
 
     if (!result.value) throw new ResourceNotFoundError();
@@ -246,7 +268,12 @@ export class AuthHandler extends BaseHandler {
       .has("token", token)
       .inV()
       .hasLabel(labels.USER_ACCOUNT)
-      .elementMap()
+      .as("user")
+      .out(relationships.HAS_PROFILE)
+      .as("profile")
+      .select("user", "profile")
+      .by(__.elementMap())
+      .by(__.id())
       .next();
 
     if (!result.value) throw new ResourceNotFoundError();

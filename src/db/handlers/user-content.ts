@@ -22,8 +22,8 @@ export interface IPostInput {
   publicationStatus: "public" | "draft";
   contentFormat: "markdown" | "html";
   title: string;
-  summary: string;
-  imageURL: string;
+  summary?: string;
+  imageURL?: string;
   content: string;
 }
 
@@ -65,14 +65,10 @@ export class UserContentHandler extends BaseHandler {
    * Fetches content by it's ID
    * @param {string} id
    */
-  async findById(id: string) {
+  async findById(id: string, label: typeof labels.IDEA | typeof labels.POST) {
     const query = this.graph.query();
 
-    const result = await query
-      .V(id)
-      .or(__.hasLabel(labels.POST), __.hasLabel(labels.IDEA))
-      .elementMap()
-      .next();
+    const result = await query.V(id).hasLabel(label).elementMap().next();
 
     if (!result.value) throw new ResourceNotFoundError();
 
@@ -351,6 +347,37 @@ export class UserContentHandler extends BaseHandler {
     const records: any = Object.fromEntries(result.value);
 
     return records.map(this.transform);
+  }
+
+  /**
+   * Load a user's reaction to content
+   * @param {string[]} ids
+   * @param {string} user
+   */
+  async loadReactions(ids: string[], user: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(...ids)
+      .or(__.hasLabel(labels.IDEA), __.hasLabel(labels.POST))
+      .as("content")
+      .id()
+      .as("contentID")
+      .select("content")
+      .local(
+        __.inE(relationships.REACTED_TO)
+          .as("rel")
+          .outV()
+          .hasId(user)
+          .select("rel")
+          .properties("reaction")
+          .as("reaction")
+          .values("contentID", "reaction")
+          .fold()
+      )
+      .next();
+
+    return result.value;
   }
 
   /**

@@ -40,14 +40,6 @@ export class UserService {
   }
 
   /**
-   * Get a user profile by the parent account's ID
-   * @param {string} id
-   */
-  async getByUser(id: string) {
-    return await this.dbHandler.findByAccountId(id);
-  }
-
-  /**
    * Sends a new ID to the user loader
    * @param {string} id
    */

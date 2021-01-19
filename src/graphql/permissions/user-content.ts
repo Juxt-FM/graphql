@@ -7,7 +7,7 @@ import { isAuthenticated } from "./utils";
 
 export default {
   Query: {
-    myDrafts: isAuthenticated,
+    postDrafts: isAuthenticated,
   },
   Mutation: {
     createPost: isAuthenticated,
@@ -17,7 +17,6 @@ export default {
     updateIdea: isAuthenticated,
     deleteIdea: isAuthenticated,
     createReaction: isAuthenticated,
-    updateReaction: isAuthenticated,
     deleteReaction: isAuthenticated,
   },
 };

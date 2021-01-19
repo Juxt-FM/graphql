@@ -46,6 +46,7 @@ type Idea {
   attachments: [Attachment!]
   replyStatus: Idea
   replies(limit: Int!, offset: Int!): [Idea!]
+  reactions(limit: Int!, offset: Int!): [Reaction!]!
   reactionCount: Int!
   reactionStatus: Reaction
   created: String!
@@ -67,8 +68,8 @@ type Reaction {
 }
 
 input PostInput {
-  publicationStatus: PublicationStatus
-  contentFormat: PostContentFormat
+  publicationStatus: PublicationStatus!
+  contentFormat: PostContentFormat!
   symbols: [String!]!
   tags: [String!]!
   title: String!
@@ -78,7 +79,6 @@ input PostInput {
 }
 
 input IdeaInput {
-  post: ID!
   replyStatus: ID
   message: String!
 }
@@ -95,18 +95,18 @@ extend type Mutation {
   createPost(data: PostInput!): Post!
   updatePost(id: ID!, data: PostInput!): Post!
   deletePost(id: ID!): String!
-  createIdea(data: IdeaInput!): Idea!
-  updateIdea(id: ID!, data: IdeaInput!): Idea!
+  createIdea(id: ID!, data: IdeaInput!): Idea!
+  updateIdea(id: ID!, message: String!): Idea!
   deleteIdea(id: ID!): Idea!
   createReaction(to: ID!, reaction: ReactionType!): Reaction!
-  updateReaction(id: ID!, reaction: ReactionType!): Reaction!
   deleteReaction(id: ID!): String!
   reportContent(id: ID!): String!
 }
 
 extend type Query {
-  myDrafts(limit: Int, offset: Int): [Post!]!
-  singlePost(id: ID!): Post!
-  filterPosts(filters: PostFilters!): [Post!]!
-  reactions(id: ID!, limit: Int!, offset: Int!): [Reaction!]!
+  postByID(id: ID!): Post!
+  ideaByID(id: ID!): Idea!
+  postDrafts: [Post!]!
+  suggestedPosts(limit: Int = 25, offset: Int = 0): [Post!]!
+  suggestedIdeas(limit: Int = 25, offset: Int = 0): [Idea!]!
 }
