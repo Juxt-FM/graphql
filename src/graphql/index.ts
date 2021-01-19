@@ -9,9 +9,15 @@ import {
   makeExecutableSchema,
 } from "apollo-server-express";
 import { applyMiddleware } from "graphql-middleware";
+import { S3 } from "aws-sdk";
 
 import { UserAPI, AuthAPI, MarketAPI, BlogAPI } from "./sources";
-import { AuthService, UserService, NotificationService } from "../services";
+import {
+  AuthService,
+  UserService,
+  NotificationService,
+  FileUploadService,
+} from "../services";
 import GraphDB, { AuthHandler, UserHandler } from "../db";
 import { auth, mail } from "../settings";
 
@@ -53,8 +59,12 @@ interface IServerBuilder {
  * @param options
  */
 export const buildGraph = ({ db }: IServerBuilder) => {
+  const s3 = new S3();
+
   const authService = new AuthService(auth, db.registerHandler(AuthHandler));
   const userService = new UserService(db.registerHandler(UserHandler));
+
+  const uploadService = new FileUploadService(s3);
   const notificationService = new NotificationService({
     from: mail.fromEmail,
   });
@@ -79,6 +89,7 @@ export const buildGraph = ({ db }: IServerBuilder) => {
       authService,
       userService,
       notificationService,
+      uploadService,
       client: {
         name: req.headers["client_name"],
         version: req.headers["client_version"],
@@ -96,5 +107,6 @@ export const buildGraph = ({ db }: IServerBuilder) => {
     context,
     introspection,
     playground,
+    uploads: false,
   });
 };

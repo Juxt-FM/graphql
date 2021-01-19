@@ -7,6 +7,11 @@ import { S3 } from "aws-sdk";
 
 /**
  * File upload service for AWS S3
+ *
+ * We used pre-signed URL's to allow the client
+ * to upload images/videos directly to S3 without going
+ * throw this server
+ *
  * @param {S3} s3
  */
 export class FileUploadService {

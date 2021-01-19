@@ -20,6 +20,7 @@ input ProfileInput {
 
 extend type Query {
   userProfile(id: ID!): UserProfile!
+  imageUploadURL: String!
 }
 
 extend type Mutation {
