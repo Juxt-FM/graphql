@@ -290,14 +290,12 @@ export class UserContentHandler extends BaseHandler {
       .from_("user")
       .to("to")
       .select("rel")
-      .elementMap()
+      .values("reaction")
       .next();
 
     if (!result.value) throw new ResourceNotFoundError();
 
-    const record: any = Object.fromEntries(result.value);
-
-    return this.transform(record);
+    return result.value;
   }
 
   /**
@@ -308,20 +306,7 @@ export class UserContentHandler extends BaseHandler {
   async deleteReaction(user: string, id: string) {
     const query = this.graph.query();
 
-    const result = await query
-      .E(id)
-      .as("rel")
-      .outV()
-      .hasId(user)
-      .select("rel")
-      .drop()
-      .next();
-
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const record: any = Object.fromEntries(result.value);
-
-    return this.transform(record);
+    await query.E(id).as("rel").outV().hasId(user).select("rel").drop().next();
   }
 
   /**

@@ -64,6 +64,16 @@ export class UserContentService {
         "Titles must be less than 65 characters long.",
         ["title"]
       );
+    else if (data.title.length < 10)
+      throw new ValidationError(
+        "Titles must be greater than 10 characters long.",
+        ["title"]
+      );
+    else if (data.content.length < 1000)
+      throw new ValidationError(
+        "Post content length must be greater than 1000 characters.",
+        ["title"]
+      );
     else if (data.summary.length > 100)
       throw new ValidationError(
         "Summaries must be less than 100 characters long.",
@@ -85,8 +95,31 @@ export class UserContentService {
         "Messages must be less than 325 characters long.",
         ["message"]
       );
+    else if (message.length < 10)
+      throw new ValidationError(
+        "Messages must be greater than 10 characters long.",
+        ["message"]
+      );
 
     return message;
+  }
+
+  /**
+   * Returns the object for the given ID
+   * @param {string} id
+   */
+  async getById(id: string) {
+    return await this.dbHandler.findById(id);
+  }
+
+  /**
+   * Returns replies for the object with the given ID
+   * @param {string} id
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getReplies(id: string, limit: number, offset: number) {
+    return await this.dbHandler.findReplies(id, limit, offset);
   }
 
   /**
@@ -118,7 +151,8 @@ export class UserContentService {
    * @param {string} user
    */
   async deletePost(id: string, user: string) {
-    return await this.dbHandler.deletePost(id, user);
+    await this.dbHandler.deletePost(id, user);
+    return "Successfully deleted post.";
   }
 
   /**
@@ -131,16 +165,6 @@ export class UserContentService {
       ...data,
       message: this.validateIdeaMessage(data.message),
     });
-  }
-
-  /**
-   * Returns replies for the object with the given ID
-   * @param {string} id
-   * @param {number} limit
-   * @param {number} offset
-   */
-  async findReplies(id: string, limit: number, offset: number) {
-    return await this.dbHandler.findReplies(id, limit, offset);
   }
 
   /**
@@ -163,7 +187,8 @@ export class UserContentService {
    * @param {string} user
    */
   async deleteIdea(id: string, user: string) {
-    return await this.dbHandler.deleteIdea(id, user);
+    await this.dbHandler.deleteIdea(id, user);
+    return "Successfully deleted idea.";
   }
 
   /**
@@ -181,7 +206,8 @@ export class UserContentService {
    * @param {string} id
    */
   async deleteReaction(user: string, id: string) {
-    return await this.dbHandler.deleteReaction(user, id);
+    await this.dbHandler.deleteReaction(user, id);
+    return "Successfully deleted reaction.";
   }
 
   /**
@@ -190,7 +216,8 @@ export class UserContentService {
    * @param {string} id
    */
   async reportContent(user: string, id: string) {
-    return await this.dbHandler.reportContent(user, id);
+    await this.dbHandler.reportContent(user, id);
+    return "Reported content.";
   }
 
   /**
