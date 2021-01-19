@@ -12,7 +12,7 @@ import { UserContentHandler } from "../db";
  * User service (post authors, public profiles, etc.)
  * @param {UserContentHandler} dbHandler
  */
-export class UserService {
+export class UserContentService {
   private dbHandler: UserContentHandler;
   private reactionCountLoader: DataLoader<any, any, any>;
   private replyCountLoader: DataLoader<any, any, any>;
@@ -28,9 +28,9 @@ export class UserService {
     return new DataLoader(async (ids: string[]) => {
       const result = await this.dbHandler.loadReactionCounts(ids);
 
-      const profiles = _.keyBy(result, "id");
+      const counts = _.keyBy(result, "id");
 
-      return ids.map((id) => profiles[id] || null);
+      return ids.map((id) => (counts[id] ? counts[id].count : 0));
     });
   }
 
@@ -38,9 +38,9 @@ export class UserService {
     return new DataLoader(async (ids: string[]) => {
       const result = await this.dbHandler.loadReplyCounts(ids);
 
-      const profiles = _.keyBy(result, "id");
+      const counts = _.keyBy(result, "id");
 
-      return ids.map((id) => profiles[id] || null);
+      return ids.map((id) => (counts[id] ? counts[id].count : 0));
     });
   }
 
