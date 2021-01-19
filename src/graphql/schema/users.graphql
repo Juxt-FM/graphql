@@ -6,8 +6,8 @@ type UserProfile {
   profileImageURL: String
   coverImageURL: String
   watchlists: [Watchlist!]!
-  posts: [BlogPost!]!
-  comments: [Comment!]!
+  posts: [Post!]!
+  ideas: [Idea!]!
   created: String!
   updated: String!
 }

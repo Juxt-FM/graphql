@@ -12,7 +12,7 @@ import {
 } from "../../types";
 import { IResolverContext } from "../../server";
 
-export const singleBlogPost = async (
+export const singlePost = async (
   parent: undefined,
   args: QuerySingleBlogPostArgs,
   context: IResolverContext
@@ -22,7 +22,7 @@ export const singleBlogPost = async (
   return await blog.getById(args.id);
 };
 
-export const filterBlogPosts = async (
+export const filterPosts = async (
   parent: undefined,
   args: QueryFilterBlogPostsArgs,
   context: IResolverContext
@@ -40,16 +40,6 @@ export const myDrafts = async (
   const { blog } = context.dataSources;
 
   return await blog.drafts(args);
-};
-
-export const commentThread = async (
-  parent: undefined,
-  args: QueryCommentThreadArgs,
-  context: IResolverContext
-) => {
-  const { blog } = context.dataSources;
-
-  return await blog.getCommentThread(args.parent, args.filters);
 };
 
 export const reactions = async (

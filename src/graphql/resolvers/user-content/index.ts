@@ -12,8 +12,14 @@ import { BlogPostCommentsArgs } from "../../types";
 export default {
   Query,
   Mutation,
-  BlogPost: {
-    comments: async (
+  ActionableContent: {
+    __resolveType: (parent: any) => {
+      if (parent.label === "post") return "Post";
+      else return "Idea";
+    },
+  },
+  Post: {
+    ideas: async (
       parent: any,
       args: BlogPostCommentsArgs,
       context: IResolverContext
@@ -42,7 +48,17 @@ export default {
       return await blog.loadUserReaction(parent.id);
     },
   },
-  Comment: {
+  Idea: {
+    replies: async (
+      parent: any,
+      args: BlogPostCommentsArgs,
+      context: IResolverContext
+    ) => {
+      const { blog } = context.dataSources;
+      const { id } = parent;
+
+      return await blog.getCommentThread(id, args);
+    },
     reactionCount: async (
       parent: any,
       args: undefined,

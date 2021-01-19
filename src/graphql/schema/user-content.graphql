@@ -15,7 +15,12 @@ enum ReactionType {
   hate
 }
 
-type ReactableContent = Post | Idea
+enum AttachmentType {
+  media
+  web
+}
+
+union ActionableContent = Post | Idea
 
 type Post {
   id: ID!
@@ -55,7 +60,7 @@ type Attachment {
 type Reaction {
   id: ID!
   from: UserProfile
-  to: ReactableContent!
+  to: ActionableContent!
   reaction: String!
   updated: String!
   created: String!
@@ -94,14 +99,14 @@ extend type Mutation {
   updateIdea(id: ID!, data: IdeaInput!): Idea!
   deleteIdea(id: ID!): Idea!
   createReaction(to: ID!, reaction: ReactionType!): Reaction!
-  updateReaction(id: ID!, data: ReactionInput!): Reaction!
+  updateReaction(id: ID!, reaction: ReactionType!): Reaction!
   deleteReaction(id: ID!): String!
-  reportContent(id:ID!): String!
+  reportContent(id: ID!): String!
 }
 
 extend type Query {
+  myDrafts(limit: Int, offset: Int): [Post!]!
   singlePost(id: ID!): Post!
   filterPosts(filters: PostFilters!): [Post!]!
   reactions(id: ID!, limit: Int!, offset: Int!): [Reaction!]!
-  myDrafts(limit: Int, offset: Int): [Post!]!
 }

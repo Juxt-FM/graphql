@@ -22,7 +22,6 @@ export class UserService {
     this.profileLoader = this.buildProfileLoader();
   }
 
-  // Build a new dataloader FOR EACH REQUEST
   private buildProfileLoader() {
     return new DataLoader(async (ids: string[]) => {
       const result = await this.dbHandler.loadFromIds(ids);

@@ -16,7 +16,7 @@ import {
 } from "../../types";
 import { IResolverContext } from "../../server";
 
-export const createBlogPost = async (
+export const createPost = async (
   parent: undefined,
   args: MutationCreateBlogPostArgs,
   context: IResolverContext
@@ -26,7 +26,7 @@ export const createBlogPost = async (
   return await blog.createPost(args.data);
 };
 
-export const updateBlogPost = async (
+export const updatePost = async (
   parent: undefined,
   args: MutationUpdateBlogPostArgs,
   context: IResolverContext
@@ -36,7 +36,7 @@ export const updateBlogPost = async (
   return await blog.updatePost(args.id, args.data);
 };
 
-export const deleteBlogPost = async (
+export const deletePost = async (
   parent: undefined,
   args: MutationDeleteBlogPostArgs,
   context: IResolverContext
@@ -46,7 +46,7 @@ export const deleteBlogPost = async (
   return await blog.deletePost(args.id);
 };
 
-export const createComment = async (
+export const createIdea = async (
   parent: undefined,
   args: MutationCreateCommentArgs,
   context: IResolverContext
@@ -56,7 +56,7 @@ export const createComment = async (
   return await blog.createComment(args.data);
 };
 
-export const updateComment = async (
+export const updateIdea = async (
   parent: undefined,
   args: MutationUpdateCommentArgs,
   context: IResolverContext
@@ -66,7 +66,7 @@ export const updateComment = async (
   return await blog.updateComment(args.id, args.data);
 };
 
-export const deleteComment = async (
+export const deleteIdea = async (
   parent: undefined,
   args: MutationDeleteCommentArgs,
   context: IResolverContext

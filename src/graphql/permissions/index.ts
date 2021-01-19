@@ -9,10 +9,10 @@ import _ from "lodash";
 
 import auth from "./auth";
 import users from "./users";
-import blog from "./blog";
+import content from "./user-content";
 import market from "./market";
 
-export default shield(_.merge(auth, users, market, blog), {
+export default shield(_.merge(auth, users, market, content), {
   fallbackError: new ApolloError(
     "You are not permitted to do this.",
     "NOTPERMITTED"
