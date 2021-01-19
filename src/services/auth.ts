@@ -9,7 +9,12 @@ import { uid } from "rand-token";
 
 import { ServiceError, ValidationError } from "./errors";
 
-import { AuthHandler, IUserAccount, IDeviceArgs } from "../db";
+import {
+  AuthHandler,
+  ResourceNotFoundError,
+  IUserAccount,
+  IDeviceArgs,
+} from "../db";
 
 interface IRegisterArgs {
   email: string;
@@ -227,12 +232,18 @@ export class AuthService {
    * @param {IDeviceArgs} device
    */
   async login(data: ILoginInput, device: IDeviceArgs) {
-    const user = await this.dbHandler.findUserByAttribute(data.identifier);
+    try {
+      const user = await this.dbHandler.findUserByAttribute(data.identifier);
 
-    if (user.suspended)
-      throw new ServiceError("Your account has been suspended.");
+      if (user.suspended)
+        throw new ServiceError("Your account has been suspended.");
 
-    return await this.authenticate(user, data.password, device);
+      return await this.authenticate(user, data.password, device);
+    } catch (e) {
+      if (e instanceof ResourceNotFoundError)
+        this.throwDefaultAuthenticationError();
+      else throw e;
+    }
   }
 
   /**

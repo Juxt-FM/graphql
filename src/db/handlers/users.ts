@@ -48,9 +48,10 @@ export class UserHandler extends BaseHandler {
     const result = await query
       .V(id)
       .hasLabel(labels.USER_PROFILE)
-      .property("name", data.name)
-      .property("summary", data.summary)
-      .property("location", data.location)
+      .as("profile")
+      .property("name", data.name || "")
+      .property("summary", data.summary || "")
+      .property("location", data.location || "")
       .property("updated", moment().valueOf())
       .elementMap()
       .next();
