@@ -3,12 +3,20 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
+import moment from "moment";
+
 import GraphDB from "..";
 
 import BaseHandler from "./base";
 
-import { IRawProfile, IUserProfile } from "../constants";
+import { IRawProfile, IUserProfile, labels } from "../constants";
 import { ResourceNotFoundError } from "../errors";
+
+export interface IProfileInput {
+  name?: string;
+  summary?: string;
+  location?: string;
+}
 
 /**
  * User profile database handler.
@@ -27,6 +35,31 @@ export class UserHandler extends BaseHandler {
       created: this.toDate(profile.created),
       updated: this.toDate(profile.updated),
     };
+  }
+
+  /**
+   * Fetches a user with the given ID
+   * @param {string} id
+   * @param {IProfileInput} data
+   */
+  async updateProfile(id: string, data: IProfileInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .hasLabel(labels.USER_PROFILE)
+      .property("name", data.name)
+      .property("summary", data.summary)
+      .property("location", data.location)
+      .property("updated", moment().valueOf())
+      .elementMap()
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const profile: any = Object.fromEntries(result.value);
+
+    return this.transform(profile);
   }
 
   /**

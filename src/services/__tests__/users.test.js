@@ -5,12 +5,12 @@
 
 const { UserService } = require("../users");
 
-const { mockUser } = require("../../db/__mocks__/auth");
 const { mockProfile } = require("../../db/__mocks__/users");
 
 const mockDbHandler = {
   findById: jest.fn(),
   loadFromIds: jest.fn(),
+  updateProfile: jest.fn(),
 };
 
 const service = new UserService(mockDbHandler);
@@ -21,6 +21,24 @@ test("getById - should return a user's profile", async () => {
   const result = await service.getById(mockProfile.id);
 
   expect(mockDbHandler.findById).toHaveBeenLastCalledWith(mockProfile.id);
+  expect(result).toEqual(mockProfile);
+});
+
+test("updateProfile - should return a user's profile", async () => {
+  mockDbHandler.updateProfile.mockReturnValueOnce(mockProfile);
+
+  const data = {
+    name: "New Name",
+    summary: "just an updated summary",
+    location: "Columbia, SC",
+  };
+
+  const result = await service.updateProfile(mockProfile.id, data);
+
+  expect(mockDbHandler.updateProfile).toHaveBeenLastCalledWith(
+    mockProfile.id,
+    data
+  );
   expect(result).toEqual(mockProfile);
 });
 

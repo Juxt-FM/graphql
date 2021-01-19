@@ -6,7 +6,7 @@
 import DataLoader from "dataloader";
 import _ from "lodash";
 
-import { UserHandler } from "../db";
+import { UserHandler, IProfileInput } from "../db";
 
 /**
  * User service (post authors, public profiles, etc.)
@@ -37,6 +37,15 @@ export class UserService {
    */
   async getById(id: string) {
     return await this.dbHandler.findById(id);
+  }
+
+  /**
+   * Update the user's profile
+   * @param {string} id
+   * @param {IProfileInput} data
+   */
+  async updateProfile(id: string, data: IProfileInput) {
+    return await this.dbHandler.updateProfile(id, data);
   }
 
   /**

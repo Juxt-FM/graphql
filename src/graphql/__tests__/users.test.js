@@ -31,3 +31,44 @@ test("QUERY userProfile", async () => {
 
   expect(res.data.userProfile.id).toEqual(mockProfile.id);
 });
+
+const UPDATE_PROFILE = gql`
+  mutation UpdateProfile($data: ProfileInput!) {
+    updateProfile(data: $data) {
+      id
+      name
+      location
+      summary
+      coverImageURL
+      profileImageURL
+      created
+      updated
+    }
+  }
+`;
+
+test("MUTATION updateProfile", async () => {
+  const { server, mockUserService } = await buildTestServer();
+
+  const data = {
+    name: "New Name",
+    summary: "",
+    location: "Charleston, SC",
+  };
+
+  const mockResponse = { ...mockProfile, ...data };
+
+  mockUserService.updateProfile.mockReturnValueOnce(mockResponse);
+
+  const { mutate } = createTestClient(server);
+  const res = await mutate({
+    query: UPDATE_PROFILE,
+    variables: { data },
+  });
+
+  const { updateProfile: result } = res.data;
+
+  expect(result.name).toEqual(data.name);
+  expect(result.summary).toEqual(data.summary);
+  expect(result.location).toEqual(data.location);
+});
