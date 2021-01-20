@@ -22,7 +22,7 @@ export class UserContentAPI extends BaseAPI {
      * build the reaction dataloader, as it requires
      * the logged in user's ID
      */
-    const { buildReactionLoader } = this.context.userContentService;
+    const { buildReactionLoader } = this.context.contentService;
 
     if (this.context.user) {
       buildReactionLoader(this.context.user.profile);
@@ -35,9 +35,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async getPostByID(id: string) {
     return this.handler("getPostByID", async () => {
-      const { userContentService } = this.context;
+      const { contentService } = this.context;
 
-      return await userContentService.getByID(id, "post");
+      return await contentService.getByID(id, "post");
     });
   }
 
@@ -47,9 +47,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async getIdeaByID(id: string) {
     return this.handler("getIdeaByID", async () => {
-      const { userContentService } = this.context;
+      const { contentService } = this.context;
 
-      return await userContentService.getByID(id, "idea");
+      return await contentService.getByID(id, "idea");
     });
   }
 
@@ -61,9 +61,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async getReplies(id: string, limit: number, offset: number) {
     return this.handler("getReplies", async () => {
-      const { userContentService } = this.context;
+      const { contentService } = this.context;
 
-      return await userContentService.getReplies(id, limit, offset);
+      return await contentService.getReplies(id, limit, offset);
     });
   }
 
@@ -73,9 +73,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async createPost(data: PostInput) {
     return this.handler("createPost", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.createPost(user.profile, data);
+      return await contentService.createPost(user.profile, data);
     });
   }
 
@@ -86,9 +86,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async updatePost(id: string, data: PostInput) {
     return this.handler("updatePost", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.updatePost(id, user.profile, data);
+      return await contentService.updatePost(id, user.profile, data);
     });
   }
 
@@ -98,9 +98,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async deletePost(id: string) {
     return this.handler("deletePost", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.deletePost(id, user.profile);
+      return await contentService.deletePost(id, user.profile);
     });
   }
 
@@ -110,9 +110,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async createIdea(data: IdeaInput) {
     return this.handler("createIdea", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.createIdea(user.profile, data);
+      return await contentService.createIdea(user.profile, data);
     });
   }
 
@@ -123,9 +123,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async updateIdea(id: string, message: string) {
     return this.handler("updateIdea", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.updateIdea(id, user.profile, message);
+      return await contentService.updateIdea(id, user.profile, message);
     });
   }
 
@@ -135,9 +135,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async deleteIdea(id: string) {
     return this.handler("deleteIdea", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.deleteIdea(id, user.profile);
+      return await contentService.deleteIdea(id, user.profile);
     });
   }
 
@@ -147,9 +147,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async createReaction(reaction: MutationCreateReactionArgs) {
     return this.handler("createReaction", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.createReaction(user.profile, reaction);
+      return await contentService.createReaction(user.profile, reaction);
     });
   }
 
@@ -159,9 +159,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async deleteReaction(id: string) {
     return this.handler("deleteReaction", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.deleteReaction(user.profile, id);
+      return await contentService.deleteReaction(user.profile, id);
     });
   }
 
@@ -171,9 +171,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async reportContent(id: string) {
     return this.handler("reportContent", async () => {
-      const { user, userContentService } = this.context;
+      const { user, contentService } = this.context;
 
-      return await userContentService.reportContent(user.profile, id);
+      return await contentService.reportContent(user.profile, id);
     });
   }
 
@@ -185,9 +185,9 @@ export class UserContentAPI extends BaseAPI {
     if (!this.context.user) return null;
 
     return this.handler("loadReactionStatuses", async () => {
-      const { userContentService } = this.context;
+      const { contentService } = this.context;
 
-      return await userContentService.loadReaction(id);
+      return await contentService.loadReaction(id);
     });
   }
 
@@ -197,9 +197,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async loadReactionCount(id: string) {
     return this.handler("loadReactionCount", async () => {
-      const { userContentService } = this.context;
+      const { contentService } = this.context;
 
-      return await userContentService.loadReactionCount(id);
+      return await contentService.loadReactionCount(id);
     });
   }
 
@@ -209,9 +209,9 @@ export class UserContentAPI extends BaseAPI {
    */
   async loadReplyCount(id: string) {
     return this.handler("loadReplyCount", async () => {
-      const { userContentService } = this.context;
+      const { contentService } = this.context;
 
-      return await userContentService.loadReplyCount(id);
+      return await contentService.loadReplyCount(id);
     });
   }
 }

@@ -70,12 +70,10 @@ type Reaction {
 input PostInput {
   publicationStatus: PublicationStatus!
   contentFormat: PostContentFormat!
-  symbols: [String!]!
-  tags: [String!]!
   title: String!
-  imageURL: String
+  content: String
   summary: String
-  content: String!
+  imageURL: String
 }
 
 input IdeaInput {
@@ -95,9 +93,9 @@ extend type Mutation {
   createPost(data: PostInput!): Post!
   updatePost(id: ID!, data: PostInput!): Post!
   deletePost(id: ID!): String!
-  createIdea(id: ID!, data: IdeaInput!): Idea!
+  createIdea(data: IdeaInput!): Idea!
   updateIdea(id: ID!, message: String!): Idea!
-  deleteIdea(id: ID!): Idea!
+  deleteIdea(id: ID!): String!
   createReaction(to: ID!, reaction: ReactionType!): Reaction!
   deleteReaction(id: ID!): String!
   reportContent(id: ID!): String!

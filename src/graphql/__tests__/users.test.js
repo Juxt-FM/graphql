@@ -14,6 +14,22 @@ const USER_PROFILE = gql`
   query Profile($id: ID!) {
     userProfile(id: $id) {
       id
+      name
+      location
+      summary
+      profileImageURL
+      coverImageURL
+      watchlists {
+        id
+      }
+      posts {
+        id
+      }
+      ideas {
+        id
+      }
+      created
+      updated
     }
   }
 `;
@@ -29,7 +45,12 @@ test("QUERY userProfile", async () => {
     variables: { id: mockProfile.id },
   });
 
-  expect(res.data.userProfile.id).toEqual(mockProfile.id);
+  const { userProfile: result } = res.data;
+
+  expect(result.id).toEqual(mockProfile.id);
+  expect(result.name).toEqual(mockProfile.name);
+  expect(result.summary).toEqual(mockProfile.summary);
+  expect(result.location).toEqual(mockProfile.location);
 });
 
 const UPDATE_PROFILE = gql`
@@ -44,6 +65,18 @@ const UPDATE_PROFILE = gql`
       created
       updated
     }
+  }
+`;
+
+const UPDATE_PROFILE_IMAGE = gql`
+  mutation {
+    updateProfileImage
+  }
+`;
+
+const UPDATE_COVER_IMAGE = gql`
+  mutation {
+    updateCoverImage
   }
 `;
 
@@ -62,7 +95,7 @@ test("MUTATION updateProfile", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    query: UPDATE_PROFILE,
+    mutation: UPDATE_PROFILE,
     variables: { data },
   });
 
@@ -72,3 +105,41 @@ test("MUTATION updateProfile", async () => {
   expect(result.summary).toEqual(data.summary);
   expect(result.location).toEqual(data.location);
 });
+
+test("MUTATION updateProfileImage", async () => {
+  const { server, mockMediaService } = await buildTestServer();
+
+  mockMediaService.getSignedProfileUpload.mockReturnValueOnce(mockURLOutput);
+
+  const { mutate } = createTestClient(server);
+  const res = await mutate({
+    mutation: UPDATE_PROFILE_IMAGE,
+  });
+
+  const { updateProfileImage: result } = res.data;
+
+  expect(result).toEqual(JSON.stringify(mockURLOutput));
+});
+
+test("MUTATION updateCoverImage", async () => {
+  const { server, mockMediaService } = await buildTestServer();
+
+  mockMediaService.getSignedCoverUpload.mockReturnValueOnce(mockURLOutput);
+
+  const { mutate } = createTestClient(server);
+  const res = await mutate({
+    mutation: UPDATE_COVER_IMAGE,
+  });
+
+  const { updateCoverImage: result } = res.data;
+
+  expect(result).toEqual(JSON.stringify(mockURLOutput));
+});
+
+const mockURLOutput = {
+  url: "https://s3.us-east-1.amazonaws.com/test-bucket",
+  fields: {
+    key: "test-key",
+    bucket: "test-bucket",
+  },
+};

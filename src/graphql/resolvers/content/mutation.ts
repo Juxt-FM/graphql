@@ -21,9 +21,9 @@ export const createPost = async (
   args: MutationCreatePostArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.createPost(args.data);
+  return await content.createPost(args.data);
 };
 
 export const updatePost = async (
@@ -31,9 +31,9 @@ export const updatePost = async (
   args: MutationUpdatePostArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.updatePost(args.id, args.data);
+  return await content.updatePost(args.id, args.data);
 };
 
 export const deletePost = async (
@@ -41,9 +41,9 @@ export const deletePost = async (
   args: MutationDeletePostArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.deletePost(args.id);
+  return await content.deletePost(args.id);
 };
 
 export const createIdea = async (
@@ -51,9 +51,9 @@ export const createIdea = async (
   args: MutationCreateIdeaArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.createIdea(args.data);
+  return await content.createIdea(args.data);
 };
 
 export const updateIdea = async (
@@ -61,9 +61,9 @@ export const updateIdea = async (
   args: MutationUpdateIdeaArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.updateIdea(args.id, args.message);
+  return await content.updateIdea(args.id, args.message);
 };
 
 export const deleteIdea = async (
@@ -71,9 +71,9 @@ export const deleteIdea = async (
   args: MutationDeleteIdeaArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.deleteIdea(args.id);
+  return await content.deleteIdea(args.id);
 };
 
 export const createReaction = async (
@@ -81,9 +81,9 @@ export const createReaction = async (
   args: MutationCreateReactionArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.createReaction(args);
+  return await content.createReaction(args);
 };
 
 export const deleteReaction = async (
@@ -91,9 +91,9 @@ export const deleteReaction = async (
   args: MutationDeleteReactionArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.deleteReaction(args.id);
+  return await content.deleteReaction(args.id);
 };
 
 export const reportContent = async (
@@ -101,7 +101,7 @@ export const reportContent = async (
   args: MutationReportContentArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.reportContent(args.id);
+  return await content.reportContent(args.id);
 };

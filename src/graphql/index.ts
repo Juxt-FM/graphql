@@ -62,7 +62,7 @@ export const buildGraph = ({ db }: IServerBuilder) => {
 
   const authService = new AuthService(auth, db.registerHandler(AuthHandler));
   const userService = new UserService(db.registerHandler(UserHandler));
-  const userContentService = new UserContentService(
+  const contentService = new UserContentService(
     db.registerHandler(UserContentHandler)
   );
   const mediaService = new MediaService(s3, {
@@ -78,7 +78,7 @@ export const buildGraph = ({ db }: IServerBuilder) => {
   const dataSources = () => ({
     auth: new AuthAPI(),
     users: new UserAPI(),
-    userContent: new UserContentAPI(),
+    content: new UserContentAPI(),
     market: new MarketAPI({ uri: process.env.MARKET_SERVICE_URI }),
   });
 
@@ -92,7 +92,7 @@ export const buildGraph = ({ db }: IServerBuilder) => {
       user,
       authService,
       userService,
-      userContentService,
+      contentService,
       notificationService,
       mediaService,
       client: {

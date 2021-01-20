@@ -109,4 +109,4 @@ test("loadProfile - should return a user's profile", async () => {
   expect(result).toEqual(mockProfile);
 });
 
-module.exports = { mockUserService };
+module.exports = { mockUserService, mockMediaService };

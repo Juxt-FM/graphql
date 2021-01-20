@@ -11,9 +11,9 @@ export const postByID = async (
   args: QueryPostByIdArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.getPostByID(args.id);
+  return await content.getPostByID(args.id);
 };
 
 export const ideaByID = async (
@@ -21,7 +21,7 @@ export const ideaByID = async (
   args: QueryIdeaByIdArgs,
   context: IResolverContext
 ) => {
-  const { userContent } = context.dataSources;
+  const { content } = context.dataSources;
 
-  return await userContent.getIdeaByID(args.id);
+  return await content.getIdeaByID(args.id);
 };

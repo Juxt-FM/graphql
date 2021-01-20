@@ -27,7 +27,7 @@ const mockUserContentService = {
 
 const mockContext = {
   user: { id: 1, profile: 2, verified: true },
-  userContentService: mockUserContentService,
+  contentService: mockUserContentService,
 };
 
 const ds = new UserContentAPI();
@@ -264,3 +264,5 @@ test("loadReactionCount", async () => {
 
   expect(result).toEqual(count);
 });
+
+module.exports = { mockUserContentService };

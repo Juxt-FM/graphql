@@ -30,7 +30,7 @@ export interface IContext {
   user: IAuthenticatedUser | undefined;
   authService: AuthService;
   userService: UserService;
-  userContentService: UserContentService;
+  contentService: UserContentService;
   notificationService: NotificationService;
   mediaService: MediaService;
   host: string;
@@ -49,6 +49,6 @@ export interface IResolverContext extends IContext {
     users: UserAPI;
     auth: AuthAPI;
     market: MarketAPI;
-    userContent: UserContentAPI;
+    content: UserContentAPI;
   };
 }

@@ -19,11 +19,7 @@ export default {
     },
   },
   Post: {
-    author: async (
-      parent: any,
-      args: undefined,
-      context: IResolverContext
-    ) => {
+    author: async (parent: any, args: undefined, context: IResolverContext) => {
       const { users } = context.dataSources;
 
       return await users.loadProfile(parent.author);
@@ -33,35 +29,31 @@ export default {
       args: PostIdeasArgs,
       context: IResolverContext
     ) => {
-      const { userContent } = context.dataSources;
+      const { content } = context.dataSources;
 
-      return await userContent.getReplies(parent.id, args.limit, args.offset);
+      return await content.getReplies(parent.id, args.limit, args.offset);
     },
     reactionCount: async (
       parent: any,
       args: undefined,
       context: IResolverContext
     ) => {
-      const { userContent } = context.dataSources;
+      const { content } = context.dataSources;
 
-      return await userContent.loadReactionCount(parent.id);
+      return await content.loadReactionCount(parent.id);
     },
     reactionStatus: async (
       parent: any,
       args: undefined,
       context: IResolverContext
     ): Promise<any> => {
-      const { userContent } = context.dataSources;
+      const { content } = context.dataSources;
 
-      return await userContent.loadReactionStatus(parent.id);
+      return await content.loadReactionStatus(parent.id);
     },
   },
   Idea: {
-    author: async (
-      parent: any,
-      args: undefined,
-      context: IResolverContext
-    ) => {
+    author: async (parent: any, args: undefined, context: IResolverContext) => {
       const { users } = context.dataSources;
 
       return await users.loadProfile(parent.author);
@@ -71,28 +63,29 @@ export default {
       args: IdeaRepliesArgs,
       context: IResolverContext
     ) => {
-      const { userContent } = context.dataSources;
+      const { content } = context.dataSources;
 
-      return await userContent.getReplies(parent.id, args.limit, args.offset);
+      return await content.getReplies(parent.id, args.limit, args.offset);
     },
     reactionCount: async (
       parent: any,
       args: undefined,
       context: IResolverContext
     ) => {
-      const { userContent } = context.dataSources;
+      const { content } = context.dataSources;
 
-      return await userContent.loadReactionCount(parent.id);
+      return await content.loadReactionCount(parent.id);
     },
     reactionStatus: async (
       parent: any,
       args: undefined,
       context: IResolverContext
     ): Promise<any> => {
-      const { userContent } = context.dataSources;
+      const { content } = context.dataSources;
 
-      return await userContent.loadReactionStatus(parent.id);
+      return await content.loadReactionStatus(parent.id);
     },
-    attachments: (): any[] => []
+    attachments: (): any[] => [],
+    replyStatus: (): any => null,
   },
 };

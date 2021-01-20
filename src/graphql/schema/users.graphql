@@ -24,6 +24,6 @@ extend type Query {
 
 extend type Mutation {
   updateProfile(data: ProfileInput!): UserProfile!
-  updateProfileImage(filename: String!): String!
-  updateCoverImage(filename: String!): String!
+  updateProfileImage: String!
+  updateCoverImage: String!
 }

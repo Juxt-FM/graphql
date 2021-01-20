@@ -23,7 +23,7 @@ export const updateProfileImage = async (
 ) => {
   const { users } = context.dataSources;
 
-  return await users.updateProfileImage(args.filename);
+  return await users.updateProfileImage();
 };
 
 export const updateCoverImage = async (
@@ -33,5 +33,5 @@ export const updateCoverImage = async (
 ) => {
   const { users } = context.dataSources;
 
-  return await users.updateCoverImage(args.filename);
+  return await users.updateCoverImage();
 };
