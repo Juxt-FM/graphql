@@ -31,7 +31,8 @@ export class MediaService {
   }
 
   /**
-   * Promisified AWS function
+   * Promisified AWS function to get a presigned POST request
+   * to our media bucket
    * @param {AWS.S3.PresignedPost.Params} options
    */
   private createPresignedPost(
@@ -46,9 +47,10 @@ export class MediaService {
   }
 
   /**
-   * Returns AWS pre-signed POST options
+   * Returns AWS pre-signed POST params
    * @param {string} key
    * @param {number} expires
+   * @param {number} maxContentLength
    */
   private buildParams({
     key,
