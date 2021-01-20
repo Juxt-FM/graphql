@@ -96,7 +96,7 @@ extend type Mutation {
   createIdea(data: IdeaInput!): Idea!
   updateIdea(id: ID!, message: String!): Idea!
   deleteIdea(id: ID!): String!
-  createReaction(to: ID!, reaction: ReactionType!): Reaction!
+  createReaction(to: ID!, reaction: ReactionType!): String!
   deleteReaction(id: ID!): String!
   reportContent(id: ID!): String!
 }

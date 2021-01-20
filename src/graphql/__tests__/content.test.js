@@ -178,6 +178,24 @@ const DELETE_IDEA = gql`
   }
 `;
 
+const CREATE_REACTION = gql`
+  mutation CreateReaction($to: ID!, $reaction: ReactionType!) {
+    createReaction(to: $to, reaction: $reaction)
+  }
+`;
+
+const DELETE_REACTION = gql`
+  mutation DeleteReaction($id: ID!) {
+    deleteReaction(id: $id)
+  }
+`;
+
+const REPORT_CONTENT = gql`
+  mutation ReportContent($id: ID!) {
+    reportContent(id: $id)
+  }
+`;
+
 test("MUTATION createPost", async () => {
   const { server, mockContentService } = await buildTestServer();
 
@@ -323,6 +341,70 @@ test("MUTATION deleteIdea", async () => {
   });
 
   const { deleteIdea: result } = res.data;
+
+  expect(result).toEqual(mockResponse);
+});
+
+test("MUTATION createReaction", async () => {
+  const { server, mockContentService } = await buildTestServer();
+
+  const data = {
+    to: "1",
+    reaction: "like",
+  };
+
+  const mockResponse = data.reaction;
+
+  mockContentService.createReaction.mockReturnValueOnce(mockResponse);
+
+  const { mutate } = createTestClient(server);
+
+  const res = await mutate({
+    mutation: CREATE_REACTION,
+    variables: data,
+  });
+
+  console.log(res.errors);
+
+  const { createReaction: result } = res.data;
+
+  expect(result).toEqual(data.reaction);
+});
+
+test("MUTATION deleteReaction", async () => {
+  const { server, mockContentService } = await buildTestServer();
+
+  const mockResponse = "deleted reaction";
+
+  mockContentService.deleteReaction.mockReturnValueOnce(mockResponse);
+
+  const { mutate } = createTestClient(server);
+
+  const res = await mutate({
+    mutation: DELETE_REACTION,
+    variables: { id: mockIdea.id },
+  });
+
+  const { deleteReaction: result } = res.data;
+
+  expect(result).toEqual(mockResponse);
+});
+
+test("MUTATION reportContent", async () => {
+  const { server, mockContentService } = await buildTestServer();
+
+  const mockResponse = "reported some content";
+
+  mockContentService.reportContent.mockReturnValueOnce(mockResponse);
+
+  const { mutate } = createTestClient(server);
+
+  const res = await mutate({
+    mutation: REPORT_CONTENT,
+    variables: { id: mockIdea.id },
+  });
+
+  const { reportContent: result } = res.data;
 
   expect(result).toEqual(mockResponse);
 });
