@@ -8,7 +8,7 @@ type UserProfile {
   watchlists: [Watchlist!]!
   posts: [Post!]!
   ideas: [Idea!]!
-  followingStatus: FollowingStatus
+  followStatus: FollowingStatus
   created: String!
   updated: String!
 }

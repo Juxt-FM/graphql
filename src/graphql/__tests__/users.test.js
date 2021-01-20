@@ -28,6 +28,9 @@ const USER_PROFILE = gql`
       ideas {
         id
       }
+      followStatus {
+        timestamp
+      }
       created
       updated
     }
@@ -38,6 +41,9 @@ test("QUERY userProfile", async () => {
   const { server, mockUserService } = await buildTestServer();
 
   mockUserService.getById.mockReturnValueOnce(mockProfile);
+  mockUserService.loadFollowStatus.mockReturnValueOnce({
+    timestamp: new Date(),
+  });
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
@@ -51,6 +57,10 @@ test("QUERY userProfile", async () => {
   expect(result.name).toEqual(mockProfile.name);
   expect(result.summary).toEqual(mockProfile.summary);
   expect(result.location).toEqual(mockProfile.location);
+  expect(result.followStatus.timestamp).toEqual(expect.any(String));
+  expect(Array.isArray(result.watchlists)).toBe(true);
+  expect(Array.isArray(result.ideas)).toBe(true);
+  expect(Array.isArray(result.posts)).toBe(true);
 });
 
 const UPDATE_PROFILE = gql`
@@ -77,6 +87,20 @@ const UPDATE_PROFILE_IMAGE = gql`
 const UPDATE_COVER_IMAGE = gql`
   mutation {
     updateCoverImage
+  }
+`;
+
+const FOLLOW_PROFILE = gql`
+  mutation Follow($id: ID!) {
+    followProfile(id: $id) {
+      timestamp
+    }
+  }
+`;
+
+const UNFOLLOW_PROFILE = gql`
+  mutation Unfollow($id: ID!) {
+    unfollowProfile(id: $id)
   }
 `;
 
@@ -134,6 +158,44 @@ test("MUTATION updateCoverImage", async () => {
   const { updateCoverImage: result } = res.data;
 
   expect(result).toEqual(JSON.stringify(mockURLOutput));
+});
+
+test("MUTATION followProfile", async () => {
+  const { server, mockUserService } = await buildTestServer();
+
+  const mockResponse = { timestamp: new Date() };
+
+  mockUserService.followProfile.mockReturnValueOnce(mockResponse);
+
+  const { mutate } = createTestClient(server);
+
+  const res = await mutate({
+    mutation: FOLLOW_PROFILE,
+    variables: { id: mockProfile.id },
+  });
+
+  const { followProfile: result } = res.data;
+
+  expect(result).toEqual({ timestamp: expect.any(String) });
+});
+
+test("MUTATION unfollowProfile", async () => {
+  const { server, mockUserService } = await buildTestServer();
+
+  const mockResponse = "unfollowed user";
+
+  mockUserService.unfollowProfile.mockReturnValueOnce(mockResponse);
+
+  const { mutate } = createTestClient(server);
+
+  const res = await mutate({
+    mutation: UNFOLLOW_PROFILE,
+    variables: { id: mockProfile.id },
+  });
+
+  const { unfollowProfile: result } = res.data;
+
+  expect(result).toEqual(mockResponse);
 });
 
 const mockURLOutput = {

@@ -11,7 +11,7 @@ export default {
   Query,
   Mutation,
   UserProfile: {
-    followingStatus: async (
+    followStatus: async (
       parent: any,
       args: undefined,
       context: IResolverContext
