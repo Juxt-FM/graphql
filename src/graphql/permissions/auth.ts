@@ -4,7 +4,7 @@
  */
 
 import { not } from "graphql-shield";
-import { isAuthenticated, hasRefreshCredentials } from "./utils";
+import { isAuthenticated, canRefreshToken } from "./utils";
 
 export default {
   Query: {
@@ -13,7 +13,7 @@ export default {
   Mutation: {
     createUser: not(isAuthenticated),
     loginUser: not(isAuthenticated),
-    refreshToken: hasRefreshCredentials,
+    refreshToken: canRefreshToken,
     logoutUser: isAuthenticated,
     updateEmail: isAuthenticated,
     updatePhone: isAuthenticated,

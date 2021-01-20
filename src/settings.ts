@@ -10,6 +10,7 @@ export const auth = {
   jwtIssuer: process.env.JWT_ISSUER || "http://localhost:4000/graphql",
   jwtSubject: process.env.JWT_SUBJECT || "Hedger core API",
   jwtExpiration: process.env.JWT_EXPIRATION || "15 minutes",
+  refreshCookie: process.env.REFRESH_COOKIE || "device_token",
 };
 
 export const database = {
@@ -18,4 +19,12 @@ export const database = {
 
 export const mail = {
   fromEmail: "test@email.com",
+};
+
+export const media = {
+  region: process.env.AWS_REGION || "us-east-1",
+  buckets: {
+    profileImages: process.env.PROFILE_IMAGE_BUCKET || "profile-images",
+    coverImages: process.env.COVER_IMAGE_BUCKET || "cover-images",
+  },
 };

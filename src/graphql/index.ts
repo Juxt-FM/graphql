@@ -11,20 +11,22 @@ import {
 import { applyMiddleware } from "graphql-middleware";
 
 import { UserAPI, AuthAPI, MarketAPI, UserContentAPI } from "./sources";
+
+import typeDefs from "./schema";
+import resolvers from "./resolvers";
+import permissions from "./permissions";
+
+import { IContextBuilder, IServerBuilder } from "./server";
+
 import {
   AuthService,
   UserService,
   NotificationService,
   UserContentService,
 } from "../services";
-import GraphDB, { AuthHandler, UserContentHandler, UserHandler } from "../db";
-import { auth, mail } from "../settings";
+import { AuthHandler, UserContentHandler, UserHandler } from "../db";
 
-import typeDefs from "./schema";
-import resolvers from "./resolvers";
-import permissions from "./permissions";
-
-import { IContextBuilder } from "./server";
+import { auth, mail, media } from "../settings";
 
 /**
  * Introspection controls whether or not the GraphQL schema
@@ -49,9 +51,12 @@ const schema = applyMiddleware(
   permissions
 );
 
-interface IServerBuilder {
-  db: GraphDB;
-}
+const mediaContext = {
+  ...media,
+  getResourceURL: (bucket: string, key: string) => {
+    return `https://${bucket}.s3.amazonaws.com/${key}`;
+  },
+};
 
 /**
  * Returns a GraphQL server instance
@@ -89,6 +94,7 @@ export const buildGraph = ({ db }: IServerBuilder) => {
       userService,
       userContentService,
       notificationService,
+      media: mediaContext,
       client: {
         name: req.headers["client_name"],
         version: req.headers["client_version"],

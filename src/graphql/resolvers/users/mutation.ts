@@ -3,8 +3,8 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import { IResolverContext } from "src/graphql/server";
-import { MutationUpdateProfileArgs } from "src/graphql/types";
+import { IResolverContext } from "../../server";
+import { MutationUpdateProfileArgs } from "../../types";
 
 export const updateProfile = async (
   parent: undefined,
@@ -14,4 +14,24 @@ export const updateProfile = async (
   const { users } = context.dataSources;
 
   return await users.updateProfile(args.data);
+};
+
+export const updateProfileImage = async (
+  parent: undefined,
+  args: any,
+  context: IResolverContext
+) => {
+  const { users } = context.dataSources;
+
+  return await users.updateProfileImage(args.filename);
+};
+
+export const updateCoverImage = async (
+  parent: undefined,
+  args: any,
+  context: IResolverContext
+) => {
+  const { users } = context.dataSources;
+
+  return await users.updateCoverImage(args.filename);
 };

@@ -38,7 +38,7 @@ export class UserHandler extends BaseHandler {
   }
 
   /**
-   * Fetches a user with the given ID
+   * Update's a user's profile
    * @param {string} id
    * @param {IProfileInput} data
    */
@@ -48,7 +48,6 @@ export class UserHandler extends BaseHandler {
     const result = await query
       .V(id)
       .hasLabel(labels.USER_PROFILE)
-      .as("profile")
       .property("name", data.name || "")
       .property("summary", data.summary || "")
       .property("location", data.location || "")
@@ -61,6 +60,42 @@ export class UserHandler extends BaseHandler {
     const profile: any = Object.fromEntries(result.value);
 
     return this.transform(profile);
+  }
+
+  /**
+   * Update the user's profile image
+   * @param {string} id
+   * @param {string} imageKey
+   */
+  async updateProfileImage(id: string, imageKey: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .hasLabel(labels.USER_PROFILE)
+      .property("profileImageURL", imageKey)
+      .property("updated", moment().valueOf())
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+  }
+
+  /**
+   * Update the user's cover image
+   * @param {string} id
+   * @param {string} imageKey
+   */
+  async updateCoverImage(id: string, imageKey: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .hasLabel(labels.USER_PROFILE)
+      .property("coverImageURL", imageKey)
+      .property("updated", moment().valueOf())
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
   }
 
   /**

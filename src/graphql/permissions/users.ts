@@ -3,4 +3,12 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-export default {};
+import { isAuthenticated } from "./utils";
+
+export default {
+  Mutation: {
+    updateProfile: isAuthenticated,
+    updateProfileImage: isAuthenticated,
+    updateCoverImage: isAuthenticated,
+  },
+};

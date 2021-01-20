@@ -3,8 +3,9 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import { ProfileInput } from "../types";
 import { BaseAPI } from "./base";
+
+import { ProfileInput } from "../types";
 
 export class UserAPI extends BaseAPI {
   constructor() {
@@ -32,6 +33,40 @@ export class UserAPI extends BaseAPI {
       const { user, userService } = this.context;
 
       return await userService.updateProfile(user.profile, data);
+    });
+  }
+
+  /**
+   * Creates and returns a pre-signed AWS S3 url, updates
+   * the user's profile in the db
+   * @param {string} filename
+   */
+  async updateCoverImage(filename: string) {
+    return this.handler("updateCoverImage", async () => {
+      const { user, media, userService } = this.context;
+
+      const bucket = media.buckets.coverImages;
+
+      return await userService.updateCoverImage(user.profile, bucket, filename);
+    });
+  }
+
+  /**
+   * Creates and returns a pre-signed AWS S3 url, updates
+   * the user's profile in the db
+   * @param {string} filename
+   */
+  async updateProfileImage(filename: string) {
+    return this.handler("updateProfileImage", async () => {
+      const { user, media, userService } = this.context;
+
+      const bucket = media.buckets.profileImages;
+
+      return await userService.updateProfileImage(
+        user.profile,
+        bucket,
+        filename
+      );
     });
   }
 

@@ -9,6 +9,12 @@ import {
   UserService,
 } from "../services";
 
+import GraphDB from "../db";
+
+interface IServerBuilder {
+  db: GraphDB;
+}
+
 export interface IAuthenticatedUser {
   id: string;
   profile: string;
@@ -19,6 +25,14 @@ interface IContextBuilder extends ExpressContext {
   req: Request & { user: IAuthenticatedUser | undefined };
 }
 
+export interface IMediaContext {
+  buckets: {
+    profileImages: string;
+    coverImages: string;
+  };
+  getResourceURL: (bucket: string, key: string) => string;
+}
+
 export interface IContext {
   user: IAuthenticatedUser | undefined;
   authService: AuthService;
@@ -26,6 +40,7 @@ export interface IContext {
   userContentService: UserContentService;
   notificationService: NotificationService;
   host: string;
+  media: IMediaContext;
   client: {
     name: "web" | "mobile";
     version: string;

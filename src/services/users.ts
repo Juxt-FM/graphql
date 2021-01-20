@@ -4,7 +4,10 @@
  */
 
 import DataLoader from "dataloader";
+import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
+
+import { createPresignedPost } from "./utils";
 
 import { UserHandler, IProfileInput } from "../db";
 
@@ -18,7 +21,6 @@ export class UserService {
 
   constructor(dbHandler: UserHandler) {
     this.dbHandler = dbHandler;
-
     this.profileLoader = this.buildProfileLoader();
   }
 
@@ -46,6 +48,52 @@ export class UserService {
    */
   async updateProfile(id: string, data: IProfileInput) {
     return await this.dbHandler.updateProfile(id, data);
+  }
+
+  /**
+   * Update the user's profile image
+   * @param {string} id
+   * @param {string} bucket
+   * @param {string} filename
+   */
+  async updateProfileImage(id: string, bucket: string, filename: string) {
+    const key = `${filename}-${uuidv4()}`;
+
+    const options = {
+      Bucket: bucket,
+      Fields: {
+        key,
+      },
+      Expires: 300,
+      Conditions: [["content-length-range", 0, 512000]],
+    };
+
+    await this.dbHandler.updateProfileImage(id, key);
+
+    return await createPresignedPost(options);
+  }
+
+  /**
+   * Update the user's profile cover image
+   * @param {string} id
+   * @param {string} bucket
+   * @param {string} filename
+   */
+  async updateCoverImage(id: string, bucket: string, filename: string) {
+    const key = `${filename}-${uuidv4()}`;
+
+    const options = {
+      Bucket: bucket,
+      Fields: {
+        key,
+      },
+      Expires: 300,
+      Conditions: [["content-length-range", 0, 1024000]],
+    };
+
+    await this.dbHandler.updateCoverImage(id, key);
+
+    return await createPresignedPost(options);
   }
 
   /**

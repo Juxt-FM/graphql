@@ -7,21 +7,32 @@ import { rule } from "graphql-shield";
 
 import { IResolverContext } from "../server";
 
-export const isAuthenticated = rule({ cache: "contextual" })(
-  (parent: any, args: any, ctx: IResolverContext) => {
-    return typeof ctx.user !== "undefined";
-  }
-);
+export const isUser = (parent: any, args: any, ctx: IResolverContext) => {
+  return typeof ctx.user !== "undefined";
+};
 
-export const isVerified = rule({ cache: "contextual" })(
-  (parent: any, args: any, ctx: IResolverContext) => {
-    return ctx.user ? ctx.user.verified : false;
-  }
-);
+export const hasVerifiedStatus = (
+  parent: any,
+  args: any,
+  ctx: IResolverContext
+) => {
+  return ctx.user ? ctx.user.verified : false;
+};
 
-export const hasRefreshCredentials = rule({ cache: "contextual" })(
-  (parent: any, args: any, ctx: IResolverContext) => {
-    const token = ctx.expressCtx.req.signedCookies["device_token"];
-    return typeof token !== "undefined";
-  }
-);
+export const hasCredentials = (
+  parent: any,
+  args: any,
+  ctx: IResolverContext
+) => {
+  const token = ctx.expressCtx.req.signedCookies["device_token"];
+
+  if (ctx.client.name === "web") return typeof token !== "undefined";
+  else if (ctx.client.name === "mobile") return typeof args.token === "string";
+  else return false;
+};
+
+export const isAuthenticated = rule({ cache: "contextual" })(isUser);
+
+export const isVerified = rule({ cache: "contextual" })(hasVerifiedStatus);
+
+export const canRefreshToken = rule({ cache: "contextual" })(hasCredentials);
