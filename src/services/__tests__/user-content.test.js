@@ -6,7 +6,7 @@
 const { UserContentService } = require("../user-content");
 
 const { mockIdea, mockPost } = require("../../db/__mocks__/user-content");
-const { ValidationError } = require("../errors");
+const { ValidationError } = require("../utils/errors");
 
 const mockDbHandler = {
   loadReactionCounts: jest.fn(),

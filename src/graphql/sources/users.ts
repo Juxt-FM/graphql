@@ -39,34 +39,32 @@ export class UserAPI extends BaseAPI {
   /**
    * Creates and returns a pre-signed AWS S3 url, updates
    * the user's profile in the db
-   * @param {string} filename
    */
-  async updateCoverImage(filename: string) {
+  async updateCoverImage() {
     return this.handler("updateCoverImage", async () => {
-      const { user, media, userService } = this.context;
+      const { user, mediaService, userService } = this.context;
 
-      const bucket = media.buckets.coverImages;
+      const result = await mediaService.getSignedCoverUpload(user.id);
 
-      return await userService.updateCoverImage(user.profile, bucket, filename);
+      await userService.updateCoverImage(user.profile, result.fields.key);
+
+      return JSON.stringify(result);
     });
   }
 
   /**
    * Creates and returns a pre-signed AWS S3 url, updates
    * the user's profile in the db
-   * @param {string} filename
    */
-  async updateProfileImage(filename: string) {
+  async updateProfileImage() {
     return this.handler("updateProfileImage", async () => {
-      const { user, media, userService } = this.context;
+      const { user, mediaService, userService } = this.context;
 
-      const bucket = media.buckets.profileImages;
+      const result = await mediaService.getSignedProfileUpload(user.id);
 
-      return await userService.updateProfileImage(
-        user.profile,
-        bucket,
-        filename
-      );
+      await userService.updateProfileImage(user.profile, result.fields.key);
+
+      return JSON.stringify(result);
     });
   }
 

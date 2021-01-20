@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const decodeJWT = require("jwt-decode");
 
 const { AuthService } = require("../auth");
-const { ServiceError, ValidationError } = require("../errors");
+const { ServiceError, ValidationError } = require("../utils/errors");
 
 const {
   mockUser,

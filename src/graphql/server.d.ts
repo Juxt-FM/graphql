@@ -4,6 +4,7 @@ import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import { UserAPI, AuthAPI, MarketAPI, UserContentAPI } from "./sources";
 import {
   AuthService,
+  MediaService,
   NotificationService,
   UserContentService,
   UserService,
@@ -25,22 +26,14 @@ interface IContextBuilder extends ExpressContext {
   req: Request & { user: IAuthenticatedUser | undefined };
 }
 
-export interface IMediaContext {
-  buckets: {
-    profileImages: string;
-    coverImages: string;
-  };
-  getResourceURL: (bucket: string, key: string) => string;
-}
-
 export interface IContext {
   user: IAuthenticatedUser | undefined;
   authService: AuthService;
   userService: UserService;
   userContentService: UserContentService;
   notificationService: NotificationService;
+  mediaService: MediaService;
   host: string;
-  media: IMediaContext;
   client: {
     name: "web" | "mobile";
     version: string;

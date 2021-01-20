@@ -6,7 +6,7 @@
 import DataLoader from "dataloader";
 import _ from "lodash";
 
-import { ValidationError } from "./errors";
+import { ValidationError } from "./utils/errors";
 
 import {
   UserContentHandler,

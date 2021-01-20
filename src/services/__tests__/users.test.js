@@ -11,6 +11,8 @@ const mockDbHandler = {
   findById: jest.fn(),
   loadFromIds: jest.fn(),
   updateProfile: jest.fn(),
+  updateProfileImage: jest.fn(),
+  updateCoverImage: jest.fn(),
 };
 
 const service = new UserService(mockDbHandler);
@@ -20,7 +22,7 @@ test("getById - should return a user's profile", async () => {
 
   const result = await service.getById(mockProfile.id);
 
-  expect(mockDbHandler.findById).toHaveBeenLastCalledWith(mockProfile.id);
+  expect(mockDbHandler.findById).toBeCalledWith(mockProfile.id);
   expect(result).toEqual(mockProfile);
 });
 
@@ -35,11 +37,24 @@ test("updateProfile - should return a user's profile", async () => {
 
   const result = await service.updateProfile(mockProfile.id, data);
 
-  expect(mockDbHandler.updateProfile).toHaveBeenLastCalledWith(
-    mockProfile.id,
-    data
-  );
+  expect(mockDbHandler.updateProfile).toBeCalledWith(mockProfile.id, data);
   expect(result).toEqual(mockProfile);
+});
+
+test("updateProfileImage - should update user profile image", async () => {
+  const key = "some_image_key";
+
+  await service.updateProfileImage(mockProfile.id, key);
+
+  expect(mockDbHandler.updateProfileImage).toBeCalledWith(mockProfile.id, key);
+});
+
+test("updateCoverImage - should update user cover image", async () => {
+  const key = "some_image_key";
+
+  await service.updateCoverImage(mockProfile.id, key);
+
+  expect(mockDbHandler.updateCoverImage).toBeCalledWith(mockProfile.id, key);
 });
 
 describe("loadProfile", () => {
@@ -48,9 +63,7 @@ describe("loadProfile", () => {
 
     const result = await service.loadProfile(mockProfile.id);
 
-    expect(mockDbHandler.loadFromIds).toHaveBeenLastCalledWith([
-      mockProfile.id,
-    ]);
+    expect(mockDbHandler.loadFromIds).toBeCalledWith([mockProfile.id]);
     expect(result).toEqual(mockProfile);
   });
 
@@ -61,7 +74,7 @@ describe("loadProfile", () => {
 
     const result = await service.loadProfile(id);
 
-    expect(mockDbHandler.loadFromIds).toHaveBeenLastCalledWith([id]);
+    expect(mockDbHandler.loadFromIds).toBeCalledWith([id]);
     expect(result).toEqual(null);
   });
 });

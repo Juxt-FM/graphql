@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uid } from "rand-token";
 
-import { ServiceError, ValidationError } from "./errors";
+import { ServiceError, ValidationError } from "./utils/errors";
 
 import {
   AuthHandler,

@@ -11,12 +11,20 @@ const mockUserService = {
   getById: jest.fn(),
   loadProfile: jest.fn(),
   updateProfile: jest.fn(),
+  updateProfileImage: jest.fn(),
+  updateCoverImage: jest.fn(),
+};
+
+const mockMediaService = {
+  getSignedProfileUpload: jest.fn(),
+  getSignedCoverUpload: jest.fn(),
 };
 
 const mockContext = {
   user: { id: "1", profile: "2", verified: true },
   host: "127.0.0.1",
   userService: mockUserService,
+  mediaService: mockMediaService,
 };
 
 const ds = new UserAPI();
@@ -48,6 +56,48 @@ test("updateProfile - should update a user's profile", async () => {
     data
   );
   expect(result).toEqual(mockProfile);
+});
+
+test("updateProfileImage - should return a stringified signed request for the client", async () => {
+  const key = "some_image_key";
+
+  const mockResponse = {
+    fields: { key },
+  };
+
+  mockMediaService.getSignedProfileUpload.mockReturnValueOnce(mockResponse);
+
+  const result = await ds.updateProfileImage("1");
+
+  expect(mockMediaService.getSignedProfileUpload).toBeCalledWith(
+    mockContext.user.id
+  );
+  expect(mockUserService.updateProfileImage).toBeCalledWith(
+    mockContext.user.profile,
+    key
+  );
+  expect(result).toEqual(JSON.stringify(mockResponse));
+});
+
+test("updateCoverImage - should return a stringified signed request for the client", async () => {
+  const key = "some_image_key";
+
+  const mockResponse = {
+    fields: { key },
+  };
+
+  mockMediaService.getSignedCoverUpload.mockReturnValueOnce(mockResponse);
+
+  const result = await ds.updateCoverImage("1");
+
+  expect(mockMediaService.getSignedCoverUpload).toBeCalledWith(
+    mockContext.user.id
+  );
+  expect(mockUserService.updateCoverImage).toBeCalledWith(
+    mockContext.user.profile,
+    key
+  );
+  expect(result).toEqual(JSON.stringify(mockResponse));
 });
 
 test("loadProfile - should return a user's profile", async () => {

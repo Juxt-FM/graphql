@@ -3,6 +3,7 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
+import AWS from "aws-sdk";
 import {
   ApolloServer,
   PlaygroundConfig,
@@ -23,6 +24,7 @@ import {
   UserService,
   NotificationService,
   UserContentService,
+  MediaService,
 } from "../services";
 import { AuthHandler, UserContentHandler, UserHandler } from "../db";
 
@@ -51,23 +53,21 @@ const schema = applyMiddleware(
   permissions
 );
 
-const mediaContext = {
-  ...media,
-  getResourceURL: (bucket: string, key: string) => {
-    return `https://${bucket}.s3.amazonaws.com/${key}`;
-  },
-};
-
 /**
  * Returns a GraphQL server instance
  * @param options
  */
 export const buildGraph = ({ db }: IServerBuilder) => {
+  const s3 = new AWS.S3();
+
   const authService = new AuthService(auth, db.registerHandler(AuthHandler));
   const userService = new UserService(db.registerHandler(UserHandler));
   const userContentService = new UserContentService(
     db.registerHandler(UserContentHandler)
   );
+  const mediaService = new MediaService(s3, {
+    bucket: process.env.MEDIA_BUCKET || "juxt-media",
+  });
 
   const notificationService = new NotificationService({
     from: mail.fromEmail,
@@ -94,7 +94,7 @@ export const buildGraph = ({ db }: IServerBuilder) => {
       userService,
       userContentService,
       notificationService,
-      media: mediaContext,
+      mediaService,
       client: {
         name: req.headers["client_name"],
         version: req.headers["client_version"],
