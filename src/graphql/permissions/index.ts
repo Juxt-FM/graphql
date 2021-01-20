@@ -9,7 +9,7 @@ import _ from "lodash";
 
 import auth from "./auth";
 import users from "./users";
-import content from "./user-content";
+import content from "./content";
 import market from "./market";
 
 export default shield(_.merge(auth, users, market, content), {

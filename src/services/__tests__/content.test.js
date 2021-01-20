@@ -3,9 +3,9 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { UserContentService } = require("../user-content");
+const { UserContentService } = require("../content");
 
-const { mockIdea, mockPost } = require("../../db/__mocks__/user-content");
+const { mockIdea, mockPost } = require("../../db/__mocks__/content");
 const { ValidationError } = require("../utils/errors");
 
 const mockDbHandler = {

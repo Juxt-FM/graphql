@@ -3,9 +3,9 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { UserContentAPI } = require("../user-content");
+const { UserContentAPI } = require("../content");
 
-const { mockPost, mockIdea } = require("../../../db/__mocks__/user-content");
+const { mockPost, mockIdea } = require("../../../db/__mocks__/content");
 
 const mockUserContentService = {
   buildReactionLoader: jest.fn(),

@@ -8,6 +8,6 @@ import _ from "lodash";
 import auth from "./auth";
 import users from "./users";
 import market from "./market";
-import content from "./user-content";
+import content from "./content";
 
 export default _.merge(auth, users, market, content);

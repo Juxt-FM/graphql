@@ -16,16 +16,16 @@ export default {
       args: undefined,
       context: IResolverContext
     ) => {
-      const { buckets, getResourceURL } = context.media;
-      return getResourceURL(buckets.profileImages, parent.profileImageURL);
+      const { mediaService } = context;
+      return mediaService.getResourceURL(parent.profileImageURL);
     },
     coverImageURL: (
       parent: any,
       args: undefined,
       context: IResolverContext
     ) => {
-      const { buckets, getResourceURL } = context.media;
-      return getResourceURL(buckets.coverImages, parent.coverImageURL);
+      const { mediaService } = context;
+      return mediaService.getResourceURL(parent.coverImageURL);
     },
     posts: (): any[] => [],
     ideas: (): any[] => [],
