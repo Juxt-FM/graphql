@@ -8,24 +8,19 @@ import _ from "lodash";
 
 import { ValidationError } from "./utils/errors";
 
-import {
-  UserContentHandler,
-  IPostInput,
-  IIdeaInput,
-  IReactionInput,
-} from "../db";
+import { ContentHandler, IPostInput, IIdeaInput, IReactionInput } from "../db";
 
 /**
  * profile service (post authors, public profiles, etc.)
- * @param {UserContentHandler} dbHandler
+ * @param {ContentHandler} dbHandler
  */
-export class UserContentService {
-  private dbHandler: UserContentHandler;
+export class ContentService {
+  private dbHandler: ContentHandler;
   private reactionCountLoader: DataLoader<any, any, any>;
   private replyCountLoader: DataLoader<any, any, any>;
   private reactionLoader: DataLoader<any, any, any>;
 
-  constructor(dbHandler: UserContentHandler) {
+  constructor(dbHandler: ContentHandler) {
     this.dbHandler = dbHandler;
 
     this.reactionCountLoader = this.buildReactionCountLoader();

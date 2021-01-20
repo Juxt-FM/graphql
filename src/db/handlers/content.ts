@@ -46,7 +46,7 @@ export interface IUpdateReactionInput {
  * User content database handler.
  * @param {GraphDB} graph
  */
-export class UserContentHandler extends BaseHandler {
+export class ContentHandler extends BaseHandler {
   constructor(graph: GraphDB) {
     super(graph);
 

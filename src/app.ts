@@ -75,7 +75,7 @@ graph.applyMiddleware({
 
 app.get("/health", async (req, res) => {
   try {
-    const handler: MarketHandler = db.registerHandler(MarketHandler);
+    const handler: MarketHandler = db.register(MarketHandler);
 
     const results = await handler.findAllSectors(10, 0);
 

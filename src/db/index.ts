@@ -24,7 +24,7 @@ export default class GraphDB {
    * Injects a query parameter into any handlers used
    * @param Handler
    */
-  registerHandler(Handler: any) {
+  register(Handler: any) {
     return new Handler({ query: this.query });
   }
 

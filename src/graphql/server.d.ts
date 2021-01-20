@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 
-import { UserAPI, AuthAPI, MarketAPI, UserContentAPI } from "./sources";
+import { UserAPI, AuthAPI, MarketAPI, ContentAPI } from "./sources";
 import {
   AuthService,
   MediaService,
   NotificationService,
-  UserContentService,
+  ContentService,
   UserService,
 } from "../services";
 
@@ -30,7 +30,7 @@ export interface IContext {
   user: IAuthenticatedUser | undefined;
   authService: AuthService;
   userService: UserService;
-  contentService: UserContentService;
+  contentService: ContentService;
   notificationService: NotificationService;
   mediaService: MediaService;
   host: string;
@@ -49,6 +49,6 @@ export interface IResolverContext extends IContext {
     users: UserAPI;
     auth: AuthAPI;
     market: MarketAPI;
-    content: UserContentAPI;
+    content: ContentAPI;
   };
 }

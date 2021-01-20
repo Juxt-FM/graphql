@@ -22,9 +22,5 @@ export const mail = {
 };
 
 export const media = {
-  region: process.env.AWS_REGION || "us-east-1",
-  buckets: {
-    profileImages: process.env.PROFILE_IMAGE_BUCKET || "profile-images",
-    coverImages: process.env.COVER_IMAGE_BUCKET || "cover-images",
-  },
+  bucket: process.env.MEDIA_BUCKET || "juxt-media",
 };

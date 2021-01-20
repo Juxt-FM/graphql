@@ -9,7 +9,7 @@ import { IdeaInput, MutationCreateReactionArgs, PostInput } from "../types";
 import { DataSourceConfig } from "apollo-datasource";
 import { IContext } from "../server";
 
-export class UserContentAPI extends BaseAPI {
+export class ContentAPI extends BaseAPI {
   constructor() {
     super();
   }

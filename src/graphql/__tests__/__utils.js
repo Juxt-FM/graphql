@@ -4,7 +4,7 @@
  */
 
 const { ApolloServer } = require("apollo-server-express");
-const { AuthAPI, UserAPI, UserContentAPI } = require("../sources");
+const { AuthAPI, UserAPI, ContentAPI } = require("../sources");
 const { default: typeDefs } = require("../schema");
 const { default: resolvers } = require("../resolvers");
 
@@ -13,13 +13,13 @@ const {
   mockMediaService,
 } = require("../sources/__tests__/users.test");
 const { mockAuthService } = require("../sources/__tests__/auth.test");
-const { mockUserContentService } = require("../sources/__tests__/content.test");
+const { mockContentService } = require("../sources/__tests__/content.test");
 const { NotificationService } = require("../../services");
 
 const buildTestServer = async (options) => {
   const users = new UserAPI();
   const auth = new AuthAPI();
-  const content = new UserContentAPI();
+  const content = new ContentAPI();
 
   const mockExpressContext = {
     req: {
@@ -46,7 +46,7 @@ const buildTestServer = async (options) => {
     client: { name: "web" },
     userService: mockUserService,
     authService: mockAuthService,
-    contentService: mockUserContentService,
+    contentService: mockContentService,
     notificationService: mockNotificationService,
     mediaService: mockMediaService,
     expressCtx: mockExpressContext,
@@ -70,7 +70,7 @@ const buildTestServer = async (options) => {
     mockUserService,
     mockAuthService,
     mockNotificationService,
-    mockUserContentService,
+    mockContentService,
     mockMediaService,
   };
 };

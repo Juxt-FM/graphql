@@ -61,12 +61,12 @@ const IDEA_BY_ID = gql`
 test("QUERY postByID", async () => {
   const {
     server,
-    mockUserContentService,
+    mockContentService,
     mockUserService,
   } = await buildTestServer();
 
   mockUserService.loadProfile.mockReturnValueOnce(mockProfile);
-  mockUserContentService.getByID.mockReturnValueOnce(mockPost);
+  mockContentService.getByID.mockReturnValueOnce(mockPost);
 
   const { mutate } = createTestClient(server);
 
@@ -90,12 +90,12 @@ test("QUERY postByID", async () => {
 test("QUERY ideaByID", async () => {
   const {
     server,
-    mockUserContentService,
+    mockContentService,
     mockUserService,
   } = await buildTestServer();
 
   mockUserService.loadProfile.mockReturnValueOnce(mockProfile);
-  mockUserContentService.getByID.mockReturnValueOnce(mockIdea);
+  mockContentService.getByID.mockReturnValueOnce(mockIdea);
 
   const { mutate } = createTestClient(server);
 
@@ -179,7 +179,7 @@ const DELETE_IDEA = gql`
 `;
 
 test("MUTATION createPost", async () => {
-  const { server, mockUserContentService } = await buildTestServer();
+  const { server, mockContentService } = await buildTestServer();
 
   const data = {
     publicationStatus: "public",
@@ -191,7 +191,7 @@ test("MUTATION createPost", async () => {
 
   const mockResponse = { ...mockPost, ...data };
 
-  mockUserContentService.createPost.mockReturnValueOnce(mockResponse);
+  mockContentService.createPost.mockReturnValueOnce(mockResponse);
 
   const { mutate } = createTestClient(server);
 
@@ -211,7 +211,7 @@ test("MUTATION createPost", async () => {
 });
 
 test("MUTATION updatePost", async () => {
-  const { server, mockUserContentService } = await buildTestServer();
+  const { server, mockContentService } = await buildTestServer();
 
   const data = {
     publicationStatus: "public",
@@ -223,7 +223,7 @@ test("MUTATION updatePost", async () => {
 
   const mockResponse = { ...mockPost, ...data };
 
-  mockUserContentService.updatePost.mockReturnValueOnce(mockResponse);
+  mockContentService.updatePost.mockReturnValueOnce(mockResponse);
 
   const { mutate } = createTestClient(server);
 
@@ -243,11 +243,11 @@ test("MUTATION updatePost", async () => {
 });
 
 test("MUTATION deletePost", async () => {
-  const { server, mockUserContentService } = await buildTestServer();
+  const { server, mockContentService } = await buildTestServer();
 
   const mockResponse = "deleted post";
 
-  mockUserContentService.deletePost.mockReturnValueOnce(mockResponse);
+  mockContentService.deletePost.mockReturnValueOnce(mockResponse);
 
   const { mutate } = createTestClient(server);
 
@@ -262,7 +262,7 @@ test("MUTATION deletePost", async () => {
 });
 
 test("MUTATION createIdea", async () => {
-  const { server, mockUserContentService } = await buildTestServer();
+  const { server, mockContentService } = await buildTestServer();
 
   const data = {
     replyStatus: null,
@@ -271,7 +271,7 @@ test("MUTATION createIdea", async () => {
 
   const mockResponse = { ...mockPost, ...data };
 
-  mockUserContentService.createIdea.mockReturnValueOnce(mockResponse);
+  mockContentService.createIdea.mockReturnValueOnce(mockResponse);
 
   const { mutate } = createTestClient(server);
 
@@ -287,13 +287,13 @@ test("MUTATION createIdea", async () => {
 });
 
 test("MUTATION updateIdea", async () => {
-  const { server, mockUserContentService } = await buildTestServer();
+  const { server, mockContentService } = await buildTestServer();
 
   const message = "updated idea";
 
   const mockResponse = { ...mockIdea, message };
 
-  mockUserContentService.updateIdea.mockReturnValueOnce(mockResponse);
+  mockContentService.updateIdea.mockReturnValueOnce(mockResponse);
 
   const { mutate } = createTestClient(server);
 
@@ -309,11 +309,11 @@ test("MUTATION updateIdea", async () => {
 });
 
 test("MUTATION deleteIdea", async () => {
-  const { server, mockUserContentService } = await buildTestServer();
+  const { server, mockContentService } = await buildTestServer();
 
   const mockResponse = "deleted idea";
 
-  mockUserContentService.deleteIdea.mockReturnValueOnce(mockResponse);
+  mockContentService.deleteIdea.mockReturnValueOnce(mockResponse);
 
   const { mutate } = createTestClient(server);
 

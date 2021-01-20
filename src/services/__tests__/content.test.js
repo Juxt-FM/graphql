@@ -3,7 +3,7 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { UserContentService } = require("../content");
+const { ContentService } = require("../content");
 
 const { mockIdea, mockPost } = require("../../db/__mocks__/content");
 const { ValidationError } = require("../utils/errors");
@@ -26,7 +26,7 @@ const mockDbHandler = {
   reportContent: jest.fn(),
 };
 
-const service = new UserContentService(mockDbHandler);
+const service = new ContentService(mockDbHandler);
 
 describe("validatePost", () => {
   it("should validate and return post data", () => {

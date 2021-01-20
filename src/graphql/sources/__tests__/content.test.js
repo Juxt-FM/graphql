@@ -3,11 +3,11 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { UserContentAPI } = require("../content");
+const { ContentAPI } = require("../content");
 
 const { mockPost, mockIdea } = require("../../../db/__mocks__/content");
 
-const mockUserContentService = {
+const mockContentService = {
   buildReactionLoader: jest.fn(),
   getByID: jest.fn(),
   getReplies: jest.fn(),
@@ -27,51 +27,51 @@ const mockUserContentService = {
 
 const mockContext = {
   user: { id: 1, profile: 2, verified: true },
-  contentService: mockUserContentService,
+  contentService: mockContentService,
 };
 
-const ds = new UserContentAPI();
+const ds = new ContentAPI();
 
 ds.initialize({ context: mockContext });
 
 test("should have initialized reaction loader", () => {
-  const test = new UserContentAPI();
+  const test = new ContentAPI();
   test.initialize({ context: mockContext });
 
-  expect(mockUserContentService.buildReactionLoader).toBeCalledWith(
+  expect(mockContentService.buildReactionLoader).toBeCalledWith(
     mockContext.user.profile
   );
 });
 
 test("getPostByID", async () => {
-  mockUserContentService.getByID.mockReturnValueOnce(mockPost);
+  mockContentService.getByID.mockReturnValueOnce(mockPost);
 
   const post = await ds.getPostByID("1");
 
-  expect(mockUserContentService.getByID).toBeCalledWith("1", "post");
+  expect(mockContentService.getByID).toBeCalledWith("1", "post");
   expect(post).toEqual(mockPost);
 });
 
 test("getIdeaByID", async () => {
-  mockUserContentService.getByID.mockReturnValueOnce(mockIdea);
+  mockContentService.getByID.mockReturnValueOnce(mockIdea);
 
   const post = await ds.getIdeaByID("1");
 
-  expect(mockUserContentService.getByID).toBeCalledWith("1", "idea");
+  expect(mockContentService.getByID).toBeCalledWith("1", "idea");
   expect(post).toEqual(mockIdea);
 });
 
 test("getReplies", async () => {
-  mockUserContentService.getReplies.mockReturnValueOnce([mockIdea]);
+  mockContentService.getReplies.mockReturnValueOnce([mockIdea]);
 
   const result = await ds.getReplies("1", 100, 0);
 
-  expect(mockUserContentService.getReplies).toBeCalledWith("1", 100, 0);
+  expect(mockContentService.getReplies).toBeCalledWith("1", 100, 0);
   expect(result).toEqual([mockIdea]);
 });
 
 test("createPost", async () => {
-  mockUserContentService.createPost.mockReturnValueOnce(mockPost);
+  mockContentService.createPost.mockReturnValueOnce(mockPost);
 
   const data = {
     publicationStatus: "public",
@@ -83,7 +83,7 @@ test("createPost", async () => {
 
   const result = await ds.createPost(data);
 
-  expect(mockUserContentService.createPost).toBeCalledWith(
+  expect(mockContentService.createPost).toBeCalledWith(
     mockContext.user.profile,
     data
   );
@@ -91,7 +91,7 @@ test("createPost", async () => {
 });
 
 test("updatePost", async () => {
-  mockUserContentService.updatePost.mockReturnValueOnce(mockPost);
+  mockContentService.updatePost.mockReturnValueOnce(mockPost);
 
   const data = {
     publicationStatus: "public",
@@ -103,7 +103,7 @@ test("updatePost", async () => {
 
   const result = await ds.updatePost("1", data);
 
-  expect(mockUserContentService.updatePost).toBeCalledWith(
+  expect(mockContentService.updatePost).toBeCalledWith(
     "1",
     mockContext.user.profile,
     data
@@ -113,11 +113,11 @@ test("updatePost", async () => {
 
 test("deletePost", async () => {
   const res = "some success string";
-  mockUserContentService.deletePost.mockReturnValueOnce(res);
+  mockContentService.deletePost.mockReturnValueOnce(res);
 
   const result = await ds.deletePost("1");
 
-  expect(mockUserContentService.deletePost).toBeCalledWith(
+  expect(mockContentService.deletePost).toBeCalledWith(
     "1",
     mockContext.user.profile
   );
@@ -125,7 +125,7 @@ test("deletePost", async () => {
 });
 
 test("createIdea", async () => {
-  mockUserContentService.createIdea.mockReturnValueOnce(mockIdea);
+  mockContentService.createIdea.mockReturnValueOnce(mockIdea);
 
   const data = {
     replyStatus: null,
@@ -134,7 +134,7 @@ test("createIdea", async () => {
 
   const result = await ds.createIdea(data);
 
-  expect(mockUserContentService.createIdea).toBeCalledWith(
+  expect(mockContentService.createIdea).toBeCalledWith(
     mockContext.user.profile,
     data
   );
@@ -142,13 +142,13 @@ test("createIdea", async () => {
 });
 
 test("updateIdea", async () => {
-  mockUserContentService.updateIdea.mockReturnValueOnce(mockIdea);
+  mockContentService.updateIdea.mockReturnValueOnce(mockIdea);
 
   const message = "new message";
 
   const result = await ds.updateIdea("1", message);
 
-  expect(mockUserContentService.updateIdea).toBeCalledWith(
+  expect(mockContentService.updateIdea).toBeCalledWith(
     "1",
     mockContext.user.profile,
     message
@@ -158,11 +158,11 @@ test("updateIdea", async () => {
 
 test("deleteIdea", async () => {
   const res = "some success string";
-  mockUserContentService.deleteIdea.mockReturnValueOnce(res);
+  mockContentService.deleteIdea.mockReturnValueOnce(res);
 
   const result = await ds.deleteIdea("1");
 
-  expect(mockUserContentService.deleteIdea).toBeCalledWith(
+  expect(mockContentService.deleteIdea).toBeCalledWith(
     "1",
     mockContext.user.profile
   );
@@ -172,7 +172,7 @@ test("deleteIdea", async () => {
 test("createReaction", async () => {
   const reaction = "like";
 
-  mockUserContentService.createReaction.mockReturnValueOnce(reaction);
+  mockContentService.createReaction.mockReturnValueOnce(reaction);
 
   const data = {
     to: "1",
@@ -181,7 +181,7 @@ test("createReaction", async () => {
 
   const result = await ds.createReaction(data);
 
-  expect(mockUserContentService.createReaction).toBeCalledWith(
+  expect(mockContentService.createReaction).toBeCalledWith(
     mockContext.user.profile,
     data
   );
@@ -190,11 +190,11 @@ test("createReaction", async () => {
 
 test("deleteReaction", async () => {
   const res = "some success string";
-  mockUserContentService.deleteReaction.mockReturnValueOnce(res);
+  mockContentService.deleteReaction.mockReturnValueOnce(res);
 
   const result = await ds.deleteReaction("1");
 
-  expect(mockUserContentService.deleteReaction).toBeCalledWith(
+  expect(mockContentService.deleteReaction).toBeCalledWith(
     mockContext.user.profile,
     "1"
   );
@@ -204,11 +204,11 @@ test("deleteReaction", async () => {
 
 test("reportContent", async () => {
   const res = "some success string";
-  mockUserContentService.reportContent.mockReturnValueOnce(res);
+  mockContentService.reportContent.mockReturnValueOnce(res);
 
   const result = await ds.reportContent("1");
 
-  expect(mockUserContentService.reportContent).toBeCalledWith(
+  expect(mockContentService.reportContent).toBeCalledWith(
     mockContext.user.profile,
     "1"
   );
@@ -218,11 +218,11 @@ test("reportContent", async () => {
 
 test("reportContent", async () => {
   const res = "some success string";
-  mockUserContentService.reportContent.mockReturnValueOnce(res);
+  mockContentService.reportContent.mockReturnValueOnce(res);
 
   const result = await ds.reportContent("1");
 
-  expect(mockUserContentService.reportContent).toBeCalledWith(
+  expect(mockContentService.reportContent).toBeCalledWith(
     mockContext.user.profile,
     "1"
   );
@@ -232,11 +232,11 @@ test("reportContent", async () => {
 
 test("loadReactionStatus", async () => {
   const reaction = "like";
-  mockUserContentService.loadReaction.mockReturnValueOnce(reaction);
+  mockContentService.loadReaction.mockReturnValueOnce(reaction);
 
   const result = await ds.loadReactionStatus("1");
 
-  expect(mockUserContentService.loadReaction).toBeCalledWith("1");
+  expect(mockContentService.loadReaction).toBeCalledWith("1");
 
   expect(result).toEqual(reaction);
 });
@@ -244,11 +244,11 @@ test("loadReactionStatus", async () => {
 test("loadReplyCount", async () => {
   const count = 2;
 
-  mockUserContentService.loadReplyCount.mockReturnValueOnce(count);
+  mockContentService.loadReplyCount.mockReturnValueOnce(count);
 
   const result = await ds.loadReplyCount("1");
 
-  expect(mockUserContentService.loadReplyCount).toBeCalledWith("1");
+  expect(mockContentService.loadReplyCount).toBeCalledWith("1");
 
   expect(result).toEqual(count);
 });
@@ -256,13 +256,13 @@ test("loadReplyCount", async () => {
 test("loadReactionCount", async () => {
   const count = 2;
 
-  mockUserContentService.loadReactionCount.mockReturnValueOnce(count);
+  mockContentService.loadReactionCount.mockReturnValueOnce(count);
 
   const result = await ds.loadReactionCount("1");
 
-  expect(mockUserContentService.loadReactionCount).toBeCalledWith("1");
+  expect(mockContentService.loadReactionCount).toBeCalledWith("1");
 
   expect(result).toEqual(count);
 });
 
-module.exports = { mockUserContentService };
+module.exports = { mockContentService };

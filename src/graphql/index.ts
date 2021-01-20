@@ -11,7 +11,7 @@ import {
 } from "apollo-server-express";
 import { applyMiddleware } from "graphql-middleware";
 
-import { UserAPI, AuthAPI, MarketAPI, UserContentAPI } from "./sources";
+import { UserAPI, AuthAPI, MarketAPI, ContentAPI } from "./sources";
 
 import typeDefs from "./schema";
 import resolvers from "./resolvers";
@@ -23,12 +23,12 @@ import {
   AuthService,
   UserService,
   NotificationService,
-  UserContentService,
+  ContentService,
   MediaService,
 } from "../services";
-import { AuthHandler, UserContentHandler, UserHandler } from "../db";
+import { AuthHandler, ContentHandler, UserHandler } from "../db";
 
-import { auth, mail, media } from "../settings";
+import * as settings from "../settings";
 
 /**
  * Introspection controls whether or not the GraphQL schema
@@ -48,6 +48,10 @@ if (process.env.NODE_ENV === "development") {
   };
 }
 
+/**
+ * Apply the query-level permissions we defined
+ * with GraphQL Shield
+ */
 const schema = applyMiddleware(
   makeExecutableSchema({ typeDefs, resolvers }),
   permissions
@@ -60,17 +64,18 @@ const schema = applyMiddleware(
 export const buildGraph = ({ db }: IServerBuilder) => {
   const s3 = new AWS.S3();
 
-  const authService = new AuthService(auth, db.registerHandler(AuthHandler));
-  const userService = new UserService(db.registerHandler(UserHandler));
-  const contentService = new UserContentService(
-    db.registerHandler(UserContentHandler)
-  );
-  const mediaService = new MediaService(s3, {
-    bucket: process.env.MEDIA_BUCKET || "juxt-media",
-  });
+  /**
+   * Because the services don't have any per-request
+   * state, we can instantiate them when building the server
+   * and just pass them to the context creator below.
+   */
 
+  const authService = new AuthService(settings.auth, db.register(AuthHandler));
+  const userService = new UserService(db.register(UserHandler));
+  const mediaService = new MediaService(s3, settings.media);
+  const contentService = new ContentService(db.register(ContentHandler));
   const notificationService = new NotificationService({
-    from: mail.fromEmail,
+    from: settings.mail.fromEmail,
   });
 
   notificationService.initialize();
@@ -78,10 +83,15 @@ export const buildGraph = ({ db }: IServerBuilder) => {
   const dataSources = () => ({
     auth: new AuthAPI(),
     users: new UserAPI(),
-    content: new UserContentAPI(),
+    content: new ContentAPI(),
     market: new MarketAPI({ uri: process.env.MARKET_SERVICE_URI }),
   });
 
+  /**
+   * Returns the per-request context, including authenticated user
+   * info, service classes, and other request information
+   * @param {ExpressContext} ctx
+   */
   const context = async ({ req, res }: IContextBuilder) => {
     const { user } = req;
 

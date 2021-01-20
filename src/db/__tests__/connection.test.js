@@ -29,7 +29,7 @@ describe("GraphDB Instance", () => {
   });
 
   it("should register handler", () => {
-    const handler = graph.registerHandler(TestHandler);
+    const handler = graph.register(TestHandler);
 
     expect(handler.graph.query).toEqual(graph.query);
   });
