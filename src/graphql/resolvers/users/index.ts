@@ -11,6 +11,15 @@ export default {
   Query,
   Mutation,
   UserProfile: {
+    followingStatus: async (
+      parent: any,
+      args: undefined,
+      context: IResolverContext
+    ): Promise<any> => {
+      const { users } = context.dataSources;
+
+      return await users.loadFollowingStatus(parent.id);
+    },
     profileImageURL: (
       parent: any,
       args: undefined,

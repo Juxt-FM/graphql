@@ -6,10 +6,27 @@
 import { BaseAPI } from "./base";
 
 import { ProfileInput } from "../types";
+import { IContext } from "../server";
+import { DataSourceConfig } from "apollo-datasource";
 
 export class UserAPI extends BaseAPI {
   constructor() {
     super();
+  }
+
+  initialize(config: DataSourceConfig<IContext>) {
+    this.context = config.context;
+
+    /**
+     * For this service we need to manually
+     * build the reaction dataloader, as it requires
+     * the logged in user's ID
+     */
+    const { buildFollowStatusLoader } = this.context.userService;
+
+    if (this.context.user) {
+      buildFollowStatusLoader(this.context.user.profile);
+    }
   }
 
   /**
@@ -21,6 +38,30 @@ export class UserAPI extends BaseAPI {
       const { userService } = this.context;
 
       return await userService.getById(id);
+    });
+  }
+
+  /**
+   * Follow's a user's profile
+   * @param {string} id
+   */
+  async follow(id: string) {
+    return this.handler("follow", async () => {
+      const { user, userService } = this.context;
+
+      return await userService.followProfile(user.profile, id);
+    });
+  }
+
+  /**
+   * Unfollow's a user's profile
+   * @param {string} id
+   */
+  async unfollow(id: string) {
+    return this.handler("unfollow", async () => {
+      const { user, userService } = this.context;
+
+      return await userService.unfollowProfile(user.profile, id);
     });
   }
 
@@ -65,6 +106,18 @@ export class UserAPI extends BaseAPI {
       await userService.updateProfileImage(user.profile, result.fields.key);
 
       return JSON.stringify(result);
+    });
+  }
+
+  /**
+   * Uses the service dataloader to batch profiles
+   * @param {string} id
+   */
+  async loadFollowingStatus(id: string) {
+    return this.handler("loadFollowingStatus", async () => {
+      const { userService } = this.context;
+
+      return await userService.loadFollowStatus(id);
     });
   }
 

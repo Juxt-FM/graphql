@@ -15,10 +15,25 @@ import { UserHandler, IProfileInput } from "../db";
 export class UserService {
   private dbHandler: UserHandler;
   private profileLoader: DataLoader<any, any, any>;
+  private followStatusLoader: DataLoader<any, any, any>;
 
   constructor(dbHandler: UserHandler) {
     this.dbHandler = dbHandler;
     this.profileLoader = this.buildProfileLoader();
+  }
+
+  /**
+   * Loads the user's following statuses for a list of profile ID's
+   * @param {string} user
+   */
+  buildFollowStatusLoader(user: string) {
+    this.followStatusLoader = new DataLoader(async (ids: string[]) => {
+      const result = await this.dbHandler.loadFollowingStatuses(ids, user);
+
+      const statuses = _.keyBy(result, "profile");
+
+      return ids.map((id) => (statuses[id] ? statuses[id].rel : null));
+    });
   }
 
   private buildProfileLoader() {
@@ -36,6 +51,25 @@ export class UserService {
    */
   async getById(id: string) {
     return await this.dbHandler.findById(id);
+  }
+
+  /**
+   * Follows a profile with the given ID
+   * @param {string} user
+   * @param {string} id
+   */
+  async followProfile(user: string, id: string) {
+    return await this.dbHandler.followProfile(user, id);
+  }
+
+  /**
+   * Unfollows a profile with the given ID
+   * @param {string} user
+   * @param {string} id
+   */
+  async unfollowProfile(user: string, id: string) {
+    await this.dbHandler.unfollowProfile(user, id);
+    return "Successfully unfollowed profile.";
   }
 
   /**
@@ -63,6 +97,14 @@ export class UserService {
    */
   async updateCoverImage(id: string, key: string) {
     await this.dbHandler.updateCoverImage(id, key);
+  }
+
+  /**
+   * Loads a profile ID into the status loader
+   * @param {string} id
+   */
+  async loadFollowStatus(id: string) {
+    return await this.followStatusLoader.load(id);
   }
 
   /**

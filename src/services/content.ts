@@ -31,11 +31,11 @@ export class ContentService {
 
   /**
    * Loads a profile's reactions to topics
-   * @param {string} profile
+   * @param {string} user
    */
-  buildReactionLoader(profile: string) {
+  buildReactionLoader(user: string) {
     this.reactionLoader = new DataLoader(async (ids: string[]) => {
-      const result = await this.dbHandler.loadReactions(ids, profile);
+      const result = await this.dbHandler.loadReactions(ids, user);
 
       const reactions = _.keyBy(result, "id");
 

@@ -8,8 +8,13 @@ type UserProfile {
   watchlists: [Watchlist!]!
   posts: [Post!]!
   ideas: [Idea!]!
+  followingStatus: FollowingStatus
   created: String!
   updated: String!
+}
+
+type FollowingStatus {
+  timestamp: String!
 }
 
 input ProfileInput {
@@ -23,6 +28,8 @@ extend type Query {
 }
 
 extend type Mutation {
+  followProfile(id: ID!): FollowingStatus!
+  unfollowProfile(id: ID!): String!
   updateProfile(data: ProfileInput!): UserProfile!
   updateProfileImage: String!
   updateCoverImage: String!

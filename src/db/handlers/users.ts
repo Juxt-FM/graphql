@@ -3,14 +3,17 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
+import gremlin from "gremlin";
 import moment from "moment";
 
 import GraphDB from "..";
 
 import BaseHandler from "./base";
 
-import { IRawProfile, IUserProfile, labels } from "../constants";
+import { labels, relationships, IRawProfile, IUserProfile } from "../constants";
 import { ResourceNotFoundError } from "../errors";
+
+const { statics: __ } = gremlin.process;
 
 export interface IProfileInput {
   name?: string;
@@ -105,13 +108,101 @@ export class UserHandler extends BaseHandler {
   async findById(id: string) {
     const query = this.graph.query();
 
-    const result = await query.V(id).elementMap().next();
+    const result = await query
+      .V(id)
+      .hasLabel(labels.USER_PROFILE)
+      .elementMap()
+      .next();
 
     if (!result.value) throw new ResourceNotFoundError();
 
     const profile: any = Object.fromEntries(result.value);
 
     return this.transform(profile);
+  }
+
+  /**
+   * Follows a user with the given ID
+   * @param {string} currentUser
+   * @param {string} id
+   */
+  async followProfile(currentUser: string, id: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .hasLabel(labels.USER_PROFILE)
+      .as("profile")
+      .addE(relationships.FOLLOWING)
+      .property("timestamp", moment().valueOf())
+      .as("status")
+      .from_(currentUser)
+      .to("profile")
+      .select("status")
+      .values("timestamp")
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    return { timestamp: moment(result.value).toDate() };
+  }
+
+  /**
+   * Follows a user with the given ID
+   * @param {string} currentUser
+   * @param {string} id
+   */
+  async unfollowProfile(currentUser: string, id: string) {
+    const query = this.graph.query();
+
+    await query
+      .V(id)
+      .hasLabel(labels.USER_PROFILE)
+      .as("profile")
+      .inE(relationships.FOLLOWING)
+      .as("status")
+      .outV()
+      .hasId(currentUser)
+      .select("status")
+      .drop()
+      .next();
+  }
+
+  /**
+   * Fetches all following statuses to user's with an
+   * ID in the given list
+   * @param {string[]} ids
+   * @param {string} user
+   */
+  async loadFollowingStatuses(ids: string[], user: string) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(...ids)
+      .as("profile")
+      .local(
+        __.outE(relationships.FOLLOWING)
+          .as("rel")
+          .inV()
+          .hasId(user)
+          .select("profile", "rel")
+          .by(__.id())
+          .by(__.values("timestamp"))
+          .fold()
+      )
+      .next();
+
+    if (!result.value) throw new ResourceNotFoundError();
+
+    const statuses: any = Object.fromEntries(result.value);
+
+    return statuses.map((status: any) => ({
+      ...status,
+      rel: {
+        ...status.rel,
+        timestamp: moment(status.rel.timestamp).toDate(),
+      },
+    }));
   }
 
   /**

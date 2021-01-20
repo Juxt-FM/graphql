@@ -8,11 +8,15 @@ const { UserAPI } = require("../users");
 const { mockProfile } = require("../../../db/__mocks__/users");
 
 const mockUserService = {
+  buildFollowStatusLoader: jest.fn(),
   getById: jest.fn(),
   loadProfile: jest.fn(),
   updateProfile: jest.fn(),
   updateProfileImage: jest.fn(),
   updateCoverImage: jest.fn(),
+  followProfile: jest.fn(),
+  unfollowProfile: jest.fn(),
+  loadFollowStatus: jest.fn(),
 };
 
 const mockMediaService = {
@@ -31,6 +35,15 @@ const ds = new UserAPI();
 
 ds.initialize({ context: mockContext });
 
+test("should have initialized follow status loader", () => {
+  const test = new UserAPI();
+  test.initialize({ context: mockContext });
+
+  expect(mockUserService.buildFollowStatusLoader).toBeCalledWith(
+    mockContext.user.profile
+  );
+});
+
 test("getProfileByID - should return a user's profile", async () => {
   mockUserService.getById.mockReturnValueOnce(mockProfile);
 
@@ -38,6 +51,31 @@ test("getProfileByID - should return a user's profile", async () => {
 
   expect(mockUserService.getById).toBeCalledWith("1");
   expect(result).toEqual(mockProfile);
+});
+
+test("follow - should follow a user's profile", async () => {
+  mockUserService.followProfile.mockReturnValueOnce(undefined);
+
+  const result = await ds.follow("1");
+
+  expect(mockUserService.followProfile).toBeCalledWith(
+    mockContext.user.profile,
+    "1"
+  );
+  expect(result).toEqual(undefined);
+});
+
+test("unfollow - should unfollow a user's profile", async () => {
+  const message = "success string";
+  mockUserService.unfollowProfile.mockReturnValueOnce(message);
+
+  const result = await ds.unfollow("1");
+
+  expect(mockUserService.unfollowProfile).toBeCalledWith(
+    mockContext.user.profile,
+    "1"
+  );
+  expect(result).toEqual(message);
 });
 
 test("updateProfile - should update a user's profile", async () => {
@@ -98,6 +136,17 @@ test("updateCoverImage - should return a stringified signed request for the clie
     key
   );
   expect(result).toEqual(JSON.stringify(mockResponse));
+});
+
+test("loadFollowingStatus - should return a followingStatus", async () => {
+  const mockResponse = { timestamp: new Date() };
+
+  mockUserService.loadFollowStatus.mockReturnValueOnce(mockResponse);
+
+  const result = await ds.loadFollowingStatus("1");
+
+  expect(mockUserService.loadFollowStatus).toBeCalledWith("1");
+  expect(result).toEqual(mockResponse);
 });
 
 test("loadProfile - should return a user's profile", async () => {

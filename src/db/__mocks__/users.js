@@ -9,4 +9,8 @@ const mockProfile = {
   updated: new Date(),
 };
 
+const mockFollowStatus = {
+  timestamp: new Date(),
+};
+
 module.exports = { mockProfile };
