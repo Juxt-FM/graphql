@@ -1,12 +1,13 @@
-# Hedger GraphQL Service
+# JUXT GraphQL Service
 
-This component of the Hedger application serves as a GraphQL wrapper for all of the services this project provides, as well as 3rd party market APIs.
+This component of the JUXT application serves as a GraphQL wrapper for all of the services this project provides, as well as 3rd party market APIs.
 
 Technologies:
 
 - Express
 - Apollo
-- MongoDB
+- AWS SNS
+- Gremlin/AWS Neptune
 
 ## Setup
 
@@ -17,28 +18,30 @@ Technologies:
 yarn install
 ```
 
-4. Set environment variables
+## Configuration
 
-#### Available Variables
+**Server environment**
 
-**Server configuration**
+NODE_ENV (NodeJS environment)\
+PORT (server port - default is 4000)\
+COOKIE_SECRET (used to sign cookies)\
+PROXY_IN_USE (if your application is behind a proxy)
 
-NODE_ENV - Nodejs environment\
-PORT - Server port (default is 4000)\
-COOKIE_SECRET - Used to sign cookies\
-PROXY_IN_USE - If your application is behind a proxy
+**Database environment**
 
-**Database configuration**
+DB_URI\
+DB_USER\
+DB_PASSWORD
 
-DB_NAME - Database name (required)\
-DB_HOST - Database host (required)\
-DB_PORT - Database port (required)\
-DB_USER - Database username (required)\
-DB_PASS - Database password (required)
+**AWS environment**
+
+AWS_REGION\
+AWS_ACCESS_KEY_ID\
+AWS_SECRET_KEY_ID\
 
 #### Nodemon (development)
 
-nodemon.js
+rootDir/nodemon.json
 
 ```
 {
@@ -68,7 +71,6 @@ yarn start
 **Resources**
 
 Jest\
-mongodb-memory-server (Service integration)\
 apollo-server-testing (GraphQL integration)
 
 ```
