@@ -21,4 +21,12 @@ const mockIdea = {
   updated: new Date(),
 };
 
-module.exports = { mockPost, mockIdea };
+const mockReaction = {
+  id: "1",
+  from: "2",
+  to: "3",
+  reaction: "like",
+  timestamp: new Date(),
+};
+
+module.exports = { mockPost, mockIdea, mockReaction };

@@ -5,7 +5,11 @@
 
 const { ContentAPI } = require("../content");
 
-const { mockPost, mockIdea } = require("../../../database/__mocks__/content");
+const {
+  mockPost,
+  mockIdea,
+  mockReaction,
+} = require("../../../database/__mocks__/content");
 
 const mockContentService = {
   buildReactionLoader: jest.fn(),
@@ -231,14 +235,13 @@ test("reportContent", async () => {
 });
 
 test("loadReactionStatus", async () => {
-  const reaction = "like";
-  mockContentService.loadReaction.mockReturnValueOnce(reaction);
+  mockContentService.loadReaction.mockReturnValueOnce(mockReaction);
 
   const result = await ds.loadReactionStatus("1");
 
   expect(mockContentService.loadReaction).toBeCalledWith("1");
 
-  expect(result).toEqual(reaction);
+  expect(result).toEqual(mockReaction);
 });
 
 test("loadReplyCount", async () => {

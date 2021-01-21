@@ -5,7 +5,11 @@
 
 const { ContentService } = require("../content");
 
-const { mockIdea, mockPost } = require("../../database/__mocks__/content");
+const {
+  mockIdea,
+  mockPost,
+  mockReaction,
+} = require("../../database/__mocks__/content");
 const { ValidationError } = require("../utils/errors");
 
 const mockDbHandler = {
@@ -257,10 +261,11 @@ test("reportContent - should report content", async () => {
 describe("loadReactions", () => {
   test("should load a user's reactions", async () => {
     const mockUser = "1";
-    const mockReaction = "like";
     const contentID = "1";
 
-    const mockResponse = [{ id: contentID, reaction: mockReaction }];
+    const mockResponse = {};
+
+    mockResponse[contentID] = mockReaction;
 
     mockDbHandler.loadReactions.mockReturnValueOnce(mockResponse);
 
@@ -270,14 +275,14 @@ describe("loadReactions", () => {
 
     expect(mockDbHandler.loadReactions).toBeCalledWith([contentID], mockUser);
 
-    expect(result).toEqual(mockResponse[0].reaction);
+    expect(result).toEqual(mockReaction);
   });
 
   test("should return null", async () => {
     const mockUser = "1";
     const contentID = "1";
 
-    const mockResponse = [];
+    const mockResponse = {};
 
     mockDbHandler.loadReactions.mockReturnValueOnce(mockResponse);
 
@@ -293,14 +298,16 @@ describe("loadReactions", () => {
 
 describe("loadReactionCount", () => {
   test("should load an idea's reaction count", async () => {
-    const mockResponse = [{ id: mockIdea.id, count: 500 }];
+    const mockResponse = {};
+
+    mockResponse[mockIdea.id] = 500;
 
     mockDbHandler.loadReactionCounts.mockReturnValueOnce(mockResponse);
 
     const result = await service.loadReactionCount(mockIdea.id);
 
     expect(mockDbHandler.loadReactionCounts).toBeCalledWith([mockIdea.id]);
-    expect(result).toEqual(mockResponse[0].count);
+    expect(result).toEqual(mockResponse[mockIdea.id]);
   });
 
   test("should return 0", async () => {
@@ -317,18 +324,20 @@ describe("loadReactionCount", () => {
 
 describe("loadReplyCount", () => {
   test("should load an idea's reaction count", async () => {
-    const mockResponse = [{ id: mockIdea.id, count: 500 }];
+    const mockResponse = {};
+
+    mockResponse[mockIdea.id] = 500;
 
     mockDbHandler.loadReplyCounts.mockReturnValueOnce(mockResponse);
 
     const result = await service.loadReplyCount(mockIdea.id);
 
     expect(mockDbHandler.loadReplyCounts).toBeCalledWith([mockIdea.id]);
-    expect(result).toEqual(mockResponse[0].count);
+    expect(result).toEqual(mockResponse[mockIdea.id]);
   });
 
   test("should return 0", async () => {
-    mockDbHandler.loadReplyCounts.mockReturnValueOnce([]);
+    mockDbHandler.loadReplyCounts.mockReturnValueOnce({});
 
     const id = "bad_id";
 
