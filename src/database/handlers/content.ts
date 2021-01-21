@@ -13,10 +13,7 @@ import BaseHandler from "./base";
 import { ResourceNotFoundError } from "../errors";
 import { labels, relationships, IPost, IIdea } from "../constants";
 
-const {
-  statics: __,
-  t: { id },
-} = gremlin.process;
+const { statics: __ } = gremlin.process;
 
 export interface IPostInput {
   publicationStatus: "public" | "draft";
@@ -381,12 +378,13 @@ export class ContentHandler extends BaseHandler {
       )
       .next();
 
-    let records: any = Object.fromEntries(result.value);
+    const records: any = Object.fromEntries(result.value);
 
     Object.keys(records).forEach((key: string) => {
-      let inner: any = Object.fromEntries(records[key]);
+      const inner: any = Object.fromEntries(records[key]);
+
       const to = Object.fromEntries(inner.IN).id;
-      const from = Object.fromEntries(inner.IN).id;
+      const from = Object.fromEntries(inner.OUT).id;
 
       records[key] = {
         id: inner.id,

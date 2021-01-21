@@ -4,7 +4,6 @@
  */
 
 import DataLoader from "dataloader";
-import _ from "lodash";
 
 import { ValidationError } from "./utils/errors";
 
