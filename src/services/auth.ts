@@ -14,7 +14,7 @@ import {
   ResourceNotFoundError,
   IUserAccount,
   IDeviceArgs,
-} from "../db";
+} from "../database";
 
 interface IRegisterArgs {
   email: string;

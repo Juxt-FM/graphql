@@ -8,7 +8,12 @@ import _ from "lodash";
 
 import { ValidationError } from "./utils/errors";
 
-import { ContentHandler, IPostInput, IIdeaInput, IReactionInput } from "../db";
+import {
+  ContentHandler,
+  IPostInput,
+  IIdeaInput,
+  IReactionInput,
+} from "../database";
 
 /**
  * profile service (post authors, public profiles, etc.)
@@ -23,10 +28,13 @@ export class ContentService {
   constructor(dbHandler: ContentHandler) {
     this.dbHandler = dbHandler;
 
-    this.reactionCountLoader = this.buildReactionCountLoader();
-    this.replyCountLoader = this.buildReplyCountLoader();
-
+    /**
+     * Requires context state to build
+     */
     this.buildReactionLoader = this.buildReactionLoader.bind(this);
+
+    this.buildReactionCountLoader();
+    this.buildReplyCountLoader();
   }
 
   /**
@@ -37,29 +45,23 @@ export class ContentService {
     this.reactionLoader = new DataLoader(async (ids: string[]) => {
       const result = await this.dbHandler.loadReactions(ids, user);
 
-      const reactions = _.keyBy(result, "id");
-
-      return ids.map((id) => (reactions[id] ? reactions[id].reaction : null));
+      return ids.map((id) => result[id] || null);
     });
   }
 
   private buildReactionCountLoader() {
-    return new DataLoader(async (ids: string[]) => {
+    this.reactionCountLoader = new DataLoader(async (ids: string[]) => {
       const result = await this.dbHandler.loadReactionCounts(ids);
 
-      const counts = _.keyBy(result, "id");
-
-      return ids.map((id) => (counts[id] ? counts[id].count : 0));
+      return ids.map((id) => result[id] || 0);
     });
   }
 
   private buildReplyCountLoader() {
-    return new DataLoader(async (ids: string[]) => {
+    this.replyCountLoader = new DataLoader(async (ids: string[]) => {
       const result = await this.dbHandler.loadReplyCounts(ids);
 
-      const counts = _.keyBy(result, "id");
-
-      return ids.map((id) => (counts[id] ? counts[id].count : 0));
+      return ids.map((id) => result[id] || 0);
     });
   }
 

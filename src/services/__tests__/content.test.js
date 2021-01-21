@@ -5,7 +5,7 @@
 
 const { ContentService } = require("../content");
 
-const { mockIdea, mockPost } = require("../../db/__mocks__/content");
+const { mockIdea, mockPost } = require("../../database/__mocks__/content");
 const { ValidationError } = require("../utils/errors");
 
 const mockDbHandler = {

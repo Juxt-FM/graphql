@@ -3,8 +3,22 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import application, { db } from "./app";
+import { buildApp } from "./app";
+import GraphDB from "./database";
+
+import * as settings from "./settings";
 import * as logging from "./logging";
+
+/**
+ * Connect to the remote database. The database in use can be
+ * any property graph that uses Gremlin. In production we will
+ * be using AWS Neptune, but because this is a cloud-only service,
+ * Apache Tinkerpop is used in the local docker deployment.
+ */
+
+const database = new GraphDB(settings.database.host);
+
+database.connect();
 
 /**
  * Start the application
@@ -16,10 +30,9 @@ import * as logging from "./logging";
 
 const port = process.env.PORT || 4000;
 
-application.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server started at http://localhost:${port}`);
-});
+const app = buildApp({ database, port });
+
+app.start();
 
 /**
  * The logging service in use is Sematext. You can find
@@ -28,12 +41,3 @@ application.listen(port, () => {
  */
 
 logging.start();
-
-/**
- * Connect to the remote database. The database in use can be
- * any property graph that uses Gremlin. In production we will
- * be using AWS Neptune, but because this is a cloud-only service,
- * Apache Tinkerpop is used in the local docker deployment.
- */
-
-db.connect();

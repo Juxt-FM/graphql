@@ -68,13 +68,23 @@ export class ContentHandler extends BaseHandler {
   async findById(id: string, label: typeof labels.IDEA | typeof labels.POST) {
     const query = this.graph.query();
 
-    const result = await query.V(id).hasLabel(label).elementMap().next();
+    const result = await query
+      .V(id)
+      .hasLabel(label)
+      .as("content")
+      .in_(relationships.AUTHORED)
+      .as("author")
+      .select("content", "author")
+      .by(__.elementMap())
+      .by(__.id())
+      .next();
 
     if (!result.value) throw new ResourceNotFoundError();
 
     const record: any = Object.fromEntries(result.value);
+    const content: any = Object.fromEntries(record.content);
 
-    return this.transform(record);
+    return this.transform({ ...content, author: record.author });
   }
 
   /**
@@ -350,7 +360,7 @@ export class ContentHandler extends BaseHandler {
   }
 
   /**
-   * Load a user's reaction to content
+   * Load a user's reactions to content
    * @param {string[]} ids
    * @param {string} user
    */
@@ -359,25 +369,35 @@ export class ContentHandler extends BaseHandler {
 
     const result = await query
       .V(...ids)
-      .or(__.hasLabel(labels.IDEA), __.hasLabel(labels.POST))
-      .as("content")
-      .id()
-      .as("contentID")
-      .select("content")
-      .local(
+      .group()
+      .by(__.id())
+      .by(
         __.inE(relationships.REACTED_TO)
           .as("rel")
           .outV()
           .hasId(user)
           .select("rel")
-          .properties("reaction")
-          .as("reaction")
-          .values("contentID", "reaction")
-          .fold()
+          .elementMap()
       )
       .next();
 
-    return result.value;
+    let records: any = Object.fromEntries(result.value);
+
+    Object.keys(records).forEach((key: string) => {
+      let inner: any = Object.fromEntries(records[key]);
+      const to = Object.fromEntries(inner.IN).id;
+      const from = Object.fromEntries(inner.IN).id;
+
+      records[key] = {
+        id: inner.id,
+        reaction: inner.reaction,
+        timestamp: moment(inner.timestamp).toDate(),
+        from,
+        to,
+      };
+    });
+
+    return records;
   }
 
   /**
@@ -389,18 +409,12 @@ export class ContentHandler extends BaseHandler {
 
     const result = await query
       .V(...ids)
-      .hasLabel(labels.IDEA)
-      .as("parent")
-      .local(
-        __.repeat(__.in_(relationships.REPLY_TO))
-          .count()
-          .as("count")
-          .values(id, "count")
-          .fold()
-      )
+      .group()
+      .by(__.id())
+      .by(__.in_(relationships.REPLY_TO).count())
       .next();
 
-    return result.value;
+    return Object.fromEntries(result.value);
   }
 
   /**
@@ -412,17 +426,11 @@ export class ContentHandler extends BaseHandler {
 
     const result = await query
       .V(...ids)
-      .hasLabel(labels.IDEA)
-      .as("parent")
-      .local(
-        __.in_(relationships.REACTED_TO)
-          .count()
-          .as("count")
-          .values(id, "count")
-          .fold()
-      )
+      .group()
+      .by(__.id())
+      .by(__.in_(relationships.REACTED_TO).count())
       .next();
 
-    return result.value;
+    return Object.fromEntries(result.value);
   }
 }

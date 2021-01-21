@@ -4,59 +4,12 @@
  */
 
 const { createTestClient } = require("apollo-server-testing");
-const { gql } = require("apollo-server-express");
 
 const { buildTestServer } = require("./__utils");
 
-const { mockPost, mockIdea } = require("../../db/__mocks__/content");
-const { mockProfile } = require("../../db/__mocks__/users");
-
-const POST_BY_ID = gql`
-  query Post($id: ID!) {
-    postByID(id: $id) {
-      id
-      author {
-        id
-        name
-        summary
-        location
-        profileImageURL
-        coverImageURL
-        created
-        updated
-      }
-      title
-      summary
-      content
-      created
-      updated
-    }
-  }
-`;
-
-const IDEA_BY_ID = gql`
-  query Idea($id: ID!) {
-    ideaByID(id: $id) {
-      id
-      author {
-        id
-        name
-        summary
-        location
-        profileImageURL
-        coverImageURL
-        created
-        updated
-      }
-      replyStatus {
-        id
-      }
-      message
-      created
-      updated
-    }
-  }
-`;
+const { mockPost, mockIdea } = require("../../database/__mocks__/content");
+const { mockProfile } = require("../../database/__mocks__/users");
+const { queries, mutations } = require("../__mocks__/content");
 
 test("QUERY postByID", async () => {
   const {
@@ -71,7 +24,7 @@ test("QUERY postByID", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    query: POST_BY_ID,
+    query: queries.POST_BY_ID,
     variables: { id: mockPost.id },
   });
 
@@ -100,7 +53,7 @@ test("QUERY ideaByID", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    query: IDEA_BY_ID,
+    query: queries.IDEA_BY_ID,
     variables: { id: mockIdea.id },
   });
 
@@ -113,88 +66,6 @@ test("QUERY ideaByID", async () => {
   expect(result.author.summary).toEqual(mockProfile.summary);
   expect(result.author.location).toEqual(mockProfile.location);
 });
-
-const CREATE_POST = gql`
-  mutation CreatePost($data: PostInput!) {
-    createPost(data: $data) {
-      id
-      publicationStatus
-      contentFormat
-      title
-      summary
-      content
-      created
-      updated
-    }
-  }
-`;
-
-const UPDATE_POST = gql`
-  mutation UpdatePost($id: ID!, $data: PostInput!) {
-    updatePost(id: $id, data: $data) {
-      id
-      publicationStatus
-      contentFormat
-      title
-      summary
-      content
-      created
-      updated
-    }
-  }
-`;
-
-const DELETE_POST = gql`
-  mutation DeletePost($id: ID!) {
-    deletePost(id: $id)
-  }
-`;
-
-const CREATE_IDEA = gql`
-  mutation CreateIdea($data: IdeaInput!) {
-    createIdea(data: $data) {
-      id
-      message
-      created
-      updated
-    }
-  }
-`;
-
-const UPDATE_IDEA = gql`
-  mutation UpdateIdea($id: ID!, $message: String!) {
-    updateIdea(id: $id, message: $message) {
-      id
-      message
-      created
-      updated
-    }
-  }
-`;
-
-const DELETE_IDEA = gql`
-  mutation DeleteIdea($id: ID!) {
-    deleteIdea(id: $id)
-  }
-`;
-
-const CREATE_REACTION = gql`
-  mutation CreateReaction($to: ID!, $reaction: ReactionType!) {
-    createReaction(to: $to, reaction: $reaction)
-  }
-`;
-
-const DELETE_REACTION = gql`
-  mutation DeleteReaction($id: ID!) {
-    deleteReaction(id: $id)
-  }
-`;
-
-const REPORT_CONTENT = gql`
-  mutation ReportContent($id: ID!) {
-    reportContent(id: $id)
-  }
-`;
 
 test("MUTATION createPost", async () => {
   const { server, mockContentService } = await buildTestServer();
@@ -214,7 +85,7 @@ test("MUTATION createPost", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: CREATE_POST,
+    mutation: mutations.CREATE_POST,
     variables: { data },
   });
 
@@ -246,7 +117,7 @@ test("MUTATION updatePost", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: UPDATE_POST,
+    mutation: mutations.UPDATE_POST,
     variables: { id: mockPost.id, data },
   });
 
@@ -270,7 +141,7 @@ test("MUTATION deletePost", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: DELETE_POST,
+    mutation: mutations.DELETE_POST,
     variables: { id: mockPost.id },
   });
 
@@ -294,7 +165,7 @@ test("MUTATION createIdea", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: CREATE_IDEA,
+    mutation: mutations.CREATE_IDEA,
     variables: { data },
   });
 
@@ -316,7 +187,7 @@ test("MUTATION updateIdea", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: UPDATE_IDEA,
+    mutation: mutations.UPDATE_IDEA,
     variables: { id: mockIdea.id, message },
   });
 
@@ -336,7 +207,7 @@ test("MUTATION deleteIdea", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: DELETE_IDEA,
+    mutation: mutations.DELETE_IDEA,
     variables: { id: mockIdea.id },
   });
 
@@ -360,7 +231,7 @@ test("MUTATION createReaction", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: CREATE_REACTION,
+    mutation: mutations.CREATE_REACTION,
     variables: data,
   });
 
@@ -381,7 +252,7 @@ test("MUTATION deleteReaction", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: DELETE_REACTION,
+    mutation: mutations.DELETE_REACTION,
     variables: { id: mockIdea.id },
   });
 
@@ -400,7 +271,7 @@ test("MUTATION reportContent", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: REPORT_CONTENT,
+    mutation: mutations.REPORT_CONTENT,
     variables: { id: mockIdea.id },
   });
 

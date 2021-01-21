@@ -1,7 +1,7 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  modulePathIgnorePatterns: ["__utils"],
+  modulePathIgnorePatterns: ["__utils", "__mocks__"],
   reporters: [
     "default",
     [

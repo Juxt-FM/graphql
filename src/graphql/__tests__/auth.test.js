@@ -4,27 +4,19 @@
  */
 
 const { createTestClient } = require("apollo-server-testing");
-const { gql } = require("apollo-server-express");
 const { ValidationError } = require("../../services");
 
 const { buildTestServer } = require("./__utils");
 
+const { mutations, queries } = require("../__mocks__/auth");
 const { mockCredentials } = require("../sources/__tests__/auth.test");
-const { mockUser } = require("../../db/__mocks__/auth");
+const { mockUser } = require("../../database/__mocks__/auth");
 
 const mockDeviceInput = {
   id: "1",
   platform: "ios",
   model: "iPhone X",
 };
-
-const AUTH_USER = gql`
-  query {
-    me {
-      id
-    }
-  }
-`;
 
 test("QUERY me", async () => {
   const { server, mockAuthService } = await buildTestServer();
@@ -33,85 +25,11 @@ test("QUERY me", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    query: AUTH_USER,
+    query: queries.AUTH_USER,
   });
 
   expect(res.data.me.id).toEqual(mockUser.id);
 });
-
-const CREATE_USER = gql`
-  mutation CreateUser($data: UserInput!, $device: DeviceInput!) {
-    createUser(data: $data, device: $device) {
-      accessToken
-    }
-  }
-`;
-
-const LOGIN = gql`
-  mutation Login($data: LoginInput!, $device: DeviceInput!) {
-    loginUser(data: $data, device: $device) {
-      accessToken
-    }
-  }
-`;
-
-const UPDATE_EMAIL = gql`
-  mutation UpdateEmail($email: String!) {
-    updateEmail(email: $email) {
-      id
-    }
-  }
-`;
-
-const UPDATE_PHONE = gql`
-  mutation UpdatePhone($phone: String!) {
-    updatePhone(phone: $phone) {
-      id
-    }
-  }
-`;
-
-const RESET_PASSWORD = gql`
-  mutation ResetPassword($password: String!, $confirmPassword: String!) {
-    resetPassword(password: $password, confirmPassword: $confirmPassword)
-  }
-`;
-
-const REFRESH_TOKEN = gql`
-  mutation Refresh($device: ID!) {
-    refreshToken(device: $device) {
-      accessToken
-    }
-  }
-`;
-
-const LOGOUT = gql`
-  mutation Logout($device: ID!) {
-    logoutUser(device: $device)
-  }
-`;
-
-const VERIFY_EMAIL = gql`
-  mutation VerifyEmail($code: String!) {
-    verifyEmail(code: $code) {
-      accessToken
-    }
-  }
-`;
-
-const VERIFY_PHONE = gql`
-  mutation VerifyPhone($code: String!) {
-    verifyPhone(code: $code) {
-      accessToken
-    }
-  }
-`;
-
-const DEACTIVATE_ACCOUNT = gql`
-  mutation {
-    deactivateAccount
-  }
-`;
 
 describe("MUTATION createUser", () => {
   it("should create a user's account", async () => {
@@ -127,7 +45,7 @@ describe("MUTATION createUser", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: CREATE_USER,
+      mutation: mutations.CREATE_USER,
       variables: {
         data: {
           email: "new@email.com",
@@ -156,7 +74,7 @@ describe("MUTATION createUser", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: CREATE_USER,
+      mutation: mutations.CREATE_USER,
       variables: {
         data: {
           email: "new@email.com",
@@ -180,7 +98,7 @@ describe("MUTATION loginUser", () => {
     const { mutate } = createTestClient(server);
 
     const res = await mutate({
-      mutation: LOGIN,
+      mutation: mutations.LOGIN,
       variables: {
         data: {
           identifier: "new@email.com",
@@ -207,7 +125,7 @@ describe("MUTATION loginUser", () => {
     const { mutate } = createTestClient(server);
 
     const res = await mutate({
-      mutation: LOGIN,
+      mutation: mutations.LOGIN,
       variables: {
         data: {
           identifier: "new@email.com",
@@ -231,7 +149,7 @@ describe("MUTATION resetPassword", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: RESET_PASSWORD,
+      mutation: mutations.RESET_PASSWORD,
       variables: {
         password: "ab12cd34",
         confirmPassword: "ab12cd34",
@@ -254,7 +172,7 @@ describe("MUTATION resetPassword", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: RESET_PASSWORD,
+      mutation: mutations.RESET_PASSWORD,
       variables: {
         password: "ab12cd34",
         confirmPassword: "ab12cd34",
@@ -272,7 +190,7 @@ test("MUTATION refreshToken", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: REFRESH_TOKEN,
+    mutation: mutations.REFRESH_TOKEN,
     variables: { device: "1" },
   });
 
@@ -290,7 +208,7 @@ test("MUTATION logoutUser", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: LOGOUT,
+    mutation: mutations.LOGOUT,
     variables: { device: "1" },
   });
 
@@ -307,7 +225,7 @@ describe("MUTATION verifyEmail", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: VERIFY_EMAIL,
+      mutation: mutations.VERIFY_EMAIL,
       variables: {
         code: "AB12CD",
       },
@@ -327,7 +245,7 @@ describe("MUTATION verifyEmail", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: VERIFY_EMAIL,
+      mutation: mutations.VERIFY_EMAIL,
       variables: {
         code: "AB12CD",
       },
@@ -347,7 +265,7 @@ describe("MUTATION verifyPhone", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: VERIFY_PHONE,
+      mutation: mutations.VERIFY_PHONE,
       variables: {
         code: "AB12CD",
       },
@@ -367,7 +285,7 @@ describe("MUTATION verifyPhone", () => {
 
     const { mutate } = createTestClient(server);
     const res = await mutate({
-      mutation: VERIFY_PHONE,
+      mutation: mutations.VERIFY_PHONE,
       variables: {
         code: "AB12CD",
       },
@@ -389,7 +307,7 @@ test("MUTATION updateEmail", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: UPDATE_EMAIL,
+    mutation: mutations.UPDATE_EMAIL,
     variables: { email: "updated@email.com" },
   });
 
@@ -408,7 +326,7 @@ test("MUTATION updatePhone", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: UPDATE_PHONE,
+    mutation: mutations.UPDATE_PHONE,
     variables: { phone: "+11234567890" },
   });
 
@@ -424,7 +342,7 @@ test("MUTATION deactivateAccount", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: DEACTIVATE_ACCOUNT,
+    mutation: mutations.DEACTIVATE_ACCOUNT,
   });
 
   expect(res.data.deactivateAccount).toEqual(message);

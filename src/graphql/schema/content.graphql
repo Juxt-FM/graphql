@@ -31,9 +31,10 @@ type Post {
   summary: String
   imageURL: String
   content: String!
-  ideas(limit: Int!, offset: Int!): [Idea!]!
+  replies(limit: Int!, offset: Int!): [Idea!]!
   reactions(limit: Int!, offset: Int!): [Reaction!]!
   reactionCount: Int!
+  replyCount: Int!
   reactionStatus: Reaction
   created: String!
   updated: String!
@@ -48,6 +49,7 @@ type Idea {
   replies(limit: Int!, offset: Int!): [Idea!]
   reactions(limit: Int!, offset: Int!): [Reaction!]!
   reactionCount: Int!
+  replyCount: Int!
   reactionStatus: Reaction
   created: String!
   updated: String!
@@ -63,8 +65,7 @@ type Reaction {
   from: UserProfile
   to: ActionableContent!
   reaction: String!
-  updated: String!
-  created: String!
+  timestamp: String!
 }
 
 input PostInput {

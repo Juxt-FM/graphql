@@ -4,38 +4,11 @@
  */
 
 const { createTestClient } = require("apollo-server-testing");
-const { gql } = require("apollo-server-express");
 
 const { buildTestServer } = require("./__utils");
 
-const { mockProfile } = require("../../db/__mocks__/users");
-
-const USER_PROFILE = gql`
-  query Profile($id: ID!) {
-    userProfile(id: $id) {
-      id
-      name
-      location
-      summary
-      profileImageURL
-      coverImageURL
-      watchlists {
-        id
-      }
-      posts {
-        id
-      }
-      ideas {
-        id
-      }
-      followStatus {
-        timestamp
-      }
-      created
-      updated
-    }
-  }
-`;
+const { mockProfile } = require("../../database/__mocks__/users");
+const { queries, mutations } = require("../__mocks__/users");
 
 test("QUERY userProfile", async () => {
   const { server, mockUserService } = await buildTestServer();
@@ -47,7 +20,7 @@ test("QUERY userProfile", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    query: USER_PROFILE,
+    query: queries.USER_PROFILE,
     variables: { id: mockProfile.id },
   });
 
@@ -62,47 +35,6 @@ test("QUERY userProfile", async () => {
   expect(Array.isArray(result.ideas)).toBe(true);
   expect(Array.isArray(result.posts)).toBe(true);
 });
-
-const UPDATE_PROFILE = gql`
-  mutation UpdateProfile($data: ProfileInput!) {
-    updateProfile(data: $data) {
-      id
-      name
-      location
-      summary
-      coverImageURL
-      profileImageURL
-      created
-      updated
-    }
-  }
-`;
-
-const UPDATE_PROFILE_IMAGE = gql`
-  mutation {
-    updateProfileImage
-  }
-`;
-
-const UPDATE_COVER_IMAGE = gql`
-  mutation {
-    updateCoverImage
-  }
-`;
-
-const FOLLOW_PROFILE = gql`
-  mutation Follow($id: ID!) {
-    followProfile(id: $id) {
-      timestamp
-    }
-  }
-`;
-
-const UNFOLLOW_PROFILE = gql`
-  mutation Unfollow($id: ID!) {
-    unfollowProfile(id: $id)
-  }
-`;
 
 test("MUTATION updateProfile", async () => {
   const { server, mockUserService } = await buildTestServer();
@@ -119,7 +51,7 @@ test("MUTATION updateProfile", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: UPDATE_PROFILE,
+    mutation: mutations.UPDATE_PROFILE,
     variables: { data },
   });
 
@@ -137,7 +69,7 @@ test("MUTATION updateProfileImage", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: UPDATE_PROFILE_IMAGE,
+    mutation: mutations.UPDATE_PROFILE_IMAGE,
   });
 
   const { updateProfileImage: result } = res.data;
@@ -152,7 +84,7 @@ test("MUTATION updateCoverImage", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: UPDATE_COVER_IMAGE,
+    mutation: mutations.UPDATE_COVER_IMAGE,
   });
 
   const { updateCoverImage: result } = res.data;
@@ -170,7 +102,7 @@ test("MUTATION followProfile", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: FOLLOW_PROFILE,
+    mutation: mutations.FOLLOW_PROFILE,
     variables: { id: mockProfile.id },
   });
 
@@ -189,7 +121,7 @@ test("MUTATION unfollowProfile", async () => {
   const { mutate } = createTestClient(server);
 
   const res = await mutate({
-    mutation: UNFOLLOW_PROFILE,
+    mutation: mutations.UNFOLLOW_PROFILE,
     variables: { id: mockProfile.id },
   });
 

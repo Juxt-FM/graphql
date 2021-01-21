@@ -13,7 +13,7 @@ const {
   mockUser,
   mockDevice,
   mockDeviceArgs,
-} = require("../../db/__mocks__/auth");
+} = require("../../database/__mocks__/auth");
 
 const mockDbHandler = {
   isUniquePhone: jest.fn(),

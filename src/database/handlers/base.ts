@@ -37,6 +37,7 @@ export default class BaseHandler {
     const result = await query
       .V(...ids)
       .elementMap()
+      .fold()
       .next();
 
     return result.value;

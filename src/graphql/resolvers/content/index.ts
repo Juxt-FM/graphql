@@ -24,7 +24,7 @@ export default {
 
       return await users.loadProfile(parent.author);
     },
-    ideas: async (
+    replies: async (
       parent: any,
       args: PostIdeasArgs,
       context: IResolverContext
@@ -41,6 +41,15 @@ export default {
       const { content } = context.dataSources;
 
       return await content.loadReactionCount(parent.id);
+    },
+    replyCount: async (
+      parent: any,
+      args: undefined,
+      context: IResolverContext
+    ) => {
+      const { content } = context.dataSources;
+
+      return await content.loadReplyCount(parent.id);
     },
     reactionStatus: async (
       parent: any,
@@ -75,6 +84,15 @@ export default {
       const { content } = context.dataSources;
 
       return await content.loadReactionCount(parent.id);
+    },
+    replyCount: async (
+      parent: any,
+      args: undefined,
+      context: IResolverContext
+    ) => {
+      const { content } = context.dataSources;
+
+      return await content.loadReplyCount(parent.id);
     },
     reactionStatus: async (
       parent: any,

@@ -26,7 +26,7 @@ import {
   ContentService,
   MediaService,
 } from "../services";
-import { AuthHandler, ContentHandler, UserHandler } from "../db";
+import { AuthHandler, ContentHandler, UserHandler } from "../database";
 
 import * as settings from "../settings";
 
@@ -61,7 +61,7 @@ const schema = applyMiddleware(
  * Returns a GraphQL server instance
  * @param options
  */
-export const buildGraph = ({ db }: IServerBuilder) => {
+export const buildGraph = ({ database }: IServerBuilder) => {
   const s3 = new AWS.S3();
 
   /**
@@ -70,10 +70,13 @@ export const buildGraph = ({ db }: IServerBuilder) => {
    * and just pass them to the context creator below.
    */
 
-  const authService = new AuthService(settings.auth, db.register(AuthHandler));
-  const userService = new UserService(db.register(UserHandler));
+  const authService = new AuthService(
+    settings.auth,
+    database.register(AuthHandler)
+  );
+  const userService = new UserService(database.register(UserHandler));
   const mediaService = new MediaService(s3, settings.media);
-  const contentService = new ContentService(db.register(ContentHandler));
+  const contentService = new ContentService(database.register(ContentHandler));
   const notificationService = new NotificationService({
     from: settings.mail.fromEmail,
   });

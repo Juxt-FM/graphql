@@ -7,7 +7,7 @@ import { DataSource, DataSourceConfig } from "apollo-datasource";
 import { ApolloError, UserInputError } from "apollo-server-express";
 
 import { ServiceError, ValidationError } from "../../services";
-import { ResourceNotFoundError } from "../../db";
+import { ResourceNotFoundError } from "../../database";
 
 import * as logging from "../../logging";
 

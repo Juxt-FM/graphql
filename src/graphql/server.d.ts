@@ -10,10 +10,10 @@ import {
   UserService,
 } from "../services";
 
-import GraphDB from "../db";
+import GraphDB from "../database";
 
 interface IServerBuilder {
-  db: GraphDB;
+  database: GraphDB;
 }
 
 export interface IAuthenticatedUser {

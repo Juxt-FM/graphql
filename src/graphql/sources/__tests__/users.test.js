@@ -5,7 +5,7 @@
 
 const { UserAPI } = require("../users");
 
-const { mockProfile } = require("../../../db/__mocks__/users");
+const { mockProfile } = require("../../../database/__mocks__/users");
 
 const mockUserService = {
   buildFollowStatusLoader: jest.fn(),

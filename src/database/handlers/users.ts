@@ -214,8 +214,9 @@ export class UserHandler extends BaseHandler {
 
     if (!result) throw new ResourceNotFoundError();
 
-    const profiles: any = Object.fromEntries(result);
-
-    return profiles.map(this.transform);
+    return result.map((item: any) => {
+      const record: any = Object.fromEntries(item);
+      return this.transform(record);
+    });
   }
 }

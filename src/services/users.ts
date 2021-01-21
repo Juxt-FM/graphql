@@ -6,7 +6,7 @@
 import DataLoader from "dataloader";
 import _ from "lodash";
 
-import { UserHandler, IProfileInput } from "../db";
+import { UserHandler, IProfileInput } from "../database";
 
 /**
  * User service (post authors, public profiles, etc.)
@@ -20,6 +20,8 @@ export class UserService {
   constructor(dbHandler: UserHandler) {
     this.dbHandler = dbHandler;
     this.profileLoader = this.buildProfileLoader();
+
+    this.buildFollowStatusLoader = this.buildFollowStatusLoader.bind(this);
   }
 
   /**

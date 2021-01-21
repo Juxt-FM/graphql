@@ -16,9 +16,11 @@ export default {
       args: undefined,
       context: IResolverContext
     ): Promise<any> => {
-      const { users } = context.dataSources;
+      const { user, dataSources } = context;
+      const { users } = dataSources;
 
-      return await users.loadFollowingStatus(parent.id);
+      if (user) return await users.loadFollowingStatus(parent.id);
+      else return null;
     },
     profileImageURL: (
       parent: any,

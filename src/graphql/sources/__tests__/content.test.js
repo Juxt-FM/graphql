@@ -5,7 +5,7 @@
 
 const { ContentAPI } = require("../content");
 
-const { mockPost, mockIdea } = require("../../../db/__mocks__/content");
+const { mockPost, mockIdea } = require("../../../database/__mocks__/content");
 
 const mockContentService = {
   buildReactionLoader: jest.fn(),
