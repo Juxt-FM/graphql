@@ -59,6 +59,16 @@ export class UserService {
   }
 
   /**
+   * Returns a user's followers
+   * @param {string} user
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getFollowers(user: string, limit: number, offset: number) {
+    return await this.dbHandler.findFollowers(user, limit, offset);
+  }
+
+  /**
    * Follows a profile with the given ID
    * @param {string} user
    * @param {string} id

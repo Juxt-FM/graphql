@@ -30,6 +30,7 @@ const mockDbHandler = {
   updateReaction: jest.fn(),
   deleteReaction: jest.fn(),
   reportContent: jest.fn(),
+  findReactions: jest.fn(),
 };
 
 const service = new ContentService(mockDbHandler);
@@ -209,6 +210,18 @@ test("getReplies - should return an idea's replies", async () => {
 
   expect(mockDbHandler.findReplies).toBeCalledWith(mockIdea.id, limit, offset);
   expect(result).toEqual([mockIdea]);
+});
+
+test("getReactions - should return content's reactions", async () => {
+  mockDbHandler.findReactions.mockReturnValueOnce([mockReaction]);
+
+  const limit = 10;
+  const offset = 0;
+
+  const result = await service.getReactions("1", limit, offset);
+
+  expect(mockDbHandler.findReactions).toBeCalledWith("1", limit, offset);
+  expect(result).toEqual([mockReaction]);
 });
 
 test("createPost - should create and return a post", async () => {

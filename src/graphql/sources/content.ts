@@ -96,6 +96,20 @@ export class ContentAPI extends BaseAPI {
   }
 
   /**
+   * Returns content reactions given the parent ID
+   * @param {string} id
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getReactions(id: string, limit: number, offset: number) {
+    return this.handler("getReactions", async () => {
+      const { contentService } = this.context;
+
+      return await contentService.getReactions(id, limit, offset);
+    });
+  }
+
+  /**
    * Create a new post
    * @param {PostInput} data
    */

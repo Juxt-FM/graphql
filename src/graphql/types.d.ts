@@ -70,7 +70,6 @@ export type Query = {
   __typename?: 'Query';
   me: UserAccount;
   userProfile: UserProfile;
-  imageUploadURL: Scalars['String'];
   postByID: Post;
   ideaByID: Idea;
   postDrafts: Array<Post>;
@@ -117,14 +116,18 @@ export type Mutation = {
   resetPassword: Scalars['String'];
   refreshToken: AuthCredentials;
   deactivateAccount: Scalars['String'];
+  followProfile: FollowingStatus;
+  unfollowProfile: Scalars['String'];
   updateProfile: UserProfile;
+  updateProfileImage: Scalars['String'];
+  updateCoverImage: Scalars['String'];
   createPost: Post;
   updatePost: Post;
   deletePost: Scalars['String'];
   createIdea: Idea;
   updateIdea: Idea;
-  deleteIdea: Idea;
-  createReaction: Reaction;
+  deleteIdea: Scalars['String'];
+  createReaction: Scalars['String'];
   deleteReaction: Scalars['String'];
   reportContent: Scalars['String'];
   createWatchlist: Watchlist;
@@ -181,6 +184,16 @@ export type MutationRefreshTokenArgs = {
 };
 
 
+export type MutationFollowProfileArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationUnfollowProfileArgs = {
+  id: Scalars['ID'];
+};
+
+
 export type MutationUpdateProfileArgs = {
   data: ProfileInput;
 };
@@ -203,7 +216,6 @@ export type MutationDeletePostArgs = {
 
 
 export type MutationCreateIdeaArgs = {
-  id: Scalars['ID'];
   data: IdeaInput;
 };
 
@@ -261,8 +273,34 @@ export type UserProfile = {
   watchlists: Array<Watchlist>;
   posts: Array<Post>;
   ideas: Array<Idea>;
+  followers: Array<UserProfile>;
+  followCount: Scalars['Int'];
+  followStatus?: Maybe<FollowingStatus>;
   created: Scalars['String'];
   updated: Scalars['String'];
+};
+
+
+export type UserProfilePostsArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+
+export type UserProfileIdeasArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+
+export type UserProfileFollowersArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+export type FollowingStatus = {
+  __typename?: 'FollowingStatus';
+  timestamp: Scalars['String'];
 };
 
 export type ProfileInput = {
@@ -305,16 +343,17 @@ export type Post = {
   summary?: Maybe<Scalars['String']>;
   imageURL?: Maybe<Scalars['String']>;
   content: Scalars['String'];
-  ideas: Array<Idea>;
+  replies: Array<Idea>;
   reactions: Array<Reaction>;
   reactionCount: Scalars['Int'];
+  replyCount: Scalars['Int'];
   reactionStatus?: Maybe<Reaction>;
   created: Scalars['String'];
   updated: Scalars['String'];
 };
 
 
-export type PostIdeasArgs = {
+export type PostRepliesArgs = {
   limit: Scalars['Int'];
   offset: Scalars['Int'];
 };
@@ -335,6 +374,7 @@ export type Idea = {
   replies?: Maybe<Array<Idea>>;
   reactions: Array<Reaction>;
   reactionCount: Scalars['Int'];
+  replyCount: Scalars['Int'];
   reactionStatus?: Maybe<Reaction>;
   created: Scalars['String'];
   updated: Scalars['String'];
@@ -364,19 +404,16 @@ export type Reaction = {
   from?: Maybe<UserProfile>;
   to: ActionableContent;
   reaction: Scalars['String'];
-  updated: Scalars['String'];
-  created: Scalars['String'];
+  timestamp: Scalars['String'];
 };
 
 export type PostInput = {
   publicationStatus: PublicationStatus;
   contentFormat: PostContentFormat;
-  symbols: Array<Scalars['String']>;
-  tags: Array<Scalars['String']>;
   title: Scalars['String'];
-  imageURL?: Maybe<Scalars['String']>;
+  content?: Maybe<Scalars['String']>;
   summary?: Maybe<Scalars['String']>;
-  content: Scalars['String'];
+  imageURL?: Maybe<Scalars['String']>;
 };
 
 export type IdeaInput = {
@@ -533,6 +570,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   UserProfile: ResolverTypeWrapper<UserProfile>;
+  FollowingStatus: ResolverTypeWrapper<FollowingStatus>;
   ProfileInput: ProfileInput;
   PublicationStatus: PublicationStatus;
   PostContentFormat: PostContentFormat;
@@ -568,6 +606,7 @@ export type ResolversParentTypes = {
   Int: Scalars['Int'];
   Mutation: {};
   UserProfile: UserProfile;
+  FollowingStatus: FollowingStatus;
   ProfileInput: ProfileInput;
   ActionableContent: ResolversParentTypes['Post'] | ResolversParentTypes['Idea'];
   Post: Post;
@@ -615,7 +654,6 @@ export type AuthCredentialsResolvers<ContextType = any, ParentType extends Resol
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   me?: Resolver<ResolversTypes['UserAccount'], ParentType, ContextType>;
   userProfile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<QueryUserProfileArgs, 'id'>>;
-  imageUploadURL?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   postByID?: Resolver<ResolversTypes['Post'], ParentType, ContextType, RequireFields<QueryPostByIdArgs, 'id'>>;
   ideaByID?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<QueryIdeaByIdArgs, 'id'>>;
   postDrafts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType>;
@@ -634,14 +672,18 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   resetPassword?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'password' | 'confirmPassword'>>;
   refreshToken?: Resolver<ResolversTypes['AuthCredentials'], ParentType, ContextType, RequireFields<MutationRefreshTokenArgs, 'device'>>;
   deactivateAccount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  followProfile?: Resolver<ResolversTypes['FollowingStatus'], ParentType, ContextType, RequireFields<MutationFollowProfileArgs, 'id'>>;
+  unfollowProfile?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationUnfollowProfileArgs, 'id'>>;
   updateProfile?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<MutationUpdateProfileArgs, 'data'>>;
+  updateProfileImage?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updateCoverImage?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createPost?: Resolver<ResolversTypes['Post'], ParentType, ContextType, RequireFields<MutationCreatePostArgs, 'data'>>;
   updatePost?: Resolver<ResolversTypes['Post'], ParentType, ContextType, RequireFields<MutationUpdatePostArgs, 'id' | 'data'>>;
   deletePost?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeletePostArgs, 'id'>>;
-  createIdea?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<MutationCreateIdeaArgs, 'id' | 'data'>>;
+  createIdea?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<MutationCreateIdeaArgs, 'data'>>;
   updateIdea?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<MutationUpdateIdeaArgs, 'id' | 'message'>>;
-  deleteIdea?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<MutationDeleteIdeaArgs, 'id'>>;
-  createReaction?: Resolver<ResolversTypes['Reaction'], ParentType, ContextType, RequireFields<MutationCreateReactionArgs, 'to' | 'reaction'>>;
+  deleteIdea?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteIdeaArgs, 'id'>>;
+  createReaction?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationCreateReactionArgs, 'to' | 'reaction'>>;
   deleteReaction?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteReactionArgs, 'id'>>;
   reportContent?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationReportContentArgs, 'id'>>;
   createWatchlist?: Resolver<ResolversTypes['Watchlist'], ParentType, ContextType, RequireFields<MutationCreateWatchlistArgs, 'data'>>;
@@ -657,10 +699,18 @@ export type UserProfileResolvers<ContextType = any, ParentType extends Resolvers
   profileImageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   coverImageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   watchlists?: Resolver<Array<ResolversTypes['Watchlist']>, ParentType, ContextType>;
-  posts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType>;
-  ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType>;
+  posts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<UserProfilePostsArgs, 'limit' | 'offset'>>;
+  ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<UserProfileIdeasArgs, 'limit' | 'offset'>>;
+  followers?: Resolver<Array<ResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<UserProfileFollowersArgs, 'limit' | 'offset'>>;
+  followCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  followStatus?: Resolver<Maybe<ResolversTypes['FollowingStatus']>, ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FollowingStatusResolvers<ContextType = any, ParentType extends ResolversParentTypes['FollowingStatus'] = ResolversParentTypes['FollowingStatus']> = {
+  timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -677,9 +727,10 @@ export type PostResolvers<ContextType = any, ParentType extends ResolversParentT
   summary?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   imageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<PostIdeasArgs, 'limit' | 'offset'>>;
+  replies?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<PostRepliesArgs, 'limit' | 'offset'>>;
   reactions?: Resolver<Array<ResolversTypes['Reaction']>, ParentType, ContextType, RequireFields<PostReactionsArgs, 'limit' | 'offset'>>;
   reactionCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  replyCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   reactionStatus?: Resolver<Maybe<ResolversTypes['Reaction']>, ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -695,6 +746,7 @@ export type IdeaResolvers<ContextType = any, ParentType extends ResolversParentT
   replies?: Resolver<Maybe<Array<ResolversTypes['Idea']>>, ParentType, ContextType, RequireFields<IdeaRepliesArgs, 'limit' | 'offset'>>;
   reactions?: Resolver<Array<ResolversTypes['Reaction']>, ParentType, ContextType, RequireFields<IdeaReactionsArgs, 'limit' | 'offset'>>;
   reactionCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  replyCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   reactionStatus?: Resolver<Maybe<ResolversTypes['Reaction']>, ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -712,8 +764,7 @@ export type ReactionResolvers<ContextType = any, ParentType extends ResolversPar
   from?: Resolver<Maybe<ResolversTypes['UserProfile']>, ParentType, ContextType>;
   to?: Resolver<ResolversTypes['ActionableContent'], ParentType, ContextType>;
   reaction?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -768,6 +819,7 @@ export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   UserProfile?: UserProfileResolvers<ContextType>;
+  FollowingStatus?: FollowingStatusResolvers<ContextType>;
   ActionableContent?: ActionableContentResolvers<ContextType>;
   Post?: PostResolvers<ContextType>;
   Idea?: IdeaResolvers<ContextType>;

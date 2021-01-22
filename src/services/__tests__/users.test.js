@@ -17,6 +17,7 @@ const mockDbHandler = {
   followProfile: jest.fn(),
   unfollowProfile: jest.fn(),
   loadFollowerCounts: jest.fn(),
+  findFollowers: jest.fn(),
 };
 
 const service = new UserService(mockDbHandler);
@@ -24,6 +25,16 @@ const service = new UserService(mockDbHandler);
 const mockUserId = "1";
 
 service.buildFollowStatusLoader(mockUserId);
+
+test("getFollowers - should return a user's followers", async () => {
+  mockDbHandler.findFollowers.mockReturnValueOnce([mockProfile]);
+
+  const result = await service.getFollowers("1", 10, 0);
+
+  expect(mockDbHandler.findFollowers).toBeCalledWith("1", 10, 0);
+
+  expect(result).toEqual([mockProfile]);
+});
 
 test("followProfile - should return a following status", async () => {
   const mockResponse = { timestamp: new Date() };

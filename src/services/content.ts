@@ -140,13 +140,23 @@ export class ContentService {
   }
 
   /**
-   * Returns replies for the object with the given ID
+   * Returns replies to the content with the given ID
    * @param {string} id
    * @param {number} limit
    * @param {number} offset
    */
   async getReplies(id: string, limit: number, offset: number) {
     return await this.dbHandler.findReplies(id, limit, offset);
+  }
+
+  /**
+   * Returns reactions to the content with the given ID
+   * @param {string} id
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getReactions(id: string, limit: number, offset: number) {
+    return await this.dbHandler.findReactions(id, limit, offset);
   }
 
   /**

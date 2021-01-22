@@ -13,7 +13,10 @@ import BaseHandler from "./base";
 import { labels, relationships, IRawProfile, IUserProfile } from "../constants";
 import { ResourceNotFoundError } from "../errors";
 
-const { statics: __ } = gremlin.process;
+const {
+  statics: __,
+  order: { desc },
+} = gremlin.process;
 
 export interface IProfileInput {
   name?: string;
@@ -38,6 +41,32 @@ export class UserHandler extends BaseHandler {
       created: this.toDate(profile.created),
       updated: this.toDate(profile.updated),
     };
+  }
+
+  /**
+   * Finds a user's followers
+   * @param {string} id
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async findFollowers(id: string, limit: number, offset: number) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .inE(relationships.FOLLOWING)
+      .order()
+      .by("timestamp", desc)
+      .outV()
+      .hasNot("deactivated")
+      .range(offset, limit)
+      .elementMap()
+      .toList();
+
+    return result.map((profile: any) => {
+      profile = Object.fromEntries(profile);
+      return this.transform(profile);
+    });
   }
 
   /**

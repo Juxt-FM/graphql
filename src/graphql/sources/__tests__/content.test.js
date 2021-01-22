@@ -28,6 +28,7 @@ const mockContentService = {
   loadReaction: jest.fn(),
   loadReplyCount: jest.fn(),
   loadReactionCount: jest.fn(),
+  getReactions: jest.fn(),
 };
 
 const mockContext = {
@@ -91,6 +92,15 @@ test("getReplies", async () => {
 
   expect(mockContentService.getReplies).toBeCalledWith("1", 100, 0);
   expect(result).toEqual([mockIdea]);
+});
+
+test("getReactions", async () => {
+  mockContentService.getReactions.mockReturnValueOnce([mockReaction]);
+
+  const result = await ds.getReactions("1", 100, 0);
+
+  expect(mockContentService.getReactions).toBeCalledWith("1", 100, 0);
+  expect(result).toEqual([mockReaction]);
 });
 
 test("createPost", async () => {
@@ -218,20 +228,6 @@ test("deleteReaction", async () => {
   const result = await ds.deleteReaction("1");
 
   expect(mockContentService.deleteReaction).toBeCalledWith(
-    mockContext.user.profile,
-    "1"
-  );
-
-  expect(result).toEqual(res);
-});
-
-test("reportContent", async () => {
-  const res = "some success string";
-  mockContentService.reportContent.mockReturnValueOnce(res);
-
-  const result = await ds.reportContent("1");
-
-  expect(mockContentService.reportContent).toBeCalledWith(
     mockContext.user.profile,
     "1"
   );

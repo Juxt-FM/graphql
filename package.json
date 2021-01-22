@@ -13,8 +13,8 @@
     "start": "node .",
     "start:dev": "nodemon 'src/server.ts' --exec 'ts-node --files'",
     "test": "jest",
-    "seed": "ts-node --files ./scripts/seed.js",
-    "drop-db": "ts-node --files ./scripts/drop-db.js",
+    "seed": "node scripts/seed.js",
+    "drop-db": "node scripts/drop-db.js",
     "generate-graph-types": "graphql-codegen"
   },
   "dependencies": {

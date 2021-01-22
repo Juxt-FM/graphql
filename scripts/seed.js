@@ -5,15 +5,19 @@ const faker = require("faker");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
 
-const { labels, relationships } = require("../src/database");
-const { database } = require("../src/settings");
+const labels = require("../lib/labels");
+const relationships = require("../lib/relationships");
 
 const traversal = gremlin.process.AnonymousTraversalSource.traversal;
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 
 const mockImageURL = faker.image.imageUrl();
 
-const query = traversal().withRemote(new DriverRemoteConnection(database.host));
+const query = traversal().withRemote(
+  new DriverRemoteConnection(
+    process.env.GREMLIN_HOST || "ws://localhost:8182/gremlin"
+  )
+);
 
 const getMockUsers = (count = 30) =>
   _.range(0, count).map(() => ({

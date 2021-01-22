@@ -24,7 +24,7 @@ export interface IPostInput {
   title: string;
   summary?: string;
   imageURL?: string;
-  content: string;
+  content?: string;
 }
 
 export interface IIdeaInput {
@@ -367,8 +367,6 @@ export class ContentHandler extends BaseHandler {
   /**
    * Finds replies to a post or idea
    *
-   * NEED TO GET AUTHOR ID TOO
-   *
    * @param {string} id
    * @param {number} limit
    * @param {number} offset
@@ -378,19 +376,63 @@ export class ContentHandler extends BaseHandler {
 
     const result = await query
       .V(id)
-      .or(__.hasLabel(labels.POST), __.hasLabel(labels.IDEA))
       .in_(relationships.REPLY_TO)
+      .as("replies")
       .order()
       .by("created", desc)
       .range(offset, limit)
+      .select("replies")
+      .local(
+        __.as("reply")
+          .in_(relationships.AUTHORED)
+          .as("profile")
+          .select("reply", "profile")
+          .by(__.elementMap())
+          .by(__.id())
+      )
+      .toList();
+
+    return result.map((record: any) => {
+      record = Object.fromEntries(record);
+      return this.transform(record);
+    });
+  }
+
+  /**
+   * Finds content's reactions
+   * @param {string} id
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async findReactions(id: string, limit: number, offset: number) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .inE(relationships.REACTED_TO)
+      .as("rel")
+      .order()
+      .by("timestamp", desc)
+      .range(offset, limit)
+      .outV()
+      .hasNot("deactivated")
+      .select("rel")
       .elementMap()
-      .next();
+      .toList();
 
-    if (!result.value) throw new ResourceNotFoundError();
+    return result.map((item: any) => {
+      const inner: any = Object.fromEntries(item);
+      const to = Object.fromEntries(inner.IN).id;
+      const from = Object.fromEntries(inner.OUT).id;
 
-    const records: any = Object.fromEntries(result.value);
-
-    return records.map(this.transform);
+      return {
+        id: inner.id,
+        reaction: inner.reaction,
+        timestamp: moment(inner.timestamp).toDate(),
+        from,
+        to,
+      };
+    });
   }
 
   /**

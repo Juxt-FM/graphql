@@ -9,7 +9,6 @@ const { mockProfile } = require("../../../database/__mocks__/users");
 
 const mockUserService = {
   buildFollowStatusLoader: jest.fn(),
-  getById: jest.fn(),
   loadProfile: jest.fn(),
   updateProfile: jest.fn(),
   updateProfileImage: jest.fn(),
@@ -18,6 +17,7 @@ const mockUserService = {
   unfollowProfile: jest.fn(),
   loadFollowStatus: jest.fn(),
   loadFollowerCount: jest.fn(),
+  getFollowers: jest.fn(),
 };
 
 const mockMediaService = {
@@ -43,6 +43,15 @@ test("should have initialized follow status loader", () => {
   expect(mockUserService.buildFollowStatusLoader).toBeCalledWith(
     mockContext.user.profile
   );
+});
+
+test("getFollowers - should return a user's followers", async () => {
+  mockUserService.getFollowers.mockReturnValueOnce([mockProfile]);
+
+  const result = await ds.getFollowers("1", 10, 0);
+
+  expect(mockUserService.getFollowers).toBeCalledWith("1", 10, 0);
+  expect(result).toEqual([mockProfile]);
 });
 
 test("follow - should follow a user's profile", async () => {

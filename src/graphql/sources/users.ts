@@ -30,6 +30,20 @@ export class UserAPI extends BaseAPI {
   }
 
   /**
+   * Returns the profile's followers
+   * @param {string} user
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getFollowers(user: string, limit: number, offset: number) {
+    return this.handler("getFollowers", async () => {
+      const { userService } = this.context;
+
+      return await userService.getFollowers(user, limit, offset);
+    });
+  }
+
+  /**
    * Follow's a user's profile
    * @param {string} id
    */
