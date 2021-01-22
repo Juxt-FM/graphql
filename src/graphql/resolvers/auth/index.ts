@@ -15,7 +15,7 @@ export default {
     profile: async (parent: any, args: undefined, ctx: IResolverContext) => {
       const { users } = ctx.dataSources;
 
-      return await users.getProfileByID(parent.profile);
+      return await users.loadProfile(parent.profile);
     },
   },
 };

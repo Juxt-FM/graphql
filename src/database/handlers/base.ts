@@ -26,20 +26,4 @@ export default class BaseHandler {
     if (typeof timestamp === "number") return moment(timestamp).toDate();
     else return timestamp;
   }
-
-  /**
-   * Returns a group of nodes by their ids
-   * @param {string[]} ids
-   */
-  async loadVFromIds(ids: string[]) {
-    const query = this.graph.query();
-
-    const result = await query
-      .V(...ids)
-      .elementMap()
-      .fold()
-      .next();
-
-    return result.value;
-  }
 }

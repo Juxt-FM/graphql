@@ -10,6 +10,7 @@ const {
   mockPost,
   mockReaction,
 } = require("../../database/__mocks__/content");
+const { mockProfile } = require("../../database/__mocks__/users");
 const { ValidationError } = require("../utils/errors");
 
 const mockDbHandler = {
@@ -17,6 +18,7 @@ const mockDbHandler = {
   loadReplyCounts: jest.fn(),
   loadReactions: jest.fn(),
   findById: jest.fn(),
+  findByAuthor: jest.fn(),
   findReplies: jest.fn(),
   createPost: jest.fn(),
   updatePost: jest.fn(),
@@ -167,6 +169,34 @@ test("getByID - should return an post", async () => {
 
   expect(mockDbHandler.findById).toBeCalledWith(mockPost.id, "post");
   expect(result).toEqual(mockPost);
+});
+
+test("getByAuthor - should return an idea", async () => {
+  mockDbHandler.findByAuthor.mockReturnValueOnce([mockIdea]);
+
+  const result = await service.getByAuthor(mockProfile.id, 10, 0, "idea");
+
+  expect(mockDbHandler.findByAuthor).toBeCalledWith(
+    mockProfile.id,
+    10,
+    0,
+    "idea"
+  );
+  expect(result).toEqual([mockIdea]);
+});
+
+test("getByAuthor - should return an post", async () => {
+  mockDbHandler.findByAuthor.mockReturnValueOnce([mockPost]);
+
+  const result = await service.getByAuthor(mockProfile.id, 10, 0, "post");
+
+  expect(mockDbHandler.findByAuthor).toBeCalledWith(
+    mockProfile.id,
+    10,
+    0,
+    "post"
+  );
+  expect(result).toEqual([mockPost]);
 });
 
 test("getReplies - should return an idea's replies", async () => {

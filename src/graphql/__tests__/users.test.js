@@ -11,17 +11,29 @@ const { mockProfile } = require("../../database/__mocks__/users");
 const { queries, mutations } = require("../__mocks__/users");
 
 test("QUERY userProfile", async () => {
-  const { server, mockUserService } = await buildTestServer();
+  const {
+    server,
+    mockUserService,
+    mockContentService,
+  } = await buildTestServer();
 
-  mockUserService.getById.mockReturnValueOnce(mockProfile);
+  mockUserService.loadProfile.mockReturnValueOnce(mockProfile);
   mockUserService.loadFollowStatus.mockReturnValueOnce({
     timestamp: new Date(),
   });
 
+  mockContentService.getByAuthor.mockReturnValue([]);
+
   const { mutate } = createTestClient(server);
   const res = await mutate({
     query: queries.USER_PROFILE,
-    variables: { id: mockProfile.id },
+    variables: {
+      id: mockProfile.id,
+      postLimit: 10,
+      postOffset: 0,
+      ideaLimit: 10,
+      ideaOffset: 0,
+    },
   });
 
   const { userProfile: result } = res.data;

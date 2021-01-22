@@ -13,5 +13,5 @@ export const userProfile = async (
 ) => {
   const { users } = context.dataSources;
 
-  return await users.getProfileByID(args.id);
+  return await users.loadProfile(args.id);
 };

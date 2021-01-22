@@ -30,7 +30,7 @@ export class ContentAPI extends BaseAPI {
   }
 
   /**
-   * Returns user content given an ID
+   * Returns a post given its ID
    * @param {string} id
    */
   async getPostByID(id: string) {
@@ -42,7 +42,7 @@ export class ContentAPI extends BaseAPI {
   }
 
   /**
-   * Returns user content given an ID
+   * Returns an idea given its ID
    * @param {string} id
    */
   async getIdeaByID(id: string) {
@@ -50,6 +50,34 @@ export class ContentAPI extends BaseAPI {
       const { contentService } = this.context;
 
       return await contentService.getByID(id, "idea");
+    });
+  }
+
+  /**
+   * Returns posts authored by the given user
+   * @param {string} author
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getPostsByAuthor(author: string, limit: number, offset: number) {
+    return this.handler("getPostsByAuthor", async () => {
+      const { contentService } = this.context;
+
+      return await contentService.getByAuthor(author, limit, offset, "post");
+    });
+  }
+
+  /**
+   * Returns ideas authored by the given user
+   * @param {string} author
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getIdeasByAuthor(author: string, limit: number, offset: number) {
+    return this.handler("getIdeasByAuthor", async () => {
+      const { contentService } = this.context;
+
+      return await contentService.getByAuthor(author, limit, offset, "idea");
     });
   }
 

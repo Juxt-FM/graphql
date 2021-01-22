@@ -13,7 +13,10 @@ import BaseHandler from "./base";
 import { ResourceNotFoundError } from "../errors";
 import { labels, relationships, IPost, IIdea } from "../constants";
 
-const { statics: __ } = gremlin.process;
+const {
+  statics: __,
+  order: { desc },
+} = gremlin.process;
 
 export interface IPostInput {
   publicationStatus: "public" | "draft";
@@ -82,6 +85,36 @@ export class ContentHandler extends BaseHandler {
     const content: any = Object.fromEntries(record.content);
 
     return this.transform({ ...content, author: record.author });
+  }
+
+  /**
+   * Fetches content by it's author
+   * @param {string} author
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async findByAuthor(
+    author: string,
+    limit: number,
+    offset: number,
+    label: typeof labels.IDEA | typeof labels.POST
+  ) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(author)
+      .out(relationships.AUTHORED)
+      .hasLabel(label)
+      .order()
+      .by("created", desc)
+      .range(offset, limit)
+      .elementMap()
+      .toList();
+
+    return result.map((item: any) => {
+      const record: any = Object.fromEntries(item);
+      return this.transform({ ...record, author });
+    });
   }
 
   /**
@@ -211,7 +244,7 @@ export class ContentHandler extends BaseHandler {
   /**
    * Updates and returns a post
    *
-   * NEED TO ADD SUPPORT FOR VERSIONING
+   * NEED TO ADD SUPPORT FOR DRAFTING
    *
    * @param {string} id
    * @param {string} user
@@ -333,6 +366,9 @@ export class ContentHandler extends BaseHandler {
 
   /**
    * Finds replies to a post or idea
+   *
+   * NEED TO GET AUTHOR ID TOO
+   *
    * @param {string} id
    * @param {number} limit
    * @param {number} offset
@@ -344,9 +380,10 @@ export class ContentHandler extends BaseHandler {
       .V(id)
       .or(__.hasLabel(labels.POST), __.hasLabel(labels.IDEA))
       .in_(relationships.REPLY_TO)
+      .order()
+      .by("created", desc)
+      .range(offset, limit)
       .elementMap()
-      .fold()
-      .by(__.range(__.local, limit + offset, offset))
       .next();
 
     if (!result.value) throw new ResourceNotFoundError();
@@ -372,6 +409,7 @@ export class ContentHandler extends BaseHandler {
         __.inE(relationships.REACTED_TO)
           .as("rel")
           .outV()
+          .hasNot("deactivated")
           .hasId(user)
           .select("rel")
           .elementMap()
@@ -409,7 +447,7 @@ export class ContentHandler extends BaseHandler {
       .V(...ids)
       .group()
       .by(__.id())
-      .by(__.in_(relationships.REPLY_TO).count())
+      .by(__.in_(relationships.REPLY_TO).hasNot("deactivated").count())
       .next();
 
     return Object.fromEntries(result.value);
@@ -426,7 +464,7 @@ export class ContentHandler extends BaseHandler {
       .V(...ids)
       .group()
       .by(__.id())
-      .by(__.in_(relationships.REACTED_TO).count())
+      .by(__.in_(relationships.REACTED_TO).hasNot("deactivated").count())
       .next();
 
     return Object.fromEntries(result.value);

@@ -11,11 +11,20 @@ export default {
   Query,
   Mutation,
   UserProfile: {
+    followCount: async (
+      parent: any,
+      args: undefined,
+      context: IResolverContext
+    ) => {
+      const { users } = context.dataSources;
+
+      return await users.loadFollowerCount(parent.id);
+    },
     followStatus: async (
       parent: any,
       args: undefined,
       context: IResolverContext
-    ): Promise<any> => {
+    ) => {
       const { user, dataSources } = context;
       const { users } = dataSources;
 
@@ -28,6 +37,7 @@ export default {
       context: IResolverContext
     ) => {
       const { mediaService } = context;
+
       return mediaService.getResourceURL(parent.profileImageURL);
     },
     coverImageURL: (
@@ -36,10 +46,19 @@ export default {
       context: IResolverContext
     ) => {
       const { mediaService } = context;
+
       return mediaService.getResourceURL(parent.coverImageURL);
     },
-    posts: (): any[] => [],
-    ideas: (): any[] => [],
+    posts: async (parent: any, args: any, context: IResolverContext) => {
+      const { content } = context.dataSources;
+
+      return await content.getPostsByAuthor(parent.id, args.limit, args.offset);
+    },
+    ideas: async (parent: any, args: any, context: IResolverContext) => {
+      const { content } = context.dataSources;
+
+      return await content.getIdeasByAuthor(parent.id, args.limit, args.offset);
+    },
     watchlists: (): any[] => [],
   },
 };

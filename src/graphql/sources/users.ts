@@ -30,18 +30,6 @@ export class UserAPI extends BaseAPI {
   }
 
   /**
-   * Returns a user's profile given it's ID
-   * @param {string} id
-   */
-  async getProfileByID(id: string) {
-    return this.handler("getProfileByID", async () => {
-      const { userService } = this.context;
-
-      return await userService.getById(id);
-    });
-  }
-
-  /**
    * Follow's a user's profile
    * @param {string} id
    */
@@ -110,7 +98,20 @@ export class UserAPI extends BaseAPI {
   }
 
   /**
-   * Uses the service dataloader to batch profiles
+   * Returns the profile's follower count
+   * @param {string} id
+   */
+  async loadFollowerCount(id: string) {
+    return this.handler("loadProfile", async () => {
+      const { userService } = this.context;
+
+      return await userService.loadFollowerCount(id);
+    });
+  }
+
+  /**
+   * Returns the follow status for the logged in user to
+   * another profile
    * @param {string} id
    */
   async loadFollowingStatus(id: string) {

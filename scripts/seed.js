@@ -11,6 +11,8 @@ const { database } = require("../src/settings");
 const traversal = gremlin.process.AnonymousTraversalSource.traversal;
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 
+const mockImageURL = faker.image.imageUrl();
+
 const query = traversal().withRemote(new DriverRemoteConnection(database.host));
 
 const getMockUsers = (count = 30) =>
@@ -21,8 +23,8 @@ const getMockUsers = (count = 30) =>
       name: faker.name.findName(),
       summary: faker.lorem.paragraph(),
       location: `${faker.address.city()}, ${faker.address.stateAbbr()}`,
-      profileImageURL: faker.image.imageUrl(),
-      coverImageURL: faker.image.imageUrl(),
+      profileImageURL: mockImageURL,
+      coverImageURL: mockImageURL,
     },
     password: bcrypt.hashSync("ab12cd34", 1),
     verified: Math.random() > 0.33,
@@ -36,7 +38,7 @@ const getMockPosts = (count = 60) =>
     contentFormat: "markdown",
     title: faker.lorem.sentence(),
     summary: faker.lorem.paragraph(),
-    imageURL: faker.image.imageUrl(),
+    imageURL: mockImageURL,
     content: faker.lorem.paragraphs(),
     created: moment().valueOf(),
     updated: moment().valueOf(),

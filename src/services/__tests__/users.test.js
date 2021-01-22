@@ -16,6 +16,7 @@ const mockDbHandler = {
   updateCoverImage: jest.fn(),
   followProfile: jest.fn(),
   unfollowProfile: jest.fn(),
+  loadFollowerCounts: jest.fn(),
 };
 
 const service = new UserService(mockDbHandler);
@@ -23,15 +24,6 @@ const service = new UserService(mockDbHandler);
 const mockUserId = "1";
 
 service.buildFollowStatusLoader(mockUserId);
-
-test("getById - should return a user's profile", async () => {
-  mockDbHandler.findById.mockReturnValueOnce(mockProfile);
-
-  const result = await service.getById(mockProfile.id);
-
-  expect(mockDbHandler.findById).toBeCalledWith(mockProfile.id);
-  expect(result).toEqual(mockProfile);
-});
 
 test("followProfile - should return a following status", async () => {
   const mockResponse = { timestamp: new Date() };
@@ -133,6 +125,32 @@ describe("loadFollowStatus", () => {
       mockUserId
     );
     expect(result).toEqual(null);
+  });
+});
+
+describe("loadFollowerCount", () => {
+  test("should load an idea's reaction count", async () => {
+    const mockResponse = {};
+
+    mockResponse[mockProfile.id] = 500;
+
+    mockDbHandler.loadFollowerCounts.mockReturnValueOnce(mockResponse);
+
+    const result = await service.loadFollowerCount(mockProfile.id);
+
+    expect(mockDbHandler.loadFollowerCounts).toBeCalledWith([mockProfile.id]);
+    expect(result).toEqual(mockResponse[mockProfile.id]);
+  });
+
+  test("should return 0", async () => {
+    mockDbHandler.loadFollowerCounts.mockReturnValueOnce({});
+
+    const id = "bad_id";
+
+    const result = await service.loadFollowerCount(id);
+
+    expect(mockDbHandler.loadFollowerCounts).toBeCalledWith([id]);
+    expect(result).toEqual(0);
   });
 });
 

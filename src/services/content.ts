@@ -15,7 +15,7 @@ import {
 } from "../database";
 
 /**
- * profile service (post authors, public profiles, etc.)
+ * Content service (posts, ideas, reactions, etc.)
  * @param {ContentHandler} dbHandler
  */
 export class ContentService {
@@ -27,9 +27,6 @@ export class ContentService {
   constructor(dbHandler: ContentHandler) {
     this.dbHandler = dbHandler;
 
-    /**
-     * Requires context state to build
-     */
     this.buildReactionLoader = this.buildReactionLoader.bind(this);
 
     this.buildReactionCountLoader();
@@ -37,7 +34,7 @@ export class ContentService {
   }
 
   /**
-   * Loads a profile's reactions to topics
+   * Loads a user's reactions to content
    * @param {string} user
    */
   buildReactionLoader(user: string) {
@@ -124,6 +121,22 @@ export class ContentService {
    */
   async getByID(id: string, label: "post" | "idea") {
     return await this.dbHandler.findById(id, label);
+  }
+
+  /**
+   * Returns the content authored by the given user
+   * @param {string} author
+   * @param {number} limit
+   * @param {number} offset
+   * @param {string} label
+   */
+  async getByAuthor(
+    author: string,
+    limit: number,
+    offset: number,
+    label: "post" | "idea"
+  ) {
+    return await this.dbHandler.findByAuthor(author, limit, offset, label);
   }
 
   /**

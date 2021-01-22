@@ -6,7 +6,13 @@
 const { gql } = require("apollo-server-express");
 
 const USER_PROFILE = gql`
-  query Profile($id: ID!) {
+  query Profile(
+    $id: ID!
+    $postLimit: Int!
+    $postOffset: Int!
+    $ideaLimit: Int!
+    $ideaOffset: Int!
+  ) {
     userProfile(id: $id) {
       id
       name
@@ -17,10 +23,10 @@ const USER_PROFILE = gql`
       watchlists {
         id
       }
-      posts {
+      posts(limit: $postLimit, offset: $postOffset) {
         id
       }
-      ideas {
+      ideas(limit: $ideaLimit, offset: $ideaOffset) {
         id
       }
       followStatus {

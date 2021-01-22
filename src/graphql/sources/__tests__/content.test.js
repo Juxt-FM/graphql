@@ -14,6 +14,7 @@ const {
 const mockContentService = {
   buildReactionLoader: jest.fn(),
   getByID: jest.fn(),
+  getByAuthor: jest.fn(),
   getReplies: jest.fn(),
   createPost: jest.fn(),
   updatePost: jest.fn(),
@@ -63,6 +64,24 @@ test("getIdeaByID", async () => {
 
   expect(mockContentService.getByID).toBeCalledWith("1", "idea");
   expect(post).toEqual(mockIdea);
+});
+
+test("getPostsByAuthor", async () => {
+  mockContentService.getByAuthor.mockReturnValueOnce([mockPost]);
+
+  const posts = await ds.getPostsByAuthor("1", 10, 0);
+
+  expect(mockContentService.getByAuthor).toBeCalledWith("1", 10, 0, "post");
+  expect(posts).toEqual([mockPost]);
+});
+
+test("getIdeasByAuthor", async () => {
+  mockContentService.getByAuthor.mockReturnValueOnce([mockIdea]);
+
+  const ideas = await ds.getIdeasByAuthor("1", 10, 0);
+
+  expect(mockContentService.getByAuthor).toBeCalledWith("1", 10, 0, "idea");
+  expect(ideas).toEqual([mockIdea]);
 });
 
 test("getReplies", async () => {

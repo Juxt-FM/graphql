@@ -18,7 +18,7 @@ interface IParams {
 }
 
 /**
- * Profile service (post authors, public profiles, etc.)
+ * Media service (profile images, attachments, etc.)
  * @param {IBuckets} buckets
  */
 export class MediaService {

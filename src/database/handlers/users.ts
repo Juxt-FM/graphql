@@ -51,6 +51,7 @@ export class UserHandler extends BaseHandler {
     const result = await query
       .V(id)
       .hasLabel(labels.USER_PROFILE)
+      .hasNot("deactivated")
       .property("name", data.name || "")
       .property("summary", data.summary || "")
       .property("location", data.location || "")
@@ -75,6 +76,7 @@ export class UserHandler extends BaseHandler {
 
     const result = await query
       .V(id)
+      .hasNot("deactivated")
       .hasLabel(labels.USER_PROFILE)
       .property("profileImageURL", imageKey)
       .property("updated", moment().valueOf())
@@ -93,32 +95,13 @@ export class UserHandler extends BaseHandler {
 
     const result = await query
       .V(id)
+      .hasNot("deactivated")
       .hasLabel(labels.USER_PROFILE)
       .property("coverImageURL", imageKey)
       .property("updated", moment().valueOf())
       .next();
 
     if (!result.value) throw new ResourceNotFoundError();
-  }
-
-  /**
-   * Fetches a user with the given ID
-   * @param {string} id
-   */
-  async findById(id: string) {
-    const query = this.graph.query();
-
-    const result = await query
-      .V(id)
-      .hasLabel(labels.USER_PROFILE)
-      .elementMap()
-      .next();
-
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const profile: any = Object.fromEntries(result.value);
-
-    return this.transform(profile);
   }
 
   /**
@@ -131,6 +114,7 @@ export class UserHandler extends BaseHandler {
 
     const result = await query
       .V(id)
+      .hasNot("deactivated")
       .hasLabel(labels.USER_PROFILE)
       .as("profile")
       .addE(relationships.FOLLOWING)
@@ -158,6 +142,7 @@ export class UserHandler extends BaseHandler {
     await query
       .V(id)
       .hasLabel(labels.USER_PROFILE)
+      .hasNot("deactivated")
       .as("profile")
       .inE(relationships.FOLLOWING)
       .as("status")
@@ -179,6 +164,7 @@ export class UserHandler extends BaseHandler {
 
     const result = await query
       .V(...ids)
+      .hasNot("deactivated")
       .as("profile")
       .local(
         __.outE(relationships.FOLLOWING)
@@ -206,15 +192,40 @@ export class UserHandler extends BaseHandler {
   }
 
   /**
+   * Load reply counts
+   * @param {string} ids
+   */
+  async loadFollowerCounts(ids: string[]) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(...ids)
+      .hasNot("deactivated")
+      .group()
+      .by(__.id())
+      .by(__.in_(relationships.FOLLOWING).hasNot("deactivated").count())
+      .next();
+
+    return Object.fromEntries(result.value);
+  }
+
+  /**
    * Fetches all user profiles in the list of ID's
    * @param {string[]} ids
    */
   async loadFromIds(ids: string[]) {
-    const result = await this.loadVFromIds(ids);
+    const query = this.graph.query();
 
-    if (!result) throw new ResourceNotFoundError();
+    const result = await query
+      .V(...ids)
+      .hasNot("deactivated")
+      .elementMap()
+      .fold()
+      .next();
 
-    return result.map((item: any) => {
+    if (!result.value) throw new ResourceNotFoundError();
+
+    return result.value.map((item: any) => {
       const record: any = Object.fromEntries(item);
       return this.transform(record);
     });

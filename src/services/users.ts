@@ -15,11 +15,14 @@ import { UserHandler, IProfileInput } from "../database";
 export class UserService {
   private dbHandler: UserHandler;
   private profileLoader: DataLoader<any, any, any>;
+  private followCountLoader: DataLoader<any, any, any>;
   private followStatusLoader: DataLoader<any, any, any>;
 
   constructor(dbHandler: UserHandler) {
     this.dbHandler = dbHandler;
-    this.profileLoader = this.buildProfileLoader();
+
+    this.buildProfileLoader();
+    this.buildFollowCountLoader();
 
     this.buildFollowStatusLoader = this.buildFollowStatusLoader.bind(this);
   }
@@ -38,21 +41,21 @@ export class UserService {
     });
   }
 
+  private buildFollowCountLoader() {
+    this.followCountLoader = new DataLoader(async (ids: string[]) => {
+      const result = await this.dbHandler.loadFollowerCounts(ids);
+
+      return ids.map((id) => result[id] || 0);
+    });
+  }
+
   private buildProfileLoader() {
-    return new DataLoader(async (ids: string[]) => {
+    this.profileLoader = new DataLoader(async (ids: string[]) => {
       const result = await this.dbHandler.loadFromIds(ids);
       const profiles = _.keyBy(result, "id");
 
       return ids.map((id) => profiles[id] || null);
     });
-  }
-
-  /**
-   * Get a user profile by ID
-   * @param {string} id
-   */
-  async getById(id: string) {
-    return await this.dbHandler.findById(id);
   }
 
   /**
@@ -107,6 +110,14 @@ export class UserService {
    */
   async loadFollowStatus(id: string) {
     return await this.followStatusLoader.load(id);
+  }
+
+  /**
+   * Loads a profile's follower count
+   * @param {string} id
+   */
+  async loadFollowerCount(id: string) {
+    return await this.followCountLoader.load(id);
   }
 
   /**

@@ -12,7 +12,7 @@ interface INotificationsConfig {
 }
 
 /**
- * Profile service (post authors, public profiles, etc.)
+ * Notification service (email, sms, etc.)
  * @param {INotificationsConfig} config
  */
 export class NotificationService {
