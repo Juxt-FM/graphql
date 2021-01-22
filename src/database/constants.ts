@@ -3,8 +3,32 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-export * as labels from "../../lib/labels";
-export * as relationships from "../../lib/relationships";
+export const labels = {
+  USER_ACCOUNT: "user_account",
+  USER_PROFILE: "user_profile",
+  USER_DEVICE: "user_device",
+  COMPANY: "company",
+  BUSINESS_SECTOR: "business_sector",
+  BUSINESS_INDUSTRY: "business_industry",
+  USER_CREATED_LIST: "user_created_list",
+  POST: "post",
+  IDEA: "idea",
+};
+
+export const relationships = {
+  LOGGED_IN: "logged_in",
+  USES_DEVICE: "uses_device",
+  HAS_PROFILE: "has_profile",
+  IN_SECTOR: "in_sector",
+  IN_INDUSTRY: "in_industry",
+  CREATED_LIST: "created_list",
+  IN_LIST: "in_list",
+  FOLLOWING: "following",
+  AUTHORED: "authored",
+  REPLY_TO: "reply_to",
+  REACTED_TO: "reacted_to",
+  REPORTED: "reported",
+};
 
 interface IVertex {
   id: string;

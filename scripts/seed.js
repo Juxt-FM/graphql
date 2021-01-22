@@ -5,11 +5,35 @@ const faker = require("faker");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
 
-const labels = require("../lib/labels");
-const relationships = require("../lib/relationships");
-
 const traversal = gremlin.process.AnonymousTraversalSource.traversal;
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
+
+const labels = {
+  USER_ACCOUNT: "user_account",
+  USER_PROFILE: "user_profile",
+  USER_DEVICE: "user_device",
+  COMPANY: "company",
+  BUSINESS_SECTOR: "business_sector",
+  BUSINESS_INDUSTRY: "business_industry",
+  USER_CREATED_LIST: "user_created_list",
+  POST: "post",
+  IDEA: "idea",
+};
+
+const relationships = {
+  LOGGED_IN: "logged_in",
+  USES_DEVICE: "uses_device",
+  HAS_PROFILE: "has_profile",
+  IN_SECTOR: "in_sector",
+  IN_INDUSTRY: "in_industry",
+  CREATED_LIST: "created_list",
+  IN_LIST: "in_list",
+  FOLLOWING: "following",
+  AUTHORED: "authored",
+  REPLY_TO: "reply_to",
+  REACTED_TO: "reacted_to",
+  REPORTED: "reported",
+};
 
 const mockImageURL = faker.image.imageUrl();
 
