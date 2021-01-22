@@ -3,9 +3,9 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { UserService } = require("../users");
+const { UserService } = require("../user-service");
 
-const { mockProfile } = require("../../database/__mocks__/users");
+const { mockProfile } = require("../../database/mocks/users");
 
 const mockDbHandler = {
   findById: jest.fn(),

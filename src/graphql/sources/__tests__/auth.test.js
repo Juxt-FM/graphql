@@ -4,31 +4,20 @@
  */
 
 const { AuthAPI } = require("../auth");
+const {
+  AuthService,
+  ...mockAuthService
+} = require("../../../services/__mocks__/auth-service");
+const {
+  NotificationService,
+  ...mockNotificationService
+} = require("../../../services/__mocks__/notification-service");
 
 const {
   mockUser,
   mockDevice,
   mockDeviceArgs,
-} = require("../../../database/__mocks__/auth");
-
-const mockAuthService = {
-  getUser: jest.fn(),
-  login: jest.fn(),
-  register: jest.fn(),
-  updateEmail: jest.fn(),
-  updatePhone: jest.fn(),
-  logout: jest.fn(),
-  refreshToken: jest.fn(),
-  resetPassword: jest.fn(),
-  verifyEmail: jest.fn(),
-  verifyPhone: jest.fn(),
-  deactivateAccount: jest.fn(),
-};
-
-const mockNotificationService = {
-  sendEmail: jest.fn(),
-  sendSMS: jest.fn(),
-};
+} = require("../../../database/mocks/auth");
 
 const mockExpressContext = {
   req: {
@@ -45,8 +34,8 @@ const mockContext = {
   user: { id: 1, verified: true },
   client: { name: "web" },
   host: "127.0.0.1",
-  authService: mockAuthService,
-  notificationService: mockNotificationService,
+  authService: new AuthService(),
+  notificationService: new NotificationService(),
   expressCtx: mockExpressContext,
 };
 
@@ -349,4 +338,4 @@ const mockCredentials = {
   refreshToken: "sadhfkjasdhfadsjkflashfjasldfhlas",
 };
 
-module.exports = { mockCredentials, mockAuthService };
+module.exports = { mockCredentials };

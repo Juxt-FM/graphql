@@ -19,7 +19,7 @@ export class UserAPI extends BaseAPI {
 
     /**
      * For this service we need to manually
-     * build the reaction dataloader, as it requires
+     * build the follow status dataloader, as it requires
      * the logged in user's ID
      */
     const { buildFollowStatusLoader } = this.context.userService;

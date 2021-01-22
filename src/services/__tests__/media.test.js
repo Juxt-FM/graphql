@@ -4,7 +4,7 @@
  */
 
 const AWS = require("aws-sdk");
-const { MediaService } = require("../media");
+const { MediaService } = require("../media-service");
 
 jest.mock("aws-sdk");
 

@@ -9,12 +9,25 @@ const { default: typeDefs } = require("../schema");
 const { default: resolvers } = require("../resolvers");
 
 const {
-  mockUserService,
-  mockMediaService,
-} = require("../sources/__tests__/users.test");
-const { mockAuthService } = require("../sources/__tests__/auth.test");
-const { mockContentService } = require("../sources/__tests__/content.test");
-const { NotificationService } = require("../../services");
+  UserService,
+  ...mockUserService
+} = require("../../services/__mocks__/user-service");
+const {
+  AuthService,
+  ...mockAuthService
+} = require("../../services/__mocks__/auth-service");
+const {
+  MediaService,
+  ...mockMediaService
+} = require("../../services/__mocks__/media-service");
+const {
+  ContentService,
+  ...mockContentService
+} = require("../../services/__mocks__/content-service");
+const {
+  NotificationService,
+  ...mockNotificationService
+} = require("../../services/__mocks__/notification-service");
 
 const buildTestServer = async (options) => {
   const users = new UserAPI();
@@ -32,14 +45,7 @@ const buildTestServer = async (options) => {
     },
   };
 
-  const mockNotificationService = new NotificationService({
-    from: "test@email.com",
-  });
-
-  mockNotificationService.sendEmail = jest.fn();
-  mockNotificationService.sendSMS = jest.fn();
-
-  const verifiedUser = options ? options.verified || false : false;
+  const verifiedUser = options ? options.verified : false;
 
   const context = {
     user: { id: 1, verified: verifiedUser },
@@ -47,8 +53,8 @@ const buildTestServer = async (options) => {
     userService: mockUserService,
     authService: mockAuthService,
     contentService: mockContentService,
-    notificationService: mockNotificationService,
     mediaService: mockMediaService,
+    notificationService: mockNotificationService,
     expressCtx: mockExpressContext,
   };
 

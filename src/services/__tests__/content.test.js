@@ -3,14 +3,14 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { ContentService } = require("../content");
+const { ContentService } = require("../content-service");
 
 const {
   mockIdea,
   mockPost,
   mockReaction,
-} = require("../../database/__mocks__/content");
-const { mockProfile } = require("../../database/__mocks__/users");
+} = require("../../database/mocks/content");
+const { mockProfile } = require("../../database/mocks/users");
 const { ValidationError } = require("../utils/errors");
 
 const mockDbHandler = {

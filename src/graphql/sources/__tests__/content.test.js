@@ -6,34 +6,19 @@
 const { ContentAPI } = require("../content");
 
 const {
+  ContentService,
+  ...mockContentService
+} = require("../../../services/__mocks__/content-service");
+
+const {
   mockPost,
   mockIdea,
   mockReaction,
-} = require("../../../database/__mocks__/content");
-
-const mockContentService = {
-  buildReactionLoader: jest.fn(),
-  getByID: jest.fn(),
-  getByAuthor: jest.fn(),
-  getReplies: jest.fn(),
-  createPost: jest.fn(),
-  updatePost: jest.fn(),
-  deletePost: jest.fn(),
-  createIdea: jest.fn(),
-  updateIdea: jest.fn(),
-  deleteIdea: jest.fn(),
-  createReaction: jest.fn(),
-  deleteReaction: jest.fn(),
-  reportContent: jest.fn(),
-  loadReaction: jest.fn(),
-  loadReplyCount: jest.fn(),
-  loadReactionCount: jest.fn(),
-  getReactions: jest.fn(),
-};
+} = require("../../../database/mocks/content");
 
 const mockContext = {
   user: { id: 1, profile: 2, verified: true },
-  contentService: mockContentService,
+  contentService: new ContentService(),
 };
 
 const ds = new ContentAPI();
@@ -282,5 +267,3 @@ test("loadReactionCount", async () => {
 
   expect(result).toEqual(count);
 });
-
-module.exports = { mockContentService };

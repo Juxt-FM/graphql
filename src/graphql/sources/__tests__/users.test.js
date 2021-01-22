@@ -4,32 +4,22 @@
  */
 
 const { UserAPI } = require("../users");
+const {
+  MediaService,
+  ...mockMediaService
+} = require("../../../services/__mocks__/media-service");
+const {
+  UserService,
+  ...mockUserService
+} = require("../../../services/__mocks__/user-service");
 
-const { mockProfile } = require("../../../database/__mocks__/users");
-
-const mockUserService = {
-  buildFollowStatusLoader: jest.fn(),
-  loadProfile: jest.fn(),
-  updateProfile: jest.fn(),
-  updateProfileImage: jest.fn(),
-  updateCoverImage: jest.fn(),
-  followProfile: jest.fn(),
-  unfollowProfile: jest.fn(),
-  loadFollowStatus: jest.fn(),
-  loadFollowerCount: jest.fn(),
-  getFollowers: jest.fn(),
-};
-
-const mockMediaService = {
-  getSignedProfileUpload: jest.fn(),
-  getSignedCoverUpload: jest.fn(),
-};
+const { mockProfile } = require("../../../database/mocks/users");
 
 const mockContext = {
   user: { id: "1", profile: "2", verified: true },
   host: "127.0.0.1",
-  userService: mockUserService,
-  mediaService: mockMediaService,
+  userService: new UserService(),
+  mediaService: new MediaService(),
 };
 
 const ds = new UserAPI();
@@ -170,5 +160,3 @@ test("loadFollowerCount", async () => {
 
   expect(result).toEqual(count);
 });
-
-module.exports = { mockUserService, mockMediaService };

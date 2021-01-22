@@ -9,7 +9,7 @@ const { AuthAPI } = require("../auth");
 const { ServiceError, ValidationError } = require("../../../services");
 
 const { mockCredentials } = require("./auth.test");
-const { mockDeviceArgs } = require("../../../database/__mocks__/auth");
+const { mockDeviceArgs } = require("../../../database/mocks/auth");
 
 const mockAuthService = {
   login: jest.fn(),
