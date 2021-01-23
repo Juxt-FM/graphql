@@ -63,9 +63,19 @@ export const reactionStatus = async (
 ) => {
   const { content } = context.dataSources;
 
+  if (!context.user) return null;
+
   return await content.loadReactionStatus(parent.id);
 };
 
-export const attachments = (): any[] => [];
+export const replyStatus = async (
+  parent: any,
+  args: undefined,
+  context: IResolverContext
+) => {
+  const { content } = context.dataSources;
 
-export const replyStatus = (): any => null;
+  return await content.loadReplyStatus(parent.id);
+};
+
+export const attachments = (): any[] => [];

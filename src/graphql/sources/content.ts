@@ -234,6 +234,18 @@ export class ContentAPI extends BaseAPI {
   }
 
   /**
+   * Load the reply status for the idea
+   * @param {string} id
+   */
+  async loadReplyStatus(id: string) {
+    return this.handler("loadReplyStatus", async () => {
+      const { contentService } = this.context;
+
+      return await contentService.loadReplyStatus(id);
+    });
+  }
+
+  /**
    * Load reaction count for content
    * @param {string} id
    */

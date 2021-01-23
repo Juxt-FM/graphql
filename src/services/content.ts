@@ -20,6 +20,7 @@ import {
  */
 export class ContentService {
   private dbHandler: ContentHandler;
+  private replyStatusLoader: DataLoader<any, any, any>;
   private reactionCountLoader: DataLoader<any, any, any>;
   private replyCountLoader: DataLoader<any, any, any>;
   private reactionLoader: DataLoader<any, any, any>;
@@ -31,6 +32,7 @@ export class ContentService {
 
     this.buildReactionCountLoader();
     this.buildReplyCountLoader();
+    this.buildReplyStatusLoader();
   }
 
   /**
@@ -58,6 +60,14 @@ export class ContentService {
       const result = await this.dbHandler.loadReplyCounts(ids);
 
       return ids.map((id) => result[id] || 0);
+    });
+  }
+
+  private buildReplyStatusLoader() {
+    this.replyStatusLoader = new DataLoader(async (ids: string[]) => {
+      const result = await this.dbHandler.loadReplyStatuses(ids);
+
+      return ids.map((id) => result[id] || null);
     });
   }
 
@@ -255,6 +265,14 @@ export class ContentService {
   async reportContent(profile: string, id: string) {
     await this.dbHandler.reportContent(profile, id);
     return "Reported content.";
+  }
+
+  /**
+   * Loads an idea's reply status
+   * @param {string} id
+   */
+  async loadReplyStatus(id: string) {
+    return await this.replyStatusLoader.load(id);
   }
 
   /**

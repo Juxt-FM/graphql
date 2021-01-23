@@ -3,14 +3,14 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-const { ContentService } = require("../content-service");
+const { ContentService } = require("../content");
 
 const {
   mockIdea,
   mockPost,
   mockReaction,
-} = require("../../database/mocks/content");
-const { mockProfile } = require("../../database/mocks/users");
+} = require("../../database/__mocks__/content");
+const { mockProfile } = require("../../database/__mocks__/users");
 const { ValidationError } = require("../utils/errors");
 
 const mockDbHandler = {
@@ -31,6 +31,7 @@ const mockDbHandler = {
   deleteReaction: jest.fn(),
   reportContent: jest.fn(),
   findReactions: jest.fn(),
+  loadReplyStatuses: jest.fn(),
 };
 
 const service = new ContentService(mockDbHandler);
@@ -339,6 +340,32 @@ describe("loadReactions", () => {
   });
 });
 
+describe("loadReplyStatus", () => {
+  test("should load an idea's reaction count", async () => {
+    const mockResponse = {};
+
+    mockResponse[mockIdea.id] = mockIdea;
+
+    mockDbHandler.loadReplyStatuses.mockReturnValueOnce(mockResponse);
+
+    const result = await service.loadReplyStatus(mockIdea.id);
+
+    expect(mockDbHandler.loadReplyStatuses).toBeCalledWith([mockIdea.id]);
+    expect(result).toEqual(mockResponse[mockIdea.id]);
+  });
+
+  test("should return null", async () => {
+    mockDbHandler.loadReplyStatuses.mockReturnValueOnce({});
+
+    const id = "bad_id";
+
+    const result = await service.loadReplyStatus(id);
+
+    expect(mockDbHandler.loadReplyStatuses).toBeCalledWith([id]);
+    expect(result).toEqual(null);
+  });
+});
+
 describe("loadReactionCount", () => {
   test("should load an idea's reaction count", async () => {
     const mockResponse = {};
@@ -354,7 +381,7 @@ describe("loadReactionCount", () => {
   });
 
   test("should return 0", async () => {
-    mockDbHandler.loadReactionCounts.mockReturnValueOnce([]);
+    mockDbHandler.loadReactionCounts.mockReturnValueOnce({});
 
     const id = "bad_id";
 

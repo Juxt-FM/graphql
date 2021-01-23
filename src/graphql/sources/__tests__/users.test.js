@@ -4,22 +4,16 @@
  */
 
 const { UserAPI } = require("../users");
-const {
-  MediaService,
-  ...mockMediaService
-} = require("../../../services/__mocks__/media-service");
-const {
-  UserService,
-  ...mockUserService
-} = require("../../../services/__mocks__/user-service");
+const mockMediaService = require("../../../services/__mocks__/media");
+const mockUserService = require("../../../services/__mocks__/users");
 
-const { mockProfile } = require("../../../database/mocks/users");
+const { mockProfile } = require("../../../database/__mocks__/users");
 
 const mockContext = {
   user: { id: "1", profile: "2", verified: true },
   host: "127.0.0.1",
-  userService: new UserService(),
-  mediaService: new MediaService(),
+  userService: mockUserService,
+  mediaService: mockMediaService,
 };
 
 const ds = new UserAPI();

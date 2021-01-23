@@ -5,20 +5,17 @@
 
 const { ContentAPI } = require("../content");
 
-const {
-  ContentService,
-  ...mockContentService
-} = require("../../../services/__mocks__/content-service");
+const mockContentService = require("../../../services/__mocks__/content");
 
 const {
   mockPost,
   mockIdea,
   mockReaction,
-} = require("../../../database/mocks/content");
+} = require("../../../database/__mocks__/content");
 
 const mockContext = {
   user: { id: 1, profile: 2, verified: true },
-  contentService: new ContentService(),
+  contentService: mockContentService,
 };
 
 const ds = new ContentAPI();
@@ -242,6 +239,16 @@ test("loadReactionStatus", async () => {
   expect(mockContentService.loadReaction).toBeCalledWith("1");
 
   expect(result).toEqual(mockReaction);
+});
+
+test("loadReplyStatus", async () => {
+  mockContentService.loadReplyStatus.mockReturnValueOnce(mockIdea);
+
+  const result = await ds.loadReplyStatus("1");
+
+  expect(mockContentService.loadReplyStatus).toBeCalledWith("1");
+
+  expect(result).toEqual(mockIdea);
 });
 
 test("loadReplyCount", async () => {

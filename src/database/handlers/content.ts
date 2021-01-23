@@ -393,8 +393,8 @@ export class ContentHandler extends BaseHandler {
       .toList();
 
     return result.map((record: any) => {
-      record = Object.fromEntries(record);
-      return this.transform(record);
+      const reply: any = Object.fromEntries(record.reply);
+      return this.transform({ ...reply, author: record.profile });
     });
   }
 
@@ -433,6 +433,45 @@ export class ContentHandler extends BaseHandler {
         to,
       };
     });
+  }
+
+  /**
+   * Load a list of ideas' reply status
+   * @param {string[]} ids
+   */
+  async loadReplyStatuses(ids: string[]) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(...ids)
+      .group()
+      .by(__.id())
+      .by(
+        __.outE(relationships.REPLY_TO)
+          .outV()
+          .as("reply")
+          .in_(relationships.AUTHORED)
+          .as("author")
+          .select("reply", "author")
+          .by(__.elementMap())
+          .by(__.id())
+      )
+      .next();
+
+    const records: any = Object.fromEntries(result.value);
+
+    Object.keys(records).forEach((key: string) => {
+      const inner: any = Object.fromEntries(records[key]);
+
+      const reply = Object.fromEntries(inner.reply);
+
+      records[key] = {
+        ...reply,
+        author: inner.author,
+      };
+    });
+
+    return records;
   }
 
   /**

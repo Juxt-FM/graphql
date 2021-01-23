@@ -7,7 +7,7 @@ const { createTestClient } = require("apollo-server-testing");
 
 const { buildTestServer } = require("./__utils");
 
-const { mockProfile } = require("../../database/mocks/users");
+const { mockProfile } = require("../../database/__mocks__/users");
 const { queries, mutations } = require("../__mocks__/users");
 
 test("QUERY userProfile", async () => {

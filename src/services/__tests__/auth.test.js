@@ -6,14 +6,14 @@
 const bcrypt = require("bcrypt");
 const decodeJWT = require("jwt-decode");
 
-const { AuthService } = require("../auth-service");
+const { AuthService } = require("../auth");
 const { ServiceError, ValidationError } = require("../utils/errors");
 
 const {
   mockUser,
   mockDevice,
   mockDeviceArgs,
-} = require("../../database/mocks/auth");
+} = require("../../database/__mocks__/auth");
 
 const mockDbHandler = {
   isUniquePhone: jest.fn(),

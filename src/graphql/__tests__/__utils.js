@@ -8,26 +8,11 @@ const { AuthAPI, UserAPI, ContentAPI } = require("../sources");
 const { default: typeDefs } = require("../schema");
 const { default: resolvers } = require("../resolvers");
 
-const {
-  UserService,
-  ...mockUserService
-} = require("../../services/__mocks__/user-service");
-const {
-  AuthService,
-  ...mockAuthService
-} = require("../../services/__mocks__/auth-service");
-const {
-  MediaService,
-  ...mockMediaService
-} = require("../../services/__mocks__/media-service");
-const {
-  ContentService,
-  ...mockContentService
-} = require("../../services/__mocks__/content-service");
-const {
-  NotificationService,
-  ...mockNotificationService
-} = require("../../services/__mocks__/notification-service");
+const mockUserService = require("../../services/__mocks__/users");
+const mockAuthService = require("../../services/__mocks__/auth");
+const mockMediaService = require("../../services/__mocks__/media");
+const mockContentService = require("../../services/__mocks__/content");
+const mockNotificationService = require("../../services/__mocks__/notifications");
 
 const buildTestServer = async (options) => {
   const users = new UserAPI();

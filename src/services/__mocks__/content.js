@@ -1,4 +1,4 @@
-const mockContentService = {
+module.exports = {
   buildReactionLoader: jest.fn(),
   getByID: jest.fn(),
   getByAuthor: jest.fn(),
@@ -16,9 +16,5 @@ const mockContentService = {
   loadReplyCount: jest.fn(),
   loadReactionCount: jest.fn(),
   getReactions: jest.fn(),
-};
-
-module.exports = {
-  ContentService: jest.fn().mockImplementation(() => mockContentService),
-  ...mockContentService,
+  loadReplyStatus: jest.fn(),
 };

@@ -8,8 +8,7 @@ const { ApolloError, UserInputError } = require("apollo-server-express");
 const { AuthAPI } = require("../auth");
 const { ServiceError, ValidationError } = require("../../../services");
 
-const { mockCredentials } = require("./auth.test");
-const { mockDeviceArgs } = require("../../../database/mocks/auth");
+const { mockDeviceArgs } = require("../../../database/__mocks__/auth");
 
 const mockAuthService = {
   login: jest.fn(),
@@ -120,3 +119,8 @@ describe("base API (using login action)", () => {
     );
   });
 });
+
+const mockCredentials = {
+  accessToken: "fdsjkafhdsajklfhdjsakfhjlksadfaf",
+  refreshToken: "sadhfkjasdhfadsjkflashfjasldfhlas",
+};

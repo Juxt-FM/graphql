@@ -63,5 +63,7 @@ export const reactionStatus = async (
 ) => {
   const { content } = context.dataSources;
 
+  if (!context.user) return null;
+
   return await content.loadReactionStatus(parent.id);
 };

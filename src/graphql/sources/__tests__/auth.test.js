@@ -4,20 +4,15 @@
  */
 
 const { AuthAPI } = require("../auth");
-const {
-  AuthService,
-  ...mockAuthService
-} = require("../../../services/__mocks__/auth-service");
-const {
-  NotificationService,
-  ...mockNotificationService
-} = require("../../../services/__mocks__/notification-service");
+
+const mockAuthService = require("../../../services/__mocks__/auth");
+const mockNotificationService = require("../../../services/__mocks__/notifications");
 
 const {
   mockUser,
   mockDevice,
   mockDeviceArgs,
-} = require("../../../database/mocks/auth");
+} = require("../../../database/__mocks__/auth");
 
 const mockExpressContext = {
   req: {
@@ -34,8 +29,8 @@ const mockContext = {
   user: { id: 1, verified: true },
   client: { name: "web" },
   host: "127.0.0.1",
-  authService: new AuthService(),
-  notificationService: new NotificationService(),
+  authService: mockAuthService,
+  notificationService: mockNotificationService,
   expressCtx: mockExpressContext,
 };
 
@@ -337,5 +332,3 @@ const mockCredentials = {
   accessToken: "fdsjkafhdsajklfhdjsakfhjlksadfaf",
   refreshToken: "sadhfkjasdhfadsjkflashfjasldfhlas",
 };
-
-module.exports = { mockCredentials };

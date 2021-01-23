@@ -1,4 +1,4 @@
-const mockUserService = {
+module.exports = {
   buildFollowStatusLoader: jest.fn(),
   loadProfile: jest.fn(),
   updateProfile: jest.fn(),
@@ -9,9 +9,4 @@ const mockUserService = {
   loadFollowStatus: jest.fn(),
   loadFollowerCount: jest.fn(),
   getFollowers: jest.fn(),
-};
-
-module.exports = {
-  UserService: jest.fn().mockImplementation(() => mockUserService),
-  ...mockUserService,
 };

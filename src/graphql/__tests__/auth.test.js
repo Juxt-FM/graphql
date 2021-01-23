@@ -9,8 +9,7 @@ const { ValidationError } = require("../../services");
 const { buildTestServer } = require("./__utils");
 
 const { mutations, queries } = require("../__mocks__/auth");
-const { mockCredentials } = require("../sources/__tests__/auth.test");
-const { mockUser } = require("../../database/mocks/auth");
+const { mockUser } = require("../../database/__mocks__/auth");
 
 const mockDeviceInput = {
   id: "1",
@@ -347,3 +346,8 @@ test("MUTATION deactivateAccount", async () => {
 
   expect(res.data.deactivateAccount).toEqual(message);
 });
+
+const mockCredentials = {
+  accessToken: "fdsjkafhdsajklfhdjsakfhjlksadfaf",
+  refreshToken: "sadhfkjasdhfadsjkflashfjasldfhlas",
+};

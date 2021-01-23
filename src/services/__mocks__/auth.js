@@ -1,4 +1,4 @@
-const mockAuthService = {
+module.exports = {
   getUser: jest.fn(),
   login: jest.fn(),
   register: jest.fn(),
@@ -10,9 +10,4 @@ const mockAuthService = {
   verifyEmail: jest.fn(),
   verifyPhone: jest.fn(),
   deactivateAccount: jest.fn(),
-};
-
-module.exports = {
-  AuthService: jest.fn().mockImplementation(() => mockAuthService),
-  ...mockAuthService,
 };
