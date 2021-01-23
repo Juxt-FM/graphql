@@ -49,7 +49,9 @@ export const profileImageURL = (
 ) => {
   const { mediaService } = context;
 
-  return mediaService.getResourceURL(parent.profileImageURL);
+  if (parent.profileImageURL)
+    return mediaService.getResourceURL(parent.profileImageURL);
+  return null;
 };
 
 export const coverImageURL = (
@@ -59,7 +61,9 @@ export const coverImageURL = (
 ) => {
   const { mediaService } = context;
 
-  return mediaService.getResourceURL(parent.coverImageURL);
+  if (parent.coverImageURL)
+    return mediaService.getResourceURL(parent.coverImageURL);
+  return null;
 };
 
 export const posts = async (
