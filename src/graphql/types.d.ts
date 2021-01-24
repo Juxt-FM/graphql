@@ -73,8 +73,10 @@ export type Query = {
   postByID: Post;
   ideaByID: Idea;
   postDrafts: Array<Post>;
-  suggestedPosts: Array<Post>;
-  suggestedIdeas: Array<Idea>;
+  posts: Array<Post>;
+  ideas: Array<Idea>;
+  sectors: Array<Sector>;
+  industries: Array<Industry>;
 };
 
 
@@ -93,15 +95,25 @@ export type QueryIdeaByIdArgs = {
 };
 
 
-export type QuerySuggestedPostsArgs = {
-  limit?: Maybe<Scalars['Int']>;
-  offset?: Maybe<Scalars['Int']>;
+export type QueryPostsArgs = {
+  filters?: Maybe<Filters>;
 };
 
 
-export type QuerySuggestedIdeasArgs = {
-  limit?: Maybe<Scalars['Int']>;
-  offset?: Maybe<Scalars['Int']>;
+export type QueryIdeasArgs = {
+  filters?: Maybe<Filters>;
+};
+
+
+export type QuerySectorsArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+
+export type QueryIndustriesArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
 };
 
 export type Mutation = {
@@ -130,9 +142,9 @@ export type Mutation = {
   createReaction: Scalars['String'];
   deleteReaction: Scalars['String'];
   reportContent: Scalars['String'];
-  createWatchlist: Watchlist;
-  updateWatchlist: Watchlist;
-  deleteWatchlist: Scalars['String'];
+  createList: List;
+  updateList: List;
+  deleteList: Scalars['String'];
 };
 
 
@@ -247,18 +259,18 @@ export type MutationReportContentArgs = {
 };
 
 
-export type MutationCreateWatchlistArgs = {
-  data: WatchlistInput;
+export type MutationCreateListArgs = {
+  data: ListInput;
 };
 
 
-export type MutationUpdateWatchlistArgs = {
+export type MutationUpdateListArgs = {
   id: Scalars['ID'];
-  data: WatchlistInput;
+  data: ListInput;
 };
 
 
-export type MutationDeleteWatchlistArgs = {
+export type MutationDeleteListArgs = {
   id: Scalars['ID'];
 };
 
@@ -270,7 +282,7 @@ export type UserProfile = {
   summary?: Maybe<Scalars['String']>;
   profileImageURL?: Maybe<Scalars['String']>;
   coverImageURL?: Maybe<Scalars['String']>;
-  watchlists: Array<Watchlist>;
+  lists: Array<List>;
   posts: Array<Post>;
   ideas: Array<Idea>;
   followers: Array<UserProfile>;
@@ -278,6 +290,12 @@ export type UserProfile = {
   followStatus?: Maybe<FollowingStatus>;
   created: Scalars['String'];
   updated: Scalars['String'];
+};
+
+
+export type UserProfileListsArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
 };
 
 
@@ -332,6 +350,36 @@ export enum AttachmentType {
 }
 
 export type ActionableContent = Post | Idea;
+
+export type Community = {
+  __typename?: 'Community';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  posts: Array<Post>;
+  ideas: Array<Idea>;
+  members: Array<UserProfile>;
+  created: Scalars['String'];
+  updated: Scalars['String'];
+};
+
+
+export type CommunityPostsArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+
+export type CommunityIdeasArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
+
+
+export type CommunityMembersArgs = {
+  limit: Scalars['Int'];
+  offset: Scalars['Int'];
+};
 
 export type Post = {
   __typename?: 'Post';
@@ -401,7 +449,7 @@ export type Attachment = {
 export type Reaction = {
   __typename?: 'Reaction';
   id: Scalars['ID'];
-  from?: Maybe<UserProfile>;
+  from: UserProfile;
   to: ActionableContent;
   reaction: Scalars['String'];
   timestamp: Scalars['String'];
@@ -421,8 +469,7 @@ export type IdeaInput = {
   message: Scalars['String'];
 };
 
-export type PostFilters = {
-  user?: Maybe<Scalars['ID']>;
+export type Filters = {
   query?: Maybe<Scalars['String']>;
   symbols?: Maybe<Array<Scalars['String']>>;
   limit: Scalars['Int'];
@@ -457,25 +504,28 @@ export type Company = {
 export type Sector = {
   __typename?: 'Sector';
   name: Scalars['String'];
+  companies: Array<Company>;
 };
 
 export type Industry = {
   __typename?: 'Industry';
   name: Scalars['String'];
+  companies: Array<Company>;
 };
 
-export type Watchlist = {
-  __typename?: 'Watchlist';
+export type List = {
+  __typename?: 'List';
   id: Scalars['ID'];
   name: Scalars['String'];
-  symbols: Array<Scalars['String']>;
+  private: Scalars['Boolean'];
+  items: Array<Scalars['String']>;
   updatedAt: Scalars['String'];
   createdAt: Scalars['String'];
 };
 
-export type WatchlistInput = {
-  name?: Maybe<Scalars['String']>;
-  symbols?: Maybe<Array<Scalars['String']>>;
+export type ListInput = {
+  name: Scalars['String'];
+  private: Scalars['Boolean'];
 };
 
 
@@ -577,18 +627,19 @@ export type ResolversTypes = {
   ReactionType: ReactionType;
   AttachmentType: AttachmentType;
   ActionableContent: ResolversTypes['Post'] | ResolversTypes['Idea'];
+  Community: ResolverTypeWrapper<Community>;
   Post: ResolverTypeWrapper<Post>;
   Idea: ResolverTypeWrapper<Idea>;
   Attachment: ResolverTypeWrapper<Attachment>;
   Reaction: ResolverTypeWrapper<Omit<Reaction, 'to'> & { to: ResolversTypes['ActionableContent'] }>;
   PostInput: PostInput;
   IdeaInput: IdeaInput;
-  PostFilters: PostFilters;
+  Filters: Filters;
   Company: ResolverTypeWrapper<Company>;
   Sector: ResolverTypeWrapper<Sector>;
   Industry: ResolverTypeWrapper<Industry>;
-  Watchlist: ResolverTypeWrapper<Watchlist>;
-  WatchlistInput: WatchlistInput;
+  List: ResolverTypeWrapper<List>;
+  ListInput: ListInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -609,18 +660,19 @@ export type ResolversParentTypes = {
   FollowingStatus: FollowingStatus;
   ProfileInput: ProfileInput;
   ActionableContent: ResolversParentTypes['Post'] | ResolversParentTypes['Idea'];
+  Community: Community;
   Post: Post;
   Idea: Idea;
   Attachment: Attachment;
   Reaction: Omit<Reaction, 'to'> & { to: ResolversParentTypes['ActionableContent'] };
   PostInput: PostInput;
   IdeaInput: IdeaInput;
-  PostFilters: PostFilters;
+  Filters: Filters;
   Company: Company;
   Sector: Sector;
   Industry: Industry;
-  Watchlist: Watchlist;
-  WatchlistInput: WatchlistInput;
+  List: List;
+  ListInput: ListInput;
 };
 
 export type UserAccountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserAccount'] = ResolversParentTypes['UserAccount']> = {
@@ -657,8 +709,10 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   postByID?: Resolver<ResolversTypes['Post'], ParentType, ContextType, RequireFields<QueryPostByIdArgs, 'id'>>;
   ideaByID?: Resolver<ResolversTypes['Idea'], ParentType, ContextType, RequireFields<QueryIdeaByIdArgs, 'id'>>;
   postDrafts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType>;
-  suggestedPosts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<QuerySuggestedPostsArgs, 'limit' | 'offset'>>;
-  suggestedIdeas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<QuerySuggestedIdeasArgs, 'limit' | 'offset'>>;
+  posts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<QueryPostsArgs, never>>;
+  ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<QueryIdeasArgs, never>>;
+  sectors?: Resolver<Array<ResolversTypes['Sector']>, ParentType, ContextType, RequireFields<QuerySectorsArgs, 'limit' | 'offset'>>;
+  industries?: Resolver<Array<ResolversTypes['Industry']>, ParentType, ContextType, RequireFields<QueryIndustriesArgs, 'limit' | 'offset'>>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
@@ -686,9 +740,9 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createReaction?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationCreateReactionArgs, 'to' | 'reaction'>>;
   deleteReaction?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteReactionArgs, 'id'>>;
   reportContent?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationReportContentArgs, 'id'>>;
-  createWatchlist?: Resolver<ResolversTypes['Watchlist'], ParentType, ContextType, RequireFields<MutationCreateWatchlistArgs, 'data'>>;
-  updateWatchlist?: Resolver<ResolversTypes['Watchlist'], ParentType, ContextType, RequireFields<MutationUpdateWatchlistArgs, 'id' | 'data'>>;
-  deleteWatchlist?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteWatchlistArgs, 'id'>>;
+  createList?: Resolver<ResolversTypes['List'], ParentType, ContextType, RequireFields<MutationCreateListArgs, 'data'>>;
+  updateList?: Resolver<ResolversTypes['List'], ParentType, ContextType, RequireFields<MutationUpdateListArgs, 'id' | 'data'>>;
+  deleteList?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteListArgs, 'id'>>;
 };
 
 export type UserProfileResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserProfile'] = ResolversParentTypes['UserProfile']> = {
@@ -698,7 +752,7 @@ export type UserProfileResolvers<ContextType = any, ParentType extends Resolvers
   summary?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   profileImageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   coverImageURL?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  watchlists?: Resolver<Array<ResolversTypes['Watchlist']>, ParentType, ContextType>;
+  lists?: Resolver<Array<ResolversTypes['List']>, ParentType, ContextType, RequireFields<UserProfileListsArgs, 'limit' | 'offset'>>;
   posts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<UserProfilePostsArgs, 'limit' | 'offset'>>;
   ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<UserProfileIdeasArgs, 'limit' | 'offset'>>;
   followers?: Resolver<Array<ResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<UserProfileFollowersArgs, 'limit' | 'offset'>>;
@@ -716,6 +770,18 @@ export type FollowingStatusResolvers<ContextType = any, ParentType extends Resol
 
 export type ActionableContentResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionableContent'] = ResolversParentTypes['ActionableContent']> = {
   __resolveType: TypeResolveFn<'Post' | 'Idea', ParentType, ContextType>;
+};
+
+export type CommunityResolvers<ContextType = any, ParentType extends ResolversParentTypes['Community'] = ResolversParentTypes['Community']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  posts?: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<CommunityPostsArgs, 'limit' | 'offset'>>;
+  ideas?: Resolver<Array<ResolversTypes['Idea']>, ParentType, ContextType, RequireFields<CommunityIdeasArgs, 'limit' | 'offset'>>;
+  members?: Resolver<Array<ResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<CommunityMembersArgs, 'limit' | 'offset'>>;
+  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PostResolvers<ContextType = any, ParentType extends ResolversParentTypes['Post'] = ResolversParentTypes['Post']> = {
@@ -761,7 +827,7 @@ export type AttachmentResolvers<ContextType = any, ParentType extends ResolversP
 
 export type ReactionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Reaction'] = ResolversParentTypes['Reaction']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  from?: Resolver<Maybe<ResolversTypes['UserProfile']>, ParentType, ContextType>;
+  from?: Resolver<ResolversTypes['UserProfile'], ParentType, ContextType>;
   to?: Resolver<ResolversTypes['ActionableContent'], ParentType, ContextType>;
   reaction?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -795,18 +861,21 @@ export type CompanyResolvers<ContextType = any, ParentType extends ResolversPare
 
 export type SectorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Sector'] = ResolversParentTypes['Sector']> = {
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  companies?: Resolver<Array<ResolversTypes['Company']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type IndustryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Industry'] = ResolversParentTypes['Industry']> = {
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  companies?: Resolver<Array<ResolversTypes['Company']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type WatchlistResolvers<ContextType = any, ParentType extends ResolversParentTypes['Watchlist'] = ResolversParentTypes['Watchlist']> = {
+export type ListResolvers<ContextType = any, ParentType extends ResolversParentTypes['List'] = ResolversParentTypes['List']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  symbols?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  private?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  items?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -821,6 +890,7 @@ export type Resolvers<ContextType = any> = {
   UserProfile?: UserProfileResolvers<ContextType>;
   FollowingStatus?: FollowingStatusResolvers<ContextType>;
   ActionableContent?: ActionableContentResolvers<ContextType>;
+  Community?: CommunityResolvers<ContextType>;
   Post?: PostResolvers<ContextType>;
   Idea?: IdeaResolvers<ContextType>;
   Attachment?: AttachmentResolvers<ContextType>;
@@ -828,7 +898,7 @@ export type Resolvers<ContextType = any> = {
   Company?: CompanyResolvers<ContextType>;
   Sector?: SectorResolvers<ContextType>;
   Industry?: IndustryResolvers<ContextType>;
-  Watchlist?: WatchlistResolvers<ContextType>;
+  List?: ListResolvers<ContextType>;
 };
 
 

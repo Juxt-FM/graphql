@@ -5,10 +5,10 @@ type UserProfile {
   summary: String
   profileImageURL: String
   coverImageURL: String
-  watchlists: [Watchlist!]!
+  followers(limit: Int!, offset: Int!): [UserProfile!]!
+  lists(limit: Int!, offset: Int!): [List!]!
   posts(limit: Int!, offset: Int!): [Post!]!
   ideas(limit: Int!, offset: Int!): [Idea!]!
-  followers(limit: Int!, offset: Int!): [UserProfile!]!
   followCount: Int!
   followStatus: FollowingStatus
   created: String!

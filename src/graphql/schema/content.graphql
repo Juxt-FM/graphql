@@ -22,6 +22,17 @@ enum AttachmentType {
 
 union ActionableContent = Post | Idea
 
+type Community {
+  id: ID!
+  name: String!
+  description: String
+  posts(limit: Int!, offset: Int!): [Post!]!
+  ideas(limit: Int!, offset: Int!): [Idea!]!
+  members(limit: Int!, offset: Int!): [UserProfile!]!
+  created: String!
+  updated: String!
+}
+
 type Post {
   id: ID!
   author: UserProfile
@@ -62,7 +73,7 @@ type Attachment {
 
 type Reaction {
   id: ID!
-  from: UserProfile
+  from: UserProfile!
   to: ActionableContent!
   reaction: String!
   timestamp: String!
@@ -82,8 +93,7 @@ input IdeaInput {
   message: String!
 }
 
-input PostFilters {
-  user: ID
+input Filters {
   query: String
   symbols: [String!]
   limit: Int!
@@ -106,6 +116,6 @@ extend type Query {
   postByID(id: ID!): Post!
   ideaByID(id: ID!): Idea!
   postDrafts: [Post!]!
-  suggestedPosts(limit: Int = 25, offset: Int = 0): [Post!]!
-  suggestedIdeas(limit: Int = 25, offset: Int = 0): [Idea!]!
+  posts(filters: Filters): [Post!]!
+  ideas(filters: Filters): [Idea!]!
 }

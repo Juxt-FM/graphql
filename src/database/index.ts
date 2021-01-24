@@ -12,7 +12,7 @@ import gremlin from "gremlin";
 export default class GraphDB {
   private host: string;
   private graph: gremlin.structure.Graph;
-  conn: gremlin.driver.DriverRemoteConnection;
+  private conn: gremlin.driver.DriverRemoteConnection;
 
   constructor(host: string) {
     this.host = host;

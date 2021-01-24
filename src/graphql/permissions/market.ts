@@ -7,8 +7,8 @@ import { isAuthenticated } from "./utils";
 
 export default {
   Mutation: {
-    createWatchlist: isAuthenticated,
-    updateWatchlist: isAuthenticated,
-    deleteWatchlist: isAuthenticated,
+    createList: isAuthenticated,
+    updateList: isAuthenticated,
+    deleteList: isAuthenticated,
   },
 };

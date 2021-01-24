@@ -8,6 +8,7 @@ import {
   UserProfileFollowersArgs,
   UserProfilePostsArgs,
   UserProfileIdeasArgs,
+  UserProfileListsArgs,
 } from "../../types";
 
 export const followers = async (
@@ -86,4 +87,12 @@ export const ideas = async (
   return await content.getIdeasByAuthor(parent.id, args.limit, args.offset);
 };
 
-export const watchlists = (): any[] => [];
+export const lists = async (
+  parent: any,
+  args: UserProfileListsArgs,
+  context: IResolverContext
+) => {
+  const { market } = context.dataSources;
+
+  return await market.getUserLists(parent.id, args.limit, args.offset);
+};

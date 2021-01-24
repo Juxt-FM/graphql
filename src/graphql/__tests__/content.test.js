@@ -21,9 +21,9 @@ test("QUERY postByID", async () => {
   mockUserService.loadProfile.mockReturnValueOnce(mockProfile);
   mockContentService.getByID.mockReturnValueOnce(mockPost);
 
-  const { mutate } = createTestClient(server);
+  const { query } = createTestClient(server);
 
-  const res = await mutate({
+  const res = await query({
     query: queries.POST_BY_ID,
     variables: { id: mockPost.id },
   });
@@ -50,9 +50,9 @@ test("QUERY ideaByID", async () => {
   mockUserService.loadProfile.mockReturnValueOnce(mockProfile);
   mockContentService.getByID.mockReturnValueOnce(mockIdea);
 
-  const { mutate } = createTestClient(server);
+  const { query } = createTestClient(server);
 
-  const res = await mutate({
+  const res = await query({
     query: queries.IDEA_BY_ID,
     variables: { id: mockIdea.id },
   });

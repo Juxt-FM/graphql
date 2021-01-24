@@ -15,8 +15,10 @@ test("QUERY userProfile", async () => {
     server,
     mockUserService,
     mockContentService,
+    mockMarketService,
   } = await buildTestServer();
 
+  mockMarketService.getListsByAuthor.mockReturnValueOnce([]);
   mockUserService.loadProfile.mockReturnValueOnce(mockProfile);
   mockUserService.loadFollowStatus.mockReturnValueOnce({
     timestamp: new Date(),
@@ -24,8 +26,8 @@ test("QUERY userProfile", async () => {
 
   mockContentService.getByAuthor.mockReturnValue([]);
 
-  const { mutate } = createTestClient(server);
-  const res = await mutate({
+  const { query } = createTestClient(server);
+  const res = await query({
     query: queries.USER_PROFILE,
     variables: {
       id: mockProfile.id,
@@ -33,6 +35,8 @@ test("QUERY userProfile", async () => {
       postOffset: 0,
       ideaLimit: 10,
       ideaOffset: 0,
+      listLimit: 10,
+      listOffset: 0,
     },
   });
 
@@ -43,7 +47,7 @@ test("QUERY userProfile", async () => {
   expect(result.summary).toEqual(mockProfile.summary);
   expect(result.location).toEqual(mockProfile.location);
   expect(result.followStatus.timestamp).toEqual(expect.any(String));
-  expect(Array.isArray(result.watchlists)).toBe(true);
+  expect(Array.isArray(result.lists)).toBe(true);
   expect(Array.isArray(result.ideas)).toBe(true);
   expect(Array.isArray(result.posts)).toBe(true);
 });

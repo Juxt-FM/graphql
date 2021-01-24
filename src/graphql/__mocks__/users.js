@@ -12,6 +12,8 @@ const USER_PROFILE = gql`
     $postOffset: Int!
     $ideaLimit: Int!
     $ideaOffset: Int!
+    $listLimit: Int!
+    $listOffset: Int!
   ) {
     userProfile(id: $id) {
       id
@@ -20,7 +22,7 @@ const USER_PROFILE = gql`
       summary
       profileImageURL
       coverImageURL
-      watchlists {
+      lists(limit: $listLimit, offset: $listOffset) {
         id
       }
       posts(limit: $postLimit, offset: $postOffset) {

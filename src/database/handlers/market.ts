@@ -4,11 +4,12 @@
  */
 
 import gremlin from "gremlin";
+import moment from "moment";
 
 import GraphDB from "..";
 
 import BaseHandler from "./base";
-import { labels, relationships } from "../constants";
+import { IList, labels, relationships } from "../constants";
 import { ResourceNotFoundError } from "../errors";
 
 const {
@@ -16,20 +17,122 @@ const {
   P: { neq },
 } = gremlin.process;
 
+export interface IListInput {
+  name: string;
+  private: boolean;
+}
+
 /**
  * Company database handler.
- *
- * ALL QUERIES ARE EXPERIMENTAL AND HAVE
- * NOT BEEN TESTED OR EVEN USED
- *
- * (they might work tho)
- *
- *
  * @param {GraphDB} graph
  */
 export class MarketHandler extends BaseHandler {
   constructor(graph: GraphDB) {
     super(graph);
+  }
+
+  /**
+   * Transforms a list object
+   * @param list
+   */
+  transformList(list: IList) {
+    return {
+      ...list,
+      created: moment(list.created).toDate(),
+      updated: moment(list.updated).toDate(),
+    };
+  }
+
+  /**
+   * Returns a user's list
+   * @param {string} author
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async findListsByAuthor(author: string, limit: number, offset: number) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(author)
+      .out(relationships.AUTHORED)
+      .hasLabel(labels.LIST)
+      .range(offset, limit)
+      .elementMap()
+      .toList();
+
+    return result.map((record: any) => {
+      const list: any = Object.fromEntries(record);
+      return this.transformList(list);
+    });
+  }
+
+  /**
+   * Creates and returns a new list
+   * @param {string} author
+   * @param {IListInput} data
+   */
+  async createList(author: string, data: IListInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(author)
+      .as("author")
+      .addV(labels.LIST)
+      .as("list")
+      .property("name", data.name)
+      .property("private", data.private)
+      .property("created", moment().valueOf())
+      .property("updated", moment().valueOf())
+      .addE(relationships.AUTHORED)
+      .from_("author")
+      .to("list")
+      .select("list")
+      .elementMap()
+      .next();
+
+    const list: any = Object.fromEntries(result.value);
+
+    return this.transformList(list);
+  }
+
+  /**
+   * Updates and returns a list
+   * @param {string} id
+   * @param {string} author
+   * @param {IListInput} data
+   */
+  async updateList(id: string, author: string, data: IListInput) {
+    const query = this.graph.query();
+
+    const result = await query
+      .V(id)
+      .hasLabel(labels.LIST)
+      .where(__.in_(relationships.AUTHORED).hasId(author))
+      .property("name", data.name)
+      .property("private", data.private)
+      .property("updated", moment().valueOf())
+      .elementMap()
+      .next();
+
+    const list: any = Object.fromEntries(result.value);
+
+    return this.transformList(list);
+  }
+
+  /**
+   * Deletes a list
+   * @param {string} id
+   * @param {string} author
+   */
+  async deleteList(id: string, author: string) {
+    const query = this.graph.query();
+
+    await query
+      .V(id)
+      .hasLabel(labels.LIST)
+      .where(__.in_(relationships.AUTHORED).hasId(author))
+      .drop()
+      .next();
   }
 
   /**
@@ -43,16 +146,11 @@ export class MarketHandler extends BaseHandler {
     const result = await query
       .V()
       .has(labels.BUSINESS_SECTOR)
-      .fold()
-      .by(__.range(__.local, limit + offset, offset))
+      .range(offset, limit)
       .elementMap()
-      .next();
+      .toList();
 
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const records: any = Object.fromEntries(result.value);
-
-    return records;
+    return result.map((record: any) => Object.fromEntries(record));
   }
 
   /**
@@ -66,16 +164,11 @@ export class MarketHandler extends BaseHandler {
     const result = await query
       .V()
       .has(labels.BUSINESS_INDUSTRY)
+      .range(offset, limit)
       .elementMap()
-      .fold()
-      .by(__.range(__.local, limit + offset, offset))
-      .next();
+      .toList();
 
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const records: any = Object.fromEntries(result.value);
-
-    return records;
+    return result.map((record: any) => Object.fromEntries(record));
   }
 
   /**
@@ -114,16 +207,11 @@ export class MarketHandler extends BaseHandler {
       .inE(relationships.IN_SECTOR)
       .outV()
       .hasLabel(labels.COMPANY)
+      .range(offset, limit)
       .elementMap()
-      .fold()
-      .by(__.range(__.local, limit + offset, offset))
-      .next();
+      .toList();
 
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const companies: any = Object.fromEntries(result.value);
-
-    return companies;
+    return result.map((company: any) => Object.fromEntries(company));
   }
 
   /**
@@ -146,16 +234,11 @@ export class MarketHandler extends BaseHandler {
       .inE(relationships.IN_INDUSTRY)
       .outV()
       .hasLabel(labels.COMPANY)
+      .range(offset, limit)
       .elementMap()
-      .fold()
-      .by(__.range(__.local, limit + offset, offset))
-      .next();
+      .toList();
 
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const companies: any = Object.fromEntries(result.value);
-
-    return companies;
+    return result.map((company: any) => Object.fromEntries(company));
   }
 
   /**
@@ -174,7 +257,7 @@ export class MarketHandler extends BaseHandler {
       .V(user)
       .outE(relationships.CREATED_LIST)
       .inV()
-      .hasLabel(labels.USER_CREATED_LIST)
+      .hasLabel(labels.LIST)
       .inE(relationships.IN_LIST)
       .outV()
       .as("currently_watching")
@@ -184,16 +267,11 @@ export class MarketHandler extends BaseHandler {
       .inV()
       .where(neq("currently_watching"))
       .dedup()
+      .range(offset, limit)
       .elementMap()
-      .fold()
-      .by(__.range(__.local, limit + offset, offset))
-      .next();
+      .toList();
 
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const companies: any = Object.fromEntries(result.value);
-
-    return companies;
+    return result.map((company: any) => Object.fromEntries(company));
   }
 
   /**
@@ -215,15 +293,10 @@ export class MarketHandler extends BaseHandler {
       .where(neq("source"))
       .order(__.count())
       .dedup()
+      .range(offset, limit)
       .elementMap()
-      .fold()
-      .by(__.range(__.local, limit + offset, offset))
-      .next();
+      .toList();
 
-    if (!result.value) throw new ResourceNotFoundError();
-
-    const companies: any = Object.fromEntries(result.value);
-
-    return companies;
+    return result.map((company: any) => Object.fromEntries(company));
   }
 }

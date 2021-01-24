@@ -5,37 +5,37 @@
 
 import { IResolverContext } from "../../server";
 import {
-  MutationCreateWatchlistArgs,
-  MutationDeleteWatchlistArgs,
-  MutationUpdateWatchlistArgs,
+  MutationCreateListArgs,
+  MutationDeleteListArgs,
+  MutationUpdateListArgs,
 } from "../../types";
 
-export const createWatchlist = async (
+export const createList = async (
   parent: undefined,
-  args: MutationCreateWatchlistArgs,
+  args: MutationCreateListArgs,
   context: IResolverContext
 ) => {
   const { market } = context.dataSources;
 
-  return await market.createWatchlist(args.data);
+  return await market.createList(args.data);
 };
 
-export const updateWatchlist = async (
+export const updateList = async (
   parent: undefined,
-  args: MutationUpdateWatchlistArgs,
+  args: MutationUpdateListArgs,
   context: IResolverContext
 ) => {
   const { market } = context.dataSources;
 
-  return await market.updateWatchlist(args.id, args.data);
+  return await market.updateList(args.id, args.data);
 };
 
-export const deleteWatchlist = async (
+export const deleteList = async (
   parent: undefined,
-  args: MutationDeleteWatchlistArgs,
+  args: MutationDeleteListArgs,
   context: IResolverContext
 ) => {
   const { market } = context.dataSources;
 
-  return await market.deleteWatchlist(args.id);
+  return await market.deleteList(args.id);
 };

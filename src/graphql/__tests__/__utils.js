@@ -4,7 +4,7 @@
  */
 
 const { ApolloServer } = require("apollo-server-express");
-const { AuthAPI, UserAPI, ContentAPI } = require("../sources");
+const { AuthAPI, UserAPI, ContentAPI, MarketAPI } = require("../sources");
 const { default: typeDefs } = require("../schema");
 const { default: resolvers } = require("../resolvers");
 
@@ -12,11 +12,13 @@ const mockUserService = require("../../services/__mocks__/users");
 const mockAuthService = require("../../services/__mocks__/auth");
 const mockMediaService = require("../../services/__mocks__/media");
 const mockContentService = require("../../services/__mocks__/content");
+const mockMarketService = require("../../services/__mocks__/market");
 const mockNotificationService = require("../../services/__mocks__/notifications");
 
 const buildTestServer = async (options) => {
   const users = new UserAPI();
   const auth = new AuthAPI();
+  const market = new MarketAPI();
   const content = new ContentAPI();
 
   const mockExpressContext = {
@@ -38,6 +40,7 @@ const buildTestServer = async (options) => {
     userService: mockUserService,
     authService: mockAuthService,
     contentService: mockContentService,
+    marketService: mockMarketService,
     mediaService: mockMediaService,
     notificationService: mockNotificationService,
     expressCtx: mockExpressContext,
@@ -47,6 +50,7 @@ const buildTestServer = async (options) => {
     users,
     auth,
     content,
+    market,
   });
 
   const server = new ApolloServer({
@@ -63,6 +67,7 @@ const buildTestServer = async (options) => {
     mockNotificationService,
     mockContentService,
     mockMediaService,
+    mockMarketService,
   };
 };
 

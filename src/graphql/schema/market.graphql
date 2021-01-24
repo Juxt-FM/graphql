@@ -24,27 +24,35 @@ type Company {
 
 type Sector {
   name: String!
+  companies: [Company!]!
 }
 
 type Industry {
   name: String!
+  companies: [Company!]!
 }
 
-type Watchlist {
+type List {
   id: ID!
   name: String!
-  symbols: [String!]!
-  updatedAt: String!
-  createdAt: String!
+  private: Boolean!
+  items: [String!]!
+  updated: String!
+  created: String!
 }
 
-input WatchlistInput {
-  name: String
-  symbols: [String!]
+input ListInput {
+  name: String!
+  private: Boolean!
+}
+
+extend type Query {
+  sectors(limit: Int!, offset: Int!): [Sector!]!
+  industries(limit: Int!, offset: Int!): [Industry!]!
 }
 
 extend type Mutation {
-  createWatchlist(data: WatchlistInput!): Watchlist!
-  updateWatchlist(id: ID!, data: WatchlistInput!): Watchlist!
-  deleteWatchlist(id: ID!): String!
+  createList(data: ListInput!): List!
+  updateList(id: ID!, data: ListInput!): List!
+  deleteList(id: ID!): String!
 }

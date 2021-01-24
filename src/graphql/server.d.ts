@@ -8,6 +8,7 @@ import {
   NotificationService,
   ContentService,
   UserService,
+  MarketService,
 } from "../services";
 
 import GraphDB from "../database";
@@ -31,6 +32,7 @@ export interface IContext {
   authService: AuthService;
   userService: UserService;
   contentService: ContentService;
+  marketService: MarketService;
   notificationService: NotificationService;
   mediaService: MediaService;
   host: string;

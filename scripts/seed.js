@@ -15,7 +15,7 @@ const labels = {
   COMPANY: "company",
   BUSINESS_SECTOR: "business_sector",
   BUSINESS_INDUSTRY: "business_industry",
-  USER_CREATED_LIST: "user_created_list",
+  LIST: "list",
   POST: "post",
   IDEA: "idea",
 };

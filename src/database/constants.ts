@@ -10,7 +10,7 @@ export const labels = {
   COMPANY: "company",
   BUSINESS_SECTOR: "business_sector",
   BUSINESS_INDUSTRY: "business_industry",
-  USER_CREATED_LIST: "user_created_list",
+  LIST: "list",
   POST: "post",
   IDEA: "idea",
 };
@@ -133,4 +133,11 @@ export interface IIdea extends IVertex {
 export interface IReaction extends IEdge {
   reaction: "like" | "dislike" | "love" | "hate";
   created: number | Date;
+}
+
+export interface IList extends IVertex {
+  name: string;
+  private: boolean;
+  created: number | Date;
+  updated: number | Date;
 }

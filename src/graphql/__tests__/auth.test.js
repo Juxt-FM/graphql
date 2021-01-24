@@ -22,8 +22,8 @@ test("QUERY me", async () => {
 
   mockAuthService.getUser.mockReturnValueOnce(mockUser);
 
-  const { mutate } = createTestClient(server);
-  const res = await mutate({
+  const { query } = createTestClient(server);
+  const res = await query({
     query: queries.AUTH_USER,
   });
 

@@ -87,7 +87,7 @@ export const buildGraph = ({ database }: IServerBuilder) => {
     auth: new AuthAPI(),
     users: new UserAPI(),
     content: new ContentAPI(),
-    market: new MarketAPI({ uri: process.env.MARKET_SERVICE_URI }),
+    market: new MarketAPI(),
   });
 
   /**

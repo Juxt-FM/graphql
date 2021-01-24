@@ -3,127 +3,156 @@
  * Copyright (C) 2020 - All rights reserved
  */
 
-import { RESTDataSource, RequestOptions } from "apollo-datasource-rest";
-import { ApolloError, UserInputError } from "apollo-server-express";
+import { BaseAPI } from "./base";
 
-import { IContext } from "../server";
+import { ListInput } from "../types";
 
-import * as logging from "../../logging";
-
-import { WatchlistInput } from "../types";
-
-interface IMarketAPI {
-  uri?: string;
-}
-
-export class MarketAPI extends RESTDataSource<IContext> {
-  context: IContext;
-
-  constructor(options: IMarketAPI = {}) {
+export class MarketAPI extends BaseAPI {
+  constructor() {
     super();
-    this.baseURL = options.uri || "http://localhost:4001/api/v1/";
-  }
-
-  willSendRequest(request: RequestOptions) {
-    const { req } = this.context.expressCtx;
-    const accessToken = req.headers.authorization;
-
-    if (typeof accessToken !== "undefined")
-      request.headers.set("Authorization", accessToken);
   }
 
   /**
-   * Returns a user's watchlists
+   * Returns a profile's lists
+   * @param {string} user
+   * @param {number} limit
+   * @param {number} offset
    */
-  async getUserWatchlists(id: string) {
-    try {
-      return await this.get(`watchlists/user/${id}`);
-    } catch (e) {
-      if (e instanceof ApolloError) return e;
-      else {
-        logging.logError(e);
-        return new ApolloError(
-          "An error occurred while processing your request."
-        );
-      }
-    }
+  async getUserLists(user: string, limit: number, offset: number) {
+    return this.handler("getUserLists", async () => {
+      const { marketService } = this.context;
+
+      return await marketService.getListsByAuthor(user, limit, offset);
+    });
   }
 
   /**
-   * Creates a new watchlist for the user
-   * @param data
+   * Returns all business sectors
+   * @param {number} limit
+   * @param {number} offset
    */
-  async createWatchlist(data: WatchlistInput) {
-    try {
-      return await this.post("watchlists", { ...data });
-    } catch (e) {
-      if (e instanceof ApolloError) {
-        const { status, body } = e.extensions.response;
+  async getAllSectors(limit: number, offset: number) {
+    return this.handler("getAllSectors", async () => {
+      const { marketService } = this.context;
 
-        const err = body.errors[0];
-
-        if (status === 422) {
-          return new UserInputError(err.message, {
-            invalidArgs: err.invalidArgs,
-          });
-        }
-
-        return new ApolloError(err.message);
-      } else {
-        logging.logError(e);
-        return new ApolloError(
-          "An error occurred while processing your request."
-        );
-      }
-    }
+      return await marketService.getAllSectors(limit, offset);
+    });
   }
 
   /**
-   * Updates a watchlist for the user
-   * @param id
-   * @param data
+   * Returns all business industries
+   * @param {number} limit
+   * @param {number} offset
    */
-  async updateWatchlist(id: string, data: WatchlistInput) {
-    try {
-      return await this.put(`watchlists/${id}`, { ...data });
-    } catch (e) {
-      if (e instanceof ApolloError) {
-        const { status, body } = e.extensions.response;
+  async getAllIndustries(limit: number, offset: number) {
+    return this.handler("getAllIndustries", async () => {
+      const { marketService } = this.context;
 
-        const err = body.errors[0];
-
-        if (status === 422) {
-          return new UserInputError(err.message, {
-            invalidArgs: err.invalidArgs,
-          });
-        }
-
-        return new ApolloError(err.message);
-      } else {
-        logging.logError(e);
-        return new ApolloError(
-          "An error occurred while processing your request."
-        );
-      }
-    }
+      return await marketService.getAllIndustries(limit, offset);
+    });
   }
 
   /**
-   * Deletes a watchlist for the user
-   * @param id
+   * Returns all companies in a sector
+   * @param {string} sector
+   * @param {number} limit
+   * @param {number} offset
    */
-  async deleteWatchlist(id: string) {
-    try {
-      await this.delete(`watchlists/${id}`);
-      return `Deleted watchlist with ID ${id}`;
-    } catch (e) {
-      if (e instanceof ApolloError) return e;
-      else {
-        logging.logError(e);
-        return new ApolloError(
-          "An error occurred while processing your request."
-        );
-      }
-    }
+  async getCompaniesBySector(sector: string, limit: number, offset: number) {
+    return this.handler("getCompaniesBySector", async () => {
+      const { marketService } = this.context;
+
+      return await marketService.getCompaniesBySector(sector, limit, offset);
+    });
+  }
+
+  /**
+   * Returns all companies in an industry
+   * @param {string} industry
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getCompaniesByIndustry(
+    industry: string,
+    limit: number,
+    offset: number
+  ) {
+    return this.handler("getCompaniesByIndustry", async () => {
+      const { marketService } = this.context;
+
+      return await marketService.getCompaniesByIndustry(
+        industry,
+        limit,
+        offset
+      );
+    });
+  }
+
+  /**
+   * Returns all suggested companies for the logged in user
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getSuggestedCompanies(limit: number, offset: number) {
+    return this.handler("getSuggestedCompanies", async () => {
+      const { user, marketService } = this.context;
+
+      return await marketService.getSuggestedCompanies(
+        user.profile,
+        limit,
+        offset
+      );
+    });
+  }
+
+  /**
+   * Returns all companies in relation to another
+   * @param {string} id
+   * @param {number} limit
+   * @param {number} offset
+   */
+  async getRelatedCompanies(id: string, limit: number, offset: number) {
+    return this.handler("getRelatedCompanies", async () => {
+      const { marketService } = this.context;
+
+      return await marketService.getRelatedCompanies(id, limit, offset);
+    });
+  }
+
+  /**
+   * Creates and returns a new list
+   * @param {ListInput} data
+   */
+  async createList(data: ListInput) {
+    return this.handler("createList", async () => {
+      const { user, marketService } = this.context;
+
+      return await marketService.createList(user.profile, data);
+    });
+  }
+
+  /**
+   * Updates and returns a list
+   * @param {string} id
+   * @param {ListInput} data
+   */
+  async updateList(id: string, data: ListInput) {
+    return this.handler("updateList", async () => {
+      const { user, marketService } = this.context;
+
+      return await marketService.updateList(id, user.profile, data);
+    });
+  }
+
+  /**
+   * Deletes a list
+   * @param {string} id
+   */
+  async deleteList(id: string) {
+    return this.handler("deleteList", async () => {
+      const { user, marketService } = this.context;
+
+      return await marketService.deleteList(id, user.profile);
+    });
   }
 }
