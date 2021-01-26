@@ -1,5 +1,4 @@
 const gremlin = require("gremlin");
-
 const _ = require("lodash");
 const faker = require("faker");
 const bcrypt = require("bcrypt");
@@ -180,7 +179,8 @@ const createReactions = async (users, posts, ideas) => {
   const create = async (user, content) => {
     const reactionTypes = ["like", "dislike", "love", "hate"];
     try {
-      const reaction = reactionTypes[Math.ceil(Math.random() * 3)];
+      const reaction =
+        reactionTypes[Math.floor(Math.random() * reactionTypes.length)];
 
       await query
         .V(user)

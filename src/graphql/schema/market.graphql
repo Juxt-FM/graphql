@@ -1,35 +1,72 @@
 type Company {
   id: ID!
-  symbol: String!
-  companyName: String!
-  exchange: String!
-  industry: Industry!
+  cik: String!
+  sic: String!
+  name: String!
   website: String
   description: String
-  CEO: String
-  securityName: String
-  issueType: String
-  sector: Sector!
-  primarySicCode: Int
+  ceo: String
   employees: Int
-  tags: [Industry!]!
-  address: String
-  address2: String
   state: String
-  city: String
-  zip: String
   country: String
-  phone: String
+  sector: Sector!
+  industry: Industry!
+  tags: [CompanyTag!]!
+  securities: [Security!]!
+  similar: [Company!]!
+}
+
+type Security {
+  id: ID!
+  type: SecurityType!
+  market: Market!
+  locale: String!
+  currency: String!
+  symbol: String!
+  marketcap: String!
+  bloomberg: String!
+  exchange: Exchange!
+}
+
+type SecurityType {
+  code: String!
+  description: String!
+}
+
+type CompanyTag {
+  name: String!
+}
+
+type Market {
+  name: String!
+  description: String!
+}
+
+type Exchange {
+  id: ID!
+  type: String!
+  name: String!
+  market: String!
+  tape: String!
+  mic: String!
+  securities: [Security!]!
 }
 
 type Sector {
+  id: ID!
   name: String!
   companies: [Company!]!
 }
 
 type Industry {
+  id: ID!
   name: String!
   companies: [Company!]!
+}
+
+type Tag {
+  id: ID!
+  name: String!
 }
 
 type List {
