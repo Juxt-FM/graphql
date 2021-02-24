@@ -7,6 +7,7 @@ Technologies:
 - Express
 - Apollo
 - AWS SNS
+- AWS S3
 - Gremlin/AWS Neptune
 
 ## Setup
