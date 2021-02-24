@@ -24,6 +24,7 @@ const mockList = {
   id: "1",
   label: "list",
   name: "some name",
+  private: true,
   created: new Date(),
   updated: new Date(),
 };

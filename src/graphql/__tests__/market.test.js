@@ -10,7 +10,6 @@ const { buildTestServer } = require("./__utils");
 const {
   mockSector,
   mockIndustry,
-  mockCompany,
   mockList,
 } = require("../../database/__mocks__/market");
 const { queries, mutations } = require("../__mocks__/market");
@@ -82,7 +81,7 @@ test("MUTATION updateList", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: mutations.CREATE_LIST,
+    mutation: mutations.UPDATE_LIST,
     variables: {
       id: "1",
       data: {
@@ -105,7 +104,7 @@ test("MUTATION deleteList", async () => {
 
   const { mutate } = createTestClient(server);
   const res = await mutate({
-    mutation: mutations.CREATE_LIST,
+    mutation: mutations.DELETE_LIST,
     variables: {
       id: "1",
     },
